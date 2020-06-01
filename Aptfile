@@ -3,3 +3,5 @@ libxrender1
 libfontconfig1
 libice6
 libssl1.0.0
+tesseract-ocr
+tesseract-ocr-eng
