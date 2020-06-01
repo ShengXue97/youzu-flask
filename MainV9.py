@@ -673,7 +673,7 @@ def main(pdfname, status):
     if not os.path.exists(sub_dir):
         os.makedirs(sub_dir)
 
-    with(wandImage(filename=pdf_path, resolution=70)) as source: 
+    with(wandImage(filename=pdf_path, resolution=200)) as source: 
         for i, image in enumerate(source.sequence):
             newfilename = "pg_" + str(pg_cntr) + '_' + pdf_path.split('/')[-1].replace('.pdf', '.jpg')
             wandImage(image).save(filename= sub_dir + newfilename)
