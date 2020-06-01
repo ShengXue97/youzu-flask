@@ -25,6 +25,8 @@ class Status:
         self.page = 1
         self.total = -1
         self.done = 0
+    def __repr__(self):
+        return "stage: " + str(self.stage) + "; " + "page: " + str(self.page) + "; " + "total: " + str(self.total) + "; " + "done: " + str(self.done)
 
 def get_image(image_path):
     """Get a numpy array of an image so that one can access values[x][y]."""

@@ -26,6 +26,7 @@ def home():
 def get_message():
     '''this could be any function that blocks until data is ready'''
     time.sleep(0.5)
+    print(str(ip_status_dict))
     out_dict = {}
     for key, value in ip_status_dict.items():
         out_dict[key] = {"running": value[0], "done": value[1].done, "stage": value[1].stage, "page": value[1].page, "total": value[1].total}
@@ -53,16 +54,11 @@ def uploadfile():
             if ip_status_dict[currentIP][0] == True:
                 return jsonify({"Succeeded": "yes"})
 
-        print("1...")
         fileDownloaded=request.files["myFile"]
-        print(fileDownloaded)
         filename = fileDownloaded.filename
-        print(filename)
         fileDownloaded.save(os.path.join("./ReactPDF", filename))
         status = Status()
-        print("starting now")
         ip_status_dict[currentIP] = (True, status)
-        print(ip_status_dict)
         # main(filename, status)
 
         print("Forking...")
