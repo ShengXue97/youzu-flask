@@ -65,9 +65,9 @@ def uploadfile():
         print(ip_status_dict)
         main(filename, status)
 
-        # print("Forking...")
-        # thread = threading.Thread(target=main, args=(filename, status))
-        # thread.start()
+        print("Forking...")
+        thread = threading.Thread(target=main, args=(filename, status))
+        thread.start()
         return jsonify({"Succeeded": "yes"})
 
 
