@@ -21,7 +21,7 @@ ip_status_dict = {}
 
 @app.route("/")
 def home_view():
-    return "<h1>Welcome><h1>"
+    return "<h1>Welcome !!!!<h1>"
     
 def get_message():
     '''this could be any function that blocks until data is ready'''
