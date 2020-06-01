@@ -53,7 +53,7 @@ def uploadfile():
             if ip_status_dict[currentIP][0] == True:
                 return jsonify({"Succeeded": "yes"})
 
-        print("1.")
+        print("1..")
         fileDownloaded=request.files["myFile"]
         print(fileDownloaded)
         filename = fileDownloaded.filename
