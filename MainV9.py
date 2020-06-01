@@ -4,12 +4,12 @@ import cv2
 import numpy as np
 import pytesseract
 from PIL import Image, ImageOps
+from langdetect import detect
 from docx import Document
 from docx.shared import Inches
 from GibberishDetector import classify
 import os
 import sys
-from pdf2image import convert_from_path
 import io
 import re
 import pandas as pd
@@ -18,6 +18,7 @@ import math as m
 import ast
 import shutil
 import json
+from wand.image import Image as wandImage
 
 class Status:
     def __init__(self):
@@ -28,6 +29,7 @@ class Status:
 
 def get_image(image_path):
     """Get a numpy array of an image so that one can access values[x][y]."""
+    print(image_path)
     image = Image.open(image_path, 'r')
     image = image.convert('L')  # makes it greyscale
     width, height = image.size
@@ -661,8 +663,7 @@ def main(pdfname, status):
         os.makedirs("TempContours")
 
     paper_name = pdfname.replace(".pdf", "")
-    pdf_path = pdfname
-    pages = convert_from_path(pdf_path)
+    pdf_path = "ReactPDF/" + paper_name + ".pdf"
     pg_cntr = 1
     filenames_list = []
     file_attribute_list = find_paper_attributes(paper_name)
@@ -671,11 +672,13 @@ def main(pdfname, status):
     if not os.path.exists(sub_dir):
         os.makedirs(sub_dir)
 
-    for page in pages:
-        filename = "pg_" + str(pg_cntr) + '_' + pdf_path.split('/')[-1].replace('.pdf', '.jpg')
-        page.save(sub_dir + filename)
-        pg_cntr = pg_cntr + 1
-        filenames_list.append(sub_dir + filename)
+    with(wandImage(filename=pdf_path, resolution=120)) as source: 
+        for i, image in enumerate(source.sequence):
+            newfilename = "pg_" + str(pg_cntr) + '_' + pdf_path.split('/')[-1].replace('.pdf', '.jpg')
+            wandImage(image).save(filename= sub_dir + newfilename)
+            pg_cntr = pg_cntr + 1
+            filenames_list.append(sub_dir + newfilename)
+
 
     total_pages = len(filenames_list)
     qn_coord = find_qn_coords(filenames_list, status)
@@ -719,11 +722,12 @@ current_ans_list = []
 file_attribute_list = []
 found_ans_options = False
 global_df = pd.DataFrame(columns=['Level', 'Question', 'isMCQ', 'A', 'B', 'C', 'D', 'Subject', 'Year', 'School', 'Exam', 'Number', 'Image', 'Image File'])
+status = Status()
 
 # for curFilename in os.listdir("Sample Resources"):
 #     if curFilename.endswith(".pdf"):
 #         filename = curFilename
-#         main(curFilename)
+#         main(curFilename, status)
 #         qn_num = 1
 #         pg_num = 1
 #         diagram_count = 1

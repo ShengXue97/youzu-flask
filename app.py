@@ -58,7 +58,7 @@ def uploadfile():
         print(fileDownloaded)
         filename = fileDownloaded.filename
         print(filename)
-        fileDownloaded.save(filename)
+        fileDownloaded.save(os.path.join("./ReactPDF", filename))
         status = Status()
         print("starting now")
         ip_status_dict[currentIP] = (True, status)
