@@ -63,7 +63,7 @@ def uploadfile():
         print("starting now")
         ip_status_dict[currentIP] = (True, status)
         print(ip_status_dict)
-        main(filename, status)
+        # main(filename, status)
 
         print("Forking...")
         thread = threading.Thread(target=main, args=(filename, status))
