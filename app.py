@@ -20,8 +20,8 @@ app.config['CORS_HEADERS'] = 'Content-Type'
 ip_status_dict = {}
 
 @app.route("/")
-def home_view():
-    return "<h1>Welcome !!!!<h1>"
+def home():
+    return "<h1>Welcome man<h1>"
     
 def get_message():
     '''this could be any function that blocks until data is ready'''
