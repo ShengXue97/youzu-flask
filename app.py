@@ -51,9 +51,9 @@ def uploadfile():
     response = None
     if request.method == 'POST':
         currentIP = request.remote_addr
-        if currentIP in ip_status_dict:
-            if ip_status_dict[currentIP][0] == True:
-                return jsonify({"Succeeded": "yes"})
+        # if currentIP in ip_status_dict:
+        #     if ip_status_dict[currentIP][0] == True:
+        #         return jsonify({"Succeeded": "yes"})
 
         fileDownloaded=request.files["myFile"]
         filename = fileDownloaded.filename
