@@ -677,6 +677,11 @@ def main(pdfname, status):
         for i, image in enumerate(source.sequence):
             newfilename = "pg_" + str(pg_cntr) + '_' + pdf_path.split('/')[-1].replace('.pdf', '.jpg')
             wandImage(image).save(filename= sub_dir + newfilename)
+            
+            #Set dpi metadata of image
+            im = Image.open(sub_dir + newfilename)
+            im.save(sub_dir + newfilename, dpi=(600,600))
+
             pg_cntr = pg_cntr + 1
             filenames_list.append(sub_dir + newfilename)
 
