@@ -33,7 +33,6 @@ def get_message():
         value[1].running = 0
         value[1].done = 0
     
-    ip_status_dict.clear()
     return json.dumps(out_dict)
 
 @app.route('/stream')
