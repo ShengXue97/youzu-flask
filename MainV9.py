@@ -570,7 +570,7 @@ def find_qn_coords(filenames_list, status):
             cv2.imwrite("TempImages/small_" + str(diagram_count) + ".jpg", new_image)
             # Read as binary image
             small_image = cv2.imread("TempImages/small_" + str(diagram_count) + ".jpg", 0)
-            text = pytesseract.image_to_string(small_image, lang='eng', config='--psm 6 --dpi 70 --oem 1')
+            text = pytesseract.image_to_string(small_image, lang='eng', config='--psm 6 --oem 1 -l rus+eng')
             small_cntrs.append((pg_num, y))
             diagram_count = diagram_count + 1
 
