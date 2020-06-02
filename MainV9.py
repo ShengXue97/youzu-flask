@@ -182,7 +182,7 @@ def draw_contours(result, img, cntrs, image_name):
             thresh = 255 - cv2.threshold(grayish, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
             ###cropping out image and convert to text
             ROI = thresh[y:y + h, x:x + w]
-            text = pytesseract.image_to_string(ROI, lang='eng', config='--psm 6')
+            text = pytesseract.image_to_string(ROI, lang='eng', config='--psm 6 --oem 1')
             text = re.sub(r"\(EMPTY\)", "_________", text)
             pseudo_text = text
 
