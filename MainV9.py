@@ -182,7 +182,7 @@ def draw_contours(result, img, cntrs, image_name):
             thresh = 255 - cv2.threshold(grayish, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
             ###cropping out image and convert to text
             ROI = thresh[y:y + h, x:x + w]
-            text = pytesseract.image_to_string(small_image, lang='eng', config='--psm 6 --oem 1 -l rus+eng')
+            text = text = pytesseract.image_to_string(ROI, lang='eng', config='--psm 6 --oem 1 -l rus+eng')
             text = re.sub(r"\(EMPTY\)", "_________", text)
             pseudo_text = text
 
@@ -220,7 +220,7 @@ def draw_contours(result, img, cntrs, image_name):
             thresh = 255 - cv2.threshold(image, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
 
             ROI = thresh[y:y + h, x:x + w]
-            text = pytesseract.image_to_string(small_image, lang='eng', config='--psm 6 --oem 1 -l rus+eng')
+            text = text = pytesseract.image_to_string(ROI, lang='eng', config='--psm 6 --oem 1 -l rus+eng')
             pseudo_text = text
 
             # Only add the image if it is large enough,
@@ -550,7 +550,7 @@ def find_qn_coords(filenames_list, status):
 
             if area < 0.1 and area > 0.01 and y / height < 0.855 and x / width < 0.25 and w / h < 2 and w / h > 0.5:
                 new_image = img[y:y + h, x:x + w]
-                text = pytesseract.image_to_string(small_image, lang='eng', config='--psm 6 --oem 1 -l rus+eng')
+                text = text = pytesseract.image_to_string(new_image, lang='eng', config='--psm 6 --oem 1 -l rus+eng')
                 if text != "":
                     # Check if pseudo_text contains numbers contained in any brackets
                     # matches = re.search(r'[\[\(\|\{][0-9a-z][\]\)\}\|]', text, re.I)
