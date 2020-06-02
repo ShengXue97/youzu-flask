@@ -680,7 +680,7 @@ def main(pdfname, status):
             
             #Set dpi metadata of image
             im = Image.open(sub_dir + newfilename)
-            im.save(sub_dir + newfilename, dpi=(600,600))
+            im.save(sub_dir + newfilename)
 
             pg_cntr = pg_cntr + 1
             filenames_list.append(sub_dir + newfilename)
