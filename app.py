@@ -47,7 +47,7 @@ def index():
 @app.route('/uploadfile', methods = ['GET', 'POST'])
 def uploadfile():
     print("called1")
-    ip_status_dict = {}
+    ip_status_dict.clear()
     response = None
     if request.method == 'POST':
         currentIP = request.remote_addr
