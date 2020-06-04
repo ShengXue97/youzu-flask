@@ -43,6 +43,10 @@ def index():
             yield 'data: {}\n\n'.format(get_message())
         return flask.Response(events(), content_type='text/event-stream')
 
+@app.route("/redeploy")
+def redeploy():
+    ip_status_dict.clear()
+    return jsonify({"Reset success": "yes"})
 
 @app.route('/uploadfile', methods = ['GET', 'POST'])
 def uploadfile():
