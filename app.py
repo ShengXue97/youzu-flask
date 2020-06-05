@@ -31,6 +31,7 @@ def get_message():
     if currentIP in ip_status_dict:
         value = ip_status_dict[currentIP]
         # Only returns the value relevant to the currentIP address
+        out_dict["ipExists"] = "yes"
         out_dict["running"] = value[0]
         out_dict["done"] = value[1].done
         out_dict["stage"] = value[1].stage
@@ -40,8 +41,10 @@ def get_message():
         #Set done to 0, this prevents the opening of multiple edit tabs
         ip_status_dict[currentIP][1].running = 0
         ip_status_dict[currentIP][1].value[1].done = 0
+        return json.dumps(out_dict)
+    else:
+        return jsonify({"ipExists": "no"})
     
-    return json.dumps(out_dict)
 
 @app.route('/stream')
 def index():
