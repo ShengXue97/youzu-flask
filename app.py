@@ -43,11 +43,13 @@ def get_message():
         ip_status_dict[currentIP][1].value[1].done = 0
         return json.dumps(out_dict)
     else:
-        return jsonify({"ipExists": "no"})
+        out_dict["ipExists"] = "no"
+        return json.dumps(out_dict)
     
 
 @app.route('/stream')
 def index():
+    print(request)
     if request.headers.get('accept') == 'text/event-stream':
         def events():
             time.sleep(.1)  # an artificial delay
