@@ -33,6 +33,9 @@ def get_message(currentIP, currentTime):
             # Only returns the value relevant to the currentIP address
             out_dict["ipExists"] = "yes"
             out_dict["timeStampExists"] = "yes"
+            out_dict["currentIP"] = currentIP
+            out_dict["curentTimeStamp"] = currentTime
+            
             out_dict["stage"] = myStatus.stage
             out_dict["page"] = myStatus.page
             out_dict["total"] = myStatus.total
@@ -40,10 +43,14 @@ def get_message(currentIP, currentTime):
         else:
             out_dict["ipExists"] = "yes"
             out_dict["timeStampExists"] = "no"
+            out_dict["currentIP"] = currentIP
+            out_dict["curentTimeStamp"] = currentTime
             return json.dumps(out_dict)
     else:
         out_dict["ipExists"] = "no"
         out_dict["timeStampExists"] = "no"
+        out_dict["currentIP"] = currentIP
+        out_dict["curentTimeStamp"] = currentTime
         return json.dumps(out_dict)
     
 
