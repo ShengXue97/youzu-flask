@@ -103,7 +103,13 @@ def uploadfile():
 
 @app.route('/getresult', methods = ['GET', 'POST'])
 def getresult():
-    df = pd.read_csv("output.csv")
+    currentIP = request.args.get("currentIP")
+    currentTime = request.args.get("currentTime")
+
+    requestIDRaw = currentIP + "_" + currentTime
+    requestIDProcessed = currentTime.replace(":", "-").replacee(".", "_")
+
+    df = pd.read_csv(requestIDProcessed + "/output.csv")
 
     # Create an empty list 
     row_json = []
