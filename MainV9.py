@@ -742,6 +742,8 @@ def main(pdfname, status, requestIDProcessed):
     shutil.rmtree(dirpath + "/" +requestID + "/TempImages")
     shutil.rmtree(dirpath + "/" +requestID + "/images/")
 
+    status.stage = 3
+
 
 qn_num = 1
 pg_num = 1
