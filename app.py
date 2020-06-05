@@ -29,8 +29,8 @@ def get_message():
     print(str(ip_status_dict))
     out_dict = {}
     for key, value in ip_status_dict.items():
-        if value[1].page == value[1].total:
-            value[1].done = 1
+        # if value[1].page == value[1].total:
+        #     value[1].done = 1
             
         out_dict[key] = {"running": value[0], "done": value[1].done, "stage": value[1].stage, "page": value[1].page, "total": value[1].total}
         value[1].running = 0
