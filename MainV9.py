@@ -145,6 +145,7 @@ def draw_contours(result, img, cntrs, image_name):
     global diagram_count
     global texted
     global filename
+    global requestID
     # Contains list of tuples of (data, type, y_coord)
     # data contains actual string if it is a text, and the image path in TempImages if it contains an image.
     # type is "text" or "image"
@@ -194,9 +195,9 @@ def draw_contours(result, img, cntrs, image_name):
                     if h / height > 0.1 and w / h < 10:
                         # Likely to be an image
                         new_image = img[y:y + h, x:x + w]
-                        cv2.imwrite("TempImages/" + str(diagram_count) + ".jpg", new_image)
+                        cv2.imwrite(requestID + "/TempImages/" + str(diagram_count) + ".jpg", new_image)
                         document_data_list.append(
-                            ("TempImages/" + str(diagram_count) + ".jpg", "image", y, pseudo_text))
+                            (requestID + "/TempImages/" + str(diagram_count) + ".jpg", "image", y, pseudo_text))
                         diagram_count = diagram_count + 1
                     else:
                         # Likely to be text, just small regions like "Go on to the next page"
@@ -232,8 +233,8 @@ def draw_contours(result, img, cntrs, image_name):
                 dst = cv2.Canny(new_image, 50, 200, None, 3)
                 linesp = cv2.HoughLinesP(dst, 1, np.pi / 180, 50, None, 50, 2)
                 if linesp is not None or is_gibberish(text):
-                    cv2.imwrite("TempImages/" + str(diagram_count) + ".jpg", new_image)
-                    document_data_list.append(("TempImages/" + str(diagram_count) + ".jpg", "image", y, pseudo_text))
+                    cv2.imwrite(requestID + "/TempImages/" + str(diagram_count) + ".jpg", new_image)
+                    document_data_list.append((requestID + "/TempImages/" + str(diagram_count) + ".jpg", "image", y, pseudo_text))
                     diagram_count = diagram_count + 1
                 else:
                     # large chunk that resembles diagram, but really is text
@@ -408,6 +409,7 @@ def generate_document(imagefilename, documentdir, qn_coord, status):
     global pg_num
     global total_pages
     global filename
+    global requestID
 
     print("Step 2 (Output Generation): PG " + str(pg_num) + "/" + str(total_pages))
     status.stage = 2
@@ -474,17 +476,17 @@ def generate_document(imagefilename, documentdir, qn_coord, status):
     parentdir = image_name.split('/', 1)[0]
 
     # put this under documentdir
-    if not os.path.exists(documentdir + "/" + parentdir):
-        os.makedirs(documentdir + "/" + parentdir)
+    if not os.path.exists(requestID + "/" + documentdir + "/" + parentdir):
+        os.makedirs(requestID + "/" + documentdir + "/" + parentdir)
 
-    document.save(documentdir + "/" + image_name + ".docx")
+    document.save(requestID + "/" + documentdir + "/" + image_name + ".docx")
 
     # cv2.imshow("THRESH", thresh)
     # cv2.imshow("MORPH", morph)
 
     ####### Step 6: Display results
     ims = cv2.resize(result, (700, 850))
-    cv2.imwrite("TempContours/" + str(pg_num) + ".jpg", ims)
+    cv2.imwrite(requestID + "/TempContours/" + str(pg_num) + ".jpg", ims)
     pg_num = pg_num + 1
     # cv2.imshow("RESULT", ims)
     # cv2.waitKey(0)
@@ -508,6 +510,7 @@ def copytree(src, dst, symlinks=False, ignore=None):
 # Map the page number and y coordinates of each question
 def find_qn_coords(filenames_list, status):
     global total_pages
+    global requestID
     qn_coord = []
     qn_coord.append((0, 0))
     pg_num = 1
@@ -564,9 +567,9 @@ def find_qn_coords(filenames_list, status):
         for c, pg_num, y, w, h, xw in sorted_cntr_tuples:
             x, y, w, h = cv2.boundingRect(c)
             new_image = img[y:y + h, x:x + w]
-            cv2.imwrite("TempImages/small_" + str(diagram_count) + ".jpg", new_image)
+            cv2.imwrite(requestID + "/TempImages/small_" + str(diagram_count) + ".jpg", new_image)
             # Read as binary image
-            small_image = cv2.imread("TempImages/small_" + str(diagram_count) + ".jpg", 0)
+            small_image = cv2.imread(requestID + "/TempImages/small_" + str(diagram_count) + ".jpg", 0)
             text = pytesseract.image_to_string(small_image, lang='eng', config='--psm 6 --oem 1 -l rus+eng')
             small_cntrs.append((pg_num, y))
             diagram_count = diagram_count + 1
@@ -575,7 +578,7 @@ def find_qn_coords(filenames_list, status):
             qn_coord.append((pg_num, y))
             # print((pg_num, y))
 
-        cv2.imwrite("TempContours/" + str(pg_num) + ".jpg", result)
+        cv2.imwrite(requestID + "/TempContours/" + str(pg_num) + ".jpg", result)
         pg_num = pg_num + 1
 
     return qn_coord
@@ -648,7 +651,7 @@ def acc_matrix(image_count, verifier, pdfname):
         pass
 
 
-def main(pdfname, status):
+def main(pdfname, status, requestIDProcessed):
     global qn_num
     global pg_num
     global diagram_count
@@ -660,7 +663,9 @@ def main(pdfname, status):
     global file_attribute_list
     global found_ans_options
     global global_df
+    global requestID
 
+    requestID = requestIDProcessed
     print(pdfname)
 
     qn_num = 1
@@ -676,11 +681,11 @@ def main(pdfname, status):
     global_df = pd.DataFrame(columns=['Level', 'Question', 'isMCQ', 'A', 'B', 'C', 'D', 'Subject', 'Year', 'School', 'Exam', 'Number', 'Image', 'Image File'])
 
 
-    if not os.path.exists("TempImages"):
-        os.makedirs("TempImages")
+    if not os.path.exists(requestID + "/TempImages"):
+        os.makedirs(requestID + "/TempImages")
 
-    if not os.path.exists("TempContours"):
-        os.makedirs("TempContours")
+    if not os.path.exists(requestID + "/TempContours"):
+        os.makedirs(requestID + "/TempContours")
 
     paper_name = pdfname.replace(".pdf", "")
     pdf_path = "ReactPDF/" + paper_name + ".pdf"
@@ -688,7 +693,7 @@ def main(pdfname, status):
     filenames_list = []
     file_attribute_list = find_paper_attributes(paper_name)
 
-    sub_dir = str("images/" + pdf_path.split('/')[-1].replace('.pdf', '') + "/")
+    sub_dir = str(requestID + "/images/" + pdf_path.split('/')[-1].replace('.pdf', '') + "/")
     if not os.path.exists(sub_dir):
         os.makedirs(sub_dir)
 
@@ -710,7 +715,7 @@ def main(pdfname, status):
     # qn_coord = ast.literal_eval("[(0, 0, 0, 0), (2, 1365, 1, ''), (2, 1703, 2, ''), (3, 1131, 3, ''), (3, 1819, 4, ''), (4, 966, 5, ''), (4, 1779, 6, ''), (5, 2056, 7, ''), (6, 744, 8, ''), (6, 1934, 9, ''), (7, 757, 10, ''), (7, 1924, 11, ''), (8, 905, 12, ''), (8, 1710, 13, ''), (9, 1077, 14, ''), (9, 1914, 15, ''), (10, 1256, 16, ''), (11, 1630, 17, ''), (12, 1385, 18, ''), (13, 1432, 19, ''), (14, 1401, 20, ''), (15, 1292, 21, ''), (16, 1047, 22, ''), (17, 1295, 23, ''), (18, 1169, 24, ''), (19, 1005, 25, ''), (19, 1527, 26, ''), (20, 1535, 27, ''), (21, 1186, 28, ''), (21, 1968, 29, ''), (24, 1630, 30, 2), (26, 1591, 31, 2), (27, 1584, 32, 2), (29, 268, 33, 3), (30, 1935, 34, 2), (31, 1858, 35, 3), (32, 1035, 36, 3), (33, 1711, 37, 1), (34, 1553, 38, 1), (35, 1395, 39, 1), (36, 1739, 40, 3)]")
 
     for filename in filenames_list:
-        generate_document(filename, "OutputDocuments", qn_coord, status)
+        generate_document(filename, requestID + "/OutputDocuments", qn_coord, status)
 
     # df = pd.read_csv("Sample Resources/pdfverifier.csv")
     # verifier = df.set_index("Paper Name", drop=False)
@@ -721,14 +726,14 @@ def main(pdfname, status):
     #     print("There could be too much noise being recognized as images, consider improving the filter" + "\n")
     # else:
     #     print("Accuracy of Images : " + str(img_acc) + "%" + "\n")
-    global_df.to_csv("output.csv")
+    global_df.to_csv(requestID + "/output.csv")
 
     # Copies all the output to a new folder under Output/PDF NAME
     dirpath = os.getcwd()
-    copytree(dirpath + "/TempContours", dirpath + "/Output/" + paper_name + "/TempContours")
-    copytree(dirpath + "/TempImages", dirpath + "/Output/" + paper_name + "/TempImages")
-    copytree(dirpath + "/images/" + paper_name, dirpath + "/Output/" + paper_name + "/images")
-    shutil.copyfile(dirpath + "/output.csv", dirpath + "/Output/" + paper_name + "/output.csv")
+    copytree(dirpath + "/" + requestID + "/TempContours", dirpath + "/Output/" + paper_name + "/TempContours")
+    copytree(dirpath + "/" + requestID + "/TempImages", dirpath + "/Output/" + paper_name + "/TempImages")
+    copytree(dirpath + "/" + requestID + "/images/" + paper_name, dirpath + "/Output/" + paper_name + "/images")
+    shutil.copyfile(dirpath + "/" +requestID + "/output.csv", dirpath + "/Output/" + paper_name + "/output.csv")
 
     global_df = pd.DataFrame(columns=['Level', 'Question', 'isMCQ', 'A', 'B', 'C', 'D', 'Subject', 'Year', 'School', 'Exam', 'Number', 'Image', 'Image File'])
     # shutil.rmtree(dirpath + "/TempContours")
@@ -746,6 +751,7 @@ current_section = ""
 current_ans_list = []
 file_attribute_list = []
 found_ans_options = False
+requestID = ""
 global_df = pd.DataFrame(columns=['Level', 'Question', 'isMCQ', 'A', 'B', 'C', 'D', 'Subject', 'Year', 'School', 'Exam', 'Number', 'Image', 'Image File'])
 status = Status()
 

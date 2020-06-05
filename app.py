@@ -35,7 +35,7 @@ def get_message(currentIP, currentTime):
             out_dict["timeStampExists"] = "yes"
             out_dict["currentIP"] = currentIP
             out_dict["curentTimeStamp"] = currentTime
-            
+
             out_dict["stage"] = myStatus.stage
             out_dict["page"] = myStatus.page
             out_dict["total"] = myStatus.total
@@ -94,7 +94,9 @@ def uploadfile():
         # main(filename, status)
 
         print("Forking....")
-        thread = threading.Thread(target=main, args=(filename, status))
+        requestIDRaw = currentIP + "_" + currentTime
+        requestIDProcessed = currentTime.replace(":", "-").replacee(".", "_")
+        thread = threading.Thread(target=main, args=(filename, status, requestIDProcessed))
         thread.start()
         return jsonify({"Succeeded": "yes", "YourIP" : str(currentIP), "YourTime" : currentTime})
 
