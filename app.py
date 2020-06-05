@@ -27,7 +27,7 @@ def get_message():
     '''this could be any function that blocks until data is ready'''
     time.sleep(0.5)
     out_dict = {}
-    currentIP = request.remote_addr
+    currentIP = ""
     if currentIP in ip_status_dict:
         value = ip_status_dict[currentIP]
         # Only returns the value relevant to the currentIP address
