@@ -26,15 +26,20 @@ def home():
 def get_message():
     '''this could be any function that blocks until data is ready'''
     time.sleep(0.5)
-    print(str(ip_status_dict))
     out_dict = {}
-    for key, value in ip_status_dict.items():
-        # if value[1].page == value[1].total:
-        #     value[1].done = 1
-            
-        out_dict[key] = {"running": value[0], "done": value[1].done, "stage": value[1].stage, "page": value[1].page, "total": value[1].total}
-        value[1].running = 0
-        value[1].done = 0
+    currentIP = request.remote_addr
+    if currentIP in ip_status_dict:
+        value = ip_status_dict[currentIP]
+        # Only returns the value relevant to the currentIP address
+        out_dict["running"] = value[0]
+        out_dict["done"] = value[1].done
+        out_dict["stage"] = value[1].stage
+        out_dict["page"] = value[1].page
+        out_dict["total"] = value[1].total
+
+        #Set done to 0, this prevents the opening of multiple edit tabs
+        ip_status_dict[currentIP][1].running = 0
+        ip_status_dict[currentIP][1].value[1].done = 0
     
     return json.dumps(out_dict)
 
