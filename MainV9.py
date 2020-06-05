@@ -726,7 +726,9 @@ def main(pdfname, status, requestIDProcessed):
     #     print("There could be too much noise being recognized as images, consider improving the filter" + "\n")
     # else:
     #     print("Accuracy of Images : " + str(img_acc) + "%" + "\n")
-    global_df.to_csv(requestID + "/output.csv")
+    pathNew = os.path.join(requestID, 'output.csv')
+    print("Saving to: " + str(pathNew))
+    global_df.to_csv(pathNew)
 
     # Copies all the output to a new folder under Output/PDF NAME
     dirpath = os.getcwd()
