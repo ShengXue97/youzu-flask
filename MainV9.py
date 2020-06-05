@@ -731,9 +731,9 @@ def main(pdfname, status):
     shutil.copyfile(dirpath + "/output.csv", dirpath + "/Output/" + paper_name + "/output.csv")
 
     global_df = pd.DataFrame(columns=['Level', 'Question', 'isMCQ', 'A', 'B', 'C', 'D', 'Subject', 'Year', 'School', 'Exam', 'Number', 'Image', 'Image File'])
-    shutil.rmtree(dirpath + "/TempContours")
-    shutil.rmtree(dirpath + "/TempImages")
-    shutil.rmtree(dirpath + "/images/")
+    # shutil.rmtree(dirpath + "/TempContours")
+    # shutil.rmtree(dirpath + "/TempImages")
+    # shutil.rmtree(dirpath + "/images/")
 
 
 qn_num = 1
