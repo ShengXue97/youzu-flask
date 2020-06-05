@@ -33,14 +33,9 @@ def get_message(currentIP, currentTime):
             # Only returns the value relevant to the currentIP address
             out_dict["ipExists"] = "yes"
             out_dict["timeStampExists"] = "yes"
-            out_dict["done"] = myStatus.done
             out_dict["stage"] = myStatus.stage
             out_dict["page"] = myStatus.page
             out_dict["total"] = myStatus.total
-
-            #Set done to 0, this prevents the opening of multiple edit tabs
-            status_dict[currentIP][currentTime].running = 0
-            status_dict[currentIP][currentTime].done = 0
             return json.dumps(out_dict)
         else:
             out_dict["ipExists"] = "yes"

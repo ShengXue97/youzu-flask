@@ -24,9 +24,8 @@ class Status:
         self.stage = 1
         self.page = 1
         self.total = -1
-        self.done = 0
     def __repr__(self):
-        return "stage: " + str(self.stage) + "; " + "page: " + str(self.page) + "; " + "total: " + str(self.total) + "; " + "done: " + str(self.done)
+        return "stage: " + str(self.stage) + "; " + "page: " + str(self.page) + "; " + "total: " + str(self.total)
 
 def get_image(image_path):
     """Get a numpy array of an image so that one can access values[x][y]."""
@@ -414,8 +413,6 @@ def generate_document(imagefilename, documentdir, qn_coord, status):
     status.stage = 2
     status.page = pg_num
     status.total = total_pages
-    if pg_num == total_pages:
-        status.done = 1
 
     image_name = imagefilename.replace(".jpg", "")
     document = Document()
