@@ -476,10 +476,10 @@ def generate_document(imagefilename, documentdir, qn_coord, status):
     parentdir = image_name.split('/', 1)[0]
 
     # put this under documentdir
-    if not os.path.exists(requestID + "/" + documentdir + "/" + parentdir):
-        os.makedirs(requestID + "/" + documentdir + "/" + parentdir)
+    if not os.path.exists(documentdir + "/" + parentdir):
+        os.makedirs(documentdir + "/" + parentdir)
 
-    document.save(requestID + "/" + documentdir + "/" + image_name + ".docx")
+    document.save(documentdir + "/" + image_name + ".docx")
 
     # cv2.imshow("THRESH", thresh)
     # cv2.imshow("MORPH", morph)
