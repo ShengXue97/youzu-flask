@@ -39,6 +39,9 @@ def get_message(currentIP, currentTime):
             out_dict["stage"] = myStatus.stage
             out_dict["page"] = myStatus.page
             out_dict["total"] = myStatus.total
+            IPDict = status_dict[currentIP]
+            del IPDict[currentTime]
+            
             return json.dumps(out_dict)
         else:
             out_dict["ipExists"] = "yes"
