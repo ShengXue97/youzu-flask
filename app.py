@@ -58,6 +58,7 @@ def uploadfile():
     response = None
     if request.method == 'POST':
         currentIP = request.remote_addr
+        print(currentIP)
         # if currentIP in ip_status_dict:
         #     if ip_status_dict[currentIP][0] == True:
         #         return jsonify({"Succeeded": "yes"})
@@ -72,7 +73,7 @@ def uploadfile():
         print("Forking....")
         thread = threading.Thread(target=main, args=(filename, status))
         thread.start()
-        return jsonify({"Succeeded": "yes"})
+        return jsonify({"Succeeded": "yes", "YourIP" : str(currentIP)})
 
 
 @app.route('/getresult', methods = ['GET', 'POST'])
