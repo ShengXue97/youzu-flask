@@ -39,7 +39,7 @@ def get_message(currentIP):
 
         #Set done to 0, this prevents the opening of multiple edit tabs
         ip_status_dict[currentIP][1].running = 0
-        ip_status_dict[currentIP][1].value[1].done = 0
+        ip_status_dict[currentIP][1].done = 0
         return json.dumps(out_dict)
     else:
         out_dict["ipExists"] = "no"
