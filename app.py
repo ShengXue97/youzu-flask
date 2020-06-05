@@ -49,7 +49,7 @@ def get_message():
 
 @app.route('/stream')
 def index():
-    print(request)
+    print(request.data)
     if request.headers.get('accept') == 'text/event-stream':
         def events():
             time.sleep(.1)  # an artificial delay
