@@ -649,10 +649,32 @@ def acc_matrix(image_count, verifier, pdfname):
 
 
 def main(pdfname, status):
+    global qn_num
+    global pg_num
+    global diagram_count
+    global filename
     global total_pages
-    global global_df
+    global image_count
+    global current_section
+    global current_ans_list
     global file_attribute_list
+    global found_ans_options
+    global global_df
+
     print(pdfname)
+
+    qn_num = 1
+    pg_num = 1
+    diagram_count = 1
+    filename = ""
+    total_pages = -1
+    image_count = 0
+    current_section = ""
+    current_ans_list = []
+    file_attribute_list = []
+    found_ans_options = False
+    global_df = pd.DataFrame(columns=['Level', 'Question', 'isMCQ', 'A', 'B', 'C', 'D', 'Subject', 'Year', 'School', 'Exam', 'Number', 'Image', 'Image File'])
+
 
     if not os.path.exists("TempImages"):
         os.makedirs("TempImages")
