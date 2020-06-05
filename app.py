@@ -95,7 +95,7 @@ def uploadfile():
 
         print("Forking....")
         requestIDRaw = currentIP + "_" + currentTime
-        requestIDProcessed = currentTime.replace(":", "-").replacee(".", "_")
+        requestIDProcessed = currentTime.replace(":", "-").replace(".", "_")
         thread = threading.Thread(target=main, args=(filename, status, requestIDProcessed))
         thread.start()
         return jsonify({"Succeeded": "yes", "YourIP" : str(currentIP), "YourTime" : currentTime})
@@ -107,7 +107,7 @@ def getresult():
     currentTime = request.args.get("currentTime")
 
     requestIDRaw = currentIP + "_" + currentTime
-    requestIDProcessed = currentTime.replace(":", "-").replacee(".", "_")
+    requestIDProcessed = currentTime.replace(":", "-").replace(".", "_")
 
     df = pd.read_csv(requestIDProcessed + "/output.csv")
 
