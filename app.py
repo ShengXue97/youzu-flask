@@ -23,11 +23,10 @@ ip_status_dict = {}
 def home():
     return "<h1>Welcome man, enjoy your stay<h1>"
     
-def get_message():
+def get_message(currentIP):
     '''this could be any function that blocks until data is ready'''
     time.sleep(0.5)
     out_dict = {}
-    currentIP = ""
     if currentIP in ip_status_dict:
         value = ip_status_dict[currentIP]
         # Only returns the value relevant to the currentIP address
@@ -49,11 +48,11 @@ def get_message():
 
 @app.route('/stream')
 def index():
-    print(request.args.get("currentIP"))
+    currentIP = request.args.get("currentIP")
     if request.headers.get('accept') == 'text/event-stream':
         def events():
             time.sleep(.1)  # an artificial delay
-            yield 'data: {}\n\n'.format(get_message())
+            yield 'data: {}\n\n'.format(get_message(currentIP))
         return flask.Response(events(), content_type='text/event-stream')
 
 @app.route("/redeploy")
