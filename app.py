@@ -17,72 +17,84 @@ app = Flask(__name__)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 # dictionary of tuple: status(whether there is an ongoing request from this ip), and the Status object of that request.
-ip_status_dict = {}
+status_dict = {}
 
 @app.route("/")
 def home():
     return "<h1>Welcome man, enjoy your stay<h1>"
     
-def get_message(currentIP):
+def get_message(currentIP, currentTime):
     '''this could be any function that blocks until data is ready'''
     time.sleep(0.5)
     out_dict = {}
-    if currentIP in ip_status_dict:
-        value = ip_status_dict[currentIP]
-        # Only returns the value relevant to the currentIP address
-        out_dict["ipExists"] = "yes"
-        out_dict["running"] = value[0]
-        out_dict["done"] = value[1].done
-        out_dict["stage"] = value[1].stage
-        out_dict["page"] = value[1].page
-        out_dict["total"] = value[1].total
+    if currentIP in status_dict:
+        if currentTime in status_dict[currentIP]:
+            myStatus = status_dict[currentIP][currentTime]
+            # Only returns the value relevant to the currentIP address
+            out_dict["ipExists"] = "yes"
+            out_dict["timeStampExists"] = "yes"
+            out_dict["done"] = myStatus.done
+            out_dict["stage"] = myStatus.stage
+            out_dict["page"] = myStatus.page
+            out_dict["total"] = myStatus.total
 
-        #Set done to 0, this prevents the opening of multiple edit tabs
-        ip_status_dict[currentIP][1].running = 0
-        ip_status_dict[currentIP][1].done = 0
-        return json.dumps(out_dict)
+            #Set done to 0, this prevents the opening of multiple edit tabs
+            status_dict[currentIP][currentTime].running = 0
+            status_dict[currentIP][currentTime].done = 0
+            return json.dumps(out_dict)
+        else:
+            out_dict["ipExists"] = "yes"
+            out_dict["timeStampExists"] = "no"
+            return json.dumps(out_dict)
     else:
         out_dict["ipExists"] = "no"
+        out_dict["timeStampExists"] = "no"
         return json.dumps(out_dict)
     
 
 @app.route('/stream')
 def index():
     currentIP = request.args.get("currentIP")
+    currentTime = request.args.get("currentTime")
     if request.headers.get('accept') == 'text/event-stream':
         def events():
             time.sleep(.1)  # an artificial delay
-            yield 'data: {}\n\n'.format(get_message(currentIP))
+            yield 'data: {}\n\n'.format(get_message(currentIP, currentTime))
         return flask.Response(events(), content_type='text/event-stream')
 
 @app.route("/redeploy")
 def redeploy():
-    ip_status_dict.clear()
+    status_dict.clear()
     return jsonify({"Reset success": "yes"})
 
 @app.route('/uploadfile', methods = ['GET', 'POST'])
 def uploadfile():
     print("called1")
-    ip_status_dict.clear()
     response = None
     if request.method == 'POST':
         currentIP = request.remote_addr
         print(currentIP)
-        # if currentIP in ip_status_dict:
-        #     if ip_status_dict[currentIP][0] == True:
-        #         return jsonify({"Succeeded": "yes"})
 
         fileDownloaded=request.files["myFile"]
         filename = fileDownloaded.filename
         fileDownloaded.save(os.path.join("./ReactPDF", filename))
         status = Status()
-        ip_status_dict[currentIP] = (True, status)
+        currentTime = str(datetime.now())
+
+        # Unique entry for each request using timestamp!
+        if currentIP in status_dict:
+            status_dict[currentIP][currentTime] = status
+        else:
+            newIPDict = {}
+            status_dict[currentIP] = newIPDict
+            status_dict[currentIP][currentTime] = status
+
         # main(filename, status)
 
         print("Forking....")
         thread = threading.Thread(target=main, args=(filename, status))
         thread.start()
-        return jsonify({"Succeeded": "yes", "YourIP" : str(currentIP)})
+        return jsonify({"Succeeded": "yes", "YourIP" : str(currentIP), "YourTime" : currentTime})
 
 
 @app.route('/getresult', methods = ['GET', 'POST'])
