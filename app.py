@@ -17,11 +17,7 @@ app = Flask(__name__)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 db = dbj('mydb.json')
-currentObj = {}
-
-def setObj(newObj):
-    currentObj = newObj
-
+currentObj
 @app.route("/")
 def home():
     return "<h1>Welcome man, enjoy your stay<h1>"
@@ -33,8 +29,10 @@ def get_message(currentIP, currentTime):
     requestIDProcessed = currentTime.replace(":", "-").replace(".", "_")
     print(requestIDProcessed)
     #print(db.getall())
-    print(currentObj)
-    print("---------------")
+    with open("mydb.json", "w+") as file:
+        for line in file:
+            print(line)
+
     if not db.exists(requestIDProcessed):
         out_dict["ipExists"] = "no"
         out_dict["timeStampExists"] = "no"
@@ -88,7 +86,7 @@ def uploadfile():
             db.insert(entry, requestIDProcessed)
 
         print("Forking....")
-        thread = threading.Thread(target=main, args=(filename, db, requestIDProcessed, setObj))
+        thread = threading.Thread(target=main, args=(filename, db, requestIDProcessed))
         thread.start()
         return jsonify({"Succeeded": "yes", "YourIP" : str(currentIP), "YourTime" : currentTime})
 

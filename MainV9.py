@@ -399,7 +399,7 @@ def write_data_to_document(document_data_list, document, qn_coord):
             image_count += 1
 
 
-def generate_document(imagefilename, documentdir, qn_coord, db, requestIDProcessed, setObj):
+def generate_document(imagefilename, documentdir, qn_coord, db, requestIDProcessed):
     global pg_num
     global total_pages
     global filename
@@ -407,8 +407,8 @@ def generate_document(imagefilename, documentdir, qn_coord, db, requestIDProcess
 
     print("Step 2 (Output Generation): PG " + str(pg_num) + "/" + str(total_pages))
     entry = {'stage': 2, 'page' : pg_num, 'total' : total_pages}
-    setObj(entry)
     db.update(requestIDProcessed, entry)
+    db.save()
     time.sleep(0)
 
     image_name = imagefilename.replace(".jpg", "")
@@ -503,7 +503,7 @@ def copytree(src, dst, symlinks=False, ignore=None):
 
 
 # Map the page number and y coordinates of each question
-def find_qn_coords(filenames_list, db, requestIDProcessed, setObj):
+def find_qn_coords(filenames_list, db, requestIDProcessed):
     global total_pages
     global requestID
     qn_coord = []
@@ -516,8 +516,8 @@ def find_qn_coords(filenames_list, db, requestIDProcessed, setObj):
         print("Step 1 (Preprocessing): PG " + str(pg_num) + "/" + str(total_pages))
 
         entry = {'stage': 1, 'page' : pg_num, 'total' : total_pages}
-        setObj(entry)
         db.update(requestIDProcessed, entry)
+        db.save()
         time.sleep(0)
         # if pg_num < 24:
         #     continue
@@ -647,7 +647,7 @@ def acc_matrix(image_count, verifier, pdfname):
         pass
 
 
-def main(pdfname, db, requestIDProcessed, setObj):
+def main(pdfname, db, requestIDProcessed):
     global qn_num
     global pg_num
     global diagram_count
@@ -707,11 +707,11 @@ def main(pdfname, db, requestIDProcessed, setObj):
 
 
     total_pages = len(filenames_list)
-    qn_coord = find_qn_coords(filenames_list, db, requestIDProcessed, setObj)
+    qn_coord = find_qn_coords(filenames_list, db, requestIDProcessed)
     # qn_coord = ast.literal_eval("[(0, 0, 0, 0), (2, 1365, 1, ''), (2, 1703, 2, ''), (3, 1131, 3, ''), (3, 1819, 4, ''), (4, 966, 5, ''), (4, 1779, 6, ''), (5, 2056, 7, ''), (6, 744, 8, ''), (6, 1934, 9, ''), (7, 757, 10, ''), (7, 1924, 11, ''), (8, 905, 12, ''), (8, 1710, 13, ''), (9, 1077, 14, ''), (9, 1914, 15, ''), (10, 1256, 16, ''), (11, 1630, 17, ''), (12, 1385, 18, ''), (13, 1432, 19, ''), (14, 1401, 20, ''), (15, 1292, 21, ''), (16, 1047, 22, ''), (17, 1295, 23, ''), (18, 1169, 24, ''), (19, 1005, 25, ''), (19, 1527, 26, ''), (20, 1535, 27, ''), (21, 1186, 28, ''), (21, 1968, 29, ''), (24, 1630, 30, 2), (26, 1591, 31, 2), (27, 1584, 32, 2), (29, 268, 33, 3), (30, 1935, 34, 2), (31, 1858, 35, 3), (32, 1035, 36, 3), (33, 1711, 37, 1), (34, 1553, 38, 1), (35, 1395, 39, 1), (36, 1739, 40, 3)]")
 
     for filename in filenames_list:
-        generate_document(filename, requestID + "/OutputDocuments", qn_coord, db, requestIDProcessed, setObj)
+        generate_document(filename, requestID + "/OutputDocuments", qn_coord, db, requestIDProcessed)
 
     # df = pd.read_csv("Sample Resources/pdfverifier.csv")
     # verifier = df.set_index("Paper Name", drop=False)
