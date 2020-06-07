@@ -33,6 +33,7 @@ def get_message(currentIP, currentTime):
     requestIDProcessed = currentTime.replace(":", "-").replace(".", "_")
     print(requestIDProcessed)
     print(db.getall())
+    print(currentObj)
     if not db.exists(requestIDProcessed):
         out_dict["ipExists"] = "no"
         out_dict["timeStampExists"] = "no"
