@@ -17,7 +17,7 @@ app = Flask(__name__)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 db = dbj('mydb.json')
-currentObj
+
 @app.route("/")
 def home():
     return "<h1>Welcome man, enjoy your stay<h1>"
