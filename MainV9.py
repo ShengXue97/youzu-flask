@@ -48,17 +48,17 @@ class Status:
 
     def get_stage(self):
         self.lock.acquire()
-        yield self.stage
-        self.lock.release()
+        return self.stage
 
     def get_page(self):
         self.lock.acquire()
-        yield self.page
-        self.lock.release()
+        return self.page
 
     def get_total(self):
         self.lock.acquire()
-        yield self.total
+        return self.total
+    
+    def release_lock(self):
         self.lock.release()
 
 def get_image(image_path):

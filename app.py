@@ -36,9 +36,12 @@ def get_message(currentIP, currentTime):
             out_dict["currentIP"] = currentIP
             out_dict["curentTimeStamp"] = currentTime
 
-            out_dict["stage"] = next(myStatus.get_stage())
-            out_dict["page"] = next(myStatus.get_page())
-            out_dict["total"] =next(myStatus.get_total())
+            out_dict["stage"] = myStatus.get_stage()
+            myStatus.release_lock()
+            out_dict["page"] = myStatus.get_page()
+            myStatus.release_lock()
+            out_dict["total"] = myStatus.get_total()
+            myStatus.release_lock()
             IPDict = status_dict[currentIP]
             del IPDict[currentTime]
             
