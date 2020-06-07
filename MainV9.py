@@ -19,14 +19,47 @@ import shutil
 import json
 from wand.image import Image as wandImage
 import time
+import threading
 
 class Status:
     def __init__(self):
+        self.lock = threading.Lock()
         self.stage = 1
         self.page = 1
         self.total = -1
+
     def __repr__(self):
         return "stage: " + str(self.stage) + "; " + "page: " + str(self.page) + "; " + "total: " + str(self.total)
+
+    def set_stage(self, stage):
+        self.lock.acquire()
+        self.stage = stage
+        self.lock.release()
+
+    def set_page(self, page):
+        self.lock.acquire()
+        self.page = page
+        self.lock.release()
+
+    def set_total(self, total):
+        self.lock.acquire()
+        self.total = total
+        self.lock.release()
+
+    def get_stage(self):
+        self.lock.acquire()
+        yield self.stage
+        self.lock.release()
+
+    def get_page(self):
+        self.lock.acquire()
+        yield self.page
+        self.lock.release()
+
+    def get_total(self):
+        self.lock.acquire()
+        yield self.total
+        self.lock.release()
 
 def get_image(image_path):
     """Get a numpy array of an image so that one can access values[x][y]."""
@@ -413,9 +446,9 @@ def generate_document(imagefilename, documentdir, qn_coord, status):
     global requestID
 
     print("Step 2 (Output Generation): PG " + str(pg_num) + "/" + str(total_pages))
-    status.stage = 2
-    status.page = pg_num
-    status.total = total_pages
+    status.set_stage(2)
+    status.set_page(pg_num)
+    status.set_total(total_pages)
     time.sleep(0)
 
     image_name = imagefilename.replace(".jpg", "")
@@ -521,12 +554,12 @@ def find_qn_coords(filenames_list, status):
 
     for filename in filenames_list:
         print("Step 1 (Preprocessing): PG " + str(pg_num) + "/" + str(total_pages))
-        status.stage = 1
-        status.page = pg_num
-        status.total = total_pages
+        status.set_stage(1)
+        status.set_page(pg_num)
+        status.set_total(total_pages)
 
         time.sleep(0)
-        
+
         # if pg_num < 24:
         #     continue
 
