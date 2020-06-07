@@ -29,7 +29,7 @@ def get_message(currentIP, currentTime):
     requestIDProcessed = currentTime.replace(":", "-").replace(".", "_")
     print(requestIDProcessed)
     #print(db.getall())
-    with open("mydb.json", "w+") as file:
+    with open("myout.txt", "w+") as file:
         for line in file:
             print(line)
 

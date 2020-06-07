@@ -408,7 +408,11 @@ def generate_document(imagefilename, documentdir, qn_coord, db, requestIDProcess
     print("Step 2 (Output Generation): PG " + str(pg_num) + "/" + str(total_pages))
     entry = {'stage': 2, 'page' : pg_num, 'total' : total_pages}
     db.update(requestIDProcessed, entry)
-    db.save()
+    
+    f = open("myout.txt", "w")
+    f.write(json.dumps(entry))
+    f.close()
+
     time.sleep(0)
 
     image_name = imagefilename.replace(".jpg", "")
@@ -517,7 +521,11 @@ def find_qn_coords(filenames_list, db, requestIDProcessed):
 
         entry = {'stage': 1, 'page' : pg_num, 'total' : total_pages}
         db.update(requestIDProcessed, entry)
-        db.save()
+
+        f = open("myout.txt", "w")
+        f.write(json.dumps(entry))
+        f.close()
+
         time.sleep(0)
         # if pg_num < 24:
         #     continue
