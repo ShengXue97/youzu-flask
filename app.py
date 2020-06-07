@@ -16,7 +16,7 @@ from datetime import datetime
 app = Flask(__name__)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
-db = dbj('mydb.json')
+db = dbj('mydb.json', autosave=True)
 
 @app.route("/")
 def home():

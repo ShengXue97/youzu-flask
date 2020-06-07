@@ -19,7 +19,7 @@ import shutil
 import json
 from wand.image import Image as wandImage
 from dbj import dbj
-
+import time
 
 def get_image(image_path):
     """Get a numpy array of an image so that one can access values[x][y]."""
@@ -408,6 +408,7 @@ def generate_document(imagefilename, documentdir, qn_coord, db, requestIDProcess
     print("Step 2 (Output Generation): PG " + str(pg_num) + "/" + str(total_pages))
     entry = {'stage': 2, 'page' : pg_num, 'total' : total_pages}
     db.update(requestIDProcessed, entry)
+    time.sleep(0)
 
     image_name = imagefilename.replace(".jpg", "")
     document = Document()
@@ -515,7 +516,7 @@ def find_qn_coords(filenames_list, db, requestIDProcessed):
 
         entry = {'stage': 1, 'page' : pg_num, 'total' : total_pages}
         db.update(requestIDProcessed, entry)
-
+        time.sleep(0)
         # if pg_num < 24:
         #     continue
 
