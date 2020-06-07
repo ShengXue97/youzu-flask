@@ -27,7 +27,8 @@ def get_message(currentIP, currentTime):
     # Unique entry for each request using timestamp!
     requestIDRaw = currentIP + "_" + currentTime
     requestIDProcessed = currentTime.replace(":", "-").replace(".", "_")
-
+    print(requestIDProcessed)
+    print(db.getall())
     if not db.exists(requestIDProcessed):
         out_dict["ipExists"] = "no"
         out_dict["timeStampExists"] = "no"
