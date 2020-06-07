@@ -3,7 +3,6 @@ from flask_cors import CORS, cross_origin
 import json
 import ast
 from MainV9 import main
-from MainV9 import Status
 import os
 import pandas as pd
 import threading, time
@@ -17,7 +16,6 @@ from datetime import datetime
 app = Flask(__name__)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
-# dictionary of tuple: status(whether there is an ongoing request from this ip), and the Status object of that request.
 db = dbj('mydb.json')
 
 @app.route("/")
@@ -72,7 +70,6 @@ def uploadfile():
         fileDownloaded=request.files["myFile"]
         filename = fileDownloaded.filename
         fileDownloaded.save(os.path.join("./ReactPDF", filename))
-        status = Status()
         currentTime = str(datetime.now())
 
         # Unique entry for each request using timestamp!
@@ -82,8 +79,6 @@ def uploadfile():
         if not db.exists(requestIDProcessed):
             entry = {'stage': 0, 'page' : 0, 'total' : 0}
             db.insert(entry, requestIDProcessed)
-
-        # main(filename, status)
 
         print("Forking....")
         thread = threading.Thread(target=main, args=(filename, db, requestIDProcessed))
