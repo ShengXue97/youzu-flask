@@ -18,6 +18,7 @@ import ast
 import shutil
 import json
 from wand.image import Image as wandImage
+import time
 
 class Status:
     def __init__(self):
@@ -415,6 +416,7 @@ def generate_document(imagefilename, documentdir, qn_coord, status):
     status.stage = 2
     status.page = pg_num
     status.total = total_pages
+    time.sleep(0)
 
     image_name = imagefilename.replace(".jpg", "")
     document = Document()
@@ -519,10 +521,12 @@ def find_qn_coords(filenames_list, status):
 
     for filename in filenames_list:
         print("Step 1 (Preprocessing): PG " + str(pg_num) + "/" + str(total_pages))
-
         status.stage = 1
         status.page = pg_num
         status.total = total_pages
+
+        time.sleep(0)
+        
         # if pg_num < 24:
         #     continue
 
