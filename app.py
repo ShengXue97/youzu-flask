@@ -9,6 +9,7 @@ import pandas as pd
 import threading, time
 import flask
 import itertools
+from dbj import dbj
 
 from datetime import datetime
 
@@ -17,46 +18,35 @@ app = Flask(__name__)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 # dictionary of tuple: status(whether there is an ongoing request from this ip), and the Status object of that request.
-status_dict = {}
+db = dbj('mydb.json')
 
 @app.route("/")
 def home():
     return "<h1>Welcome man, enjoy your stay<h1>"
     
 def get_message(currentIP, currentTime):
-    '''this could be any function that blocks until data is ready'''
-    time.sleep(0.5)
     out_dict = {}
-    if currentIP in status_dict:
-        if currentTime in status_dict[currentIP]:
-            myStatus = status_dict[currentIP][currentTime]
-            # Only returns the value relevant to the currentIP address
-            out_dict["ipExists"] = "yes"
-            out_dict["timeStampExists"] = "yes"
-            out_dict["currentIP"] = currentIP
-            out_dict["curentTimeStamp"] = currentTime
+    # Unique entry for each request using timestamp!
+    requestIDRaw = currentIP + "_" + currentTime
+    requestIDProcessed = currentTime.replace(":", "-").replace(".", "_")
 
-            out_dict["stage"] = myStatus.get_stage()
-            myStatus.release_lock()
-            out_dict["page"] = myStatus.get_page()
-            myStatus.release_lock()
-            out_dict["total"] = myStatus.get_total()
-            myStatus.release_lock()
-            IPDict = status_dict[currentIP]
-            del IPDict[currentTime]
-            
-            return json.dumps(out_dict)
-        else:
-            out_dict["ipExists"] = "yes"
-            out_dict["timeStampExists"] = "no"
-            out_dict["currentIP"] = currentIP
-            out_dict["curentTimeStamp"] = currentTime
-            return json.dumps(out_dict)
-    else:
+    if not db.exists(requestIDProcessed):
         out_dict["ipExists"] = "no"
         out_dict["timeStampExists"] = "no"
         out_dict["currentIP"] = currentIP
         out_dict["curentTimeStamp"] = currentTime
+        return json.dumps(out_dict)
+    else:
+        val = db.get(requestIDProcessed)
+
+        out_dict["ipExists"] = "yes"
+        out_dict["timeStampExists"] = "yes"
+        out_dict["currentIP"] = currentIP
+        out_dict["curentTimeStamp"] = currentTime
+
+        out_dict["stage"] = val['stage']
+        out_dict["page"] = val['page']
+        out_dict["total"] = val['total']
         return json.dumps(out_dict)
     
 
@@ -70,10 +60,6 @@ def index():
             yield 'data: {}\n\n'.format(get_message(currentIP, currentTime))
         return flask.Response(events(), content_type='text/event-stream')
 
-@app.route("/redeploy")
-def redeploy():
-    status_dict.clear()
-    return jsonify({"Reset success": "yes"})
 
 @app.route('/uploadfile', methods = ['GET', 'POST'])
 def uploadfile():
@@ -90,19 +76,17 @@ def uploadfile():
         currentTime = str(datetime.now())
 
         # Unique entry for each request using timestamp!
-        if currentIP in status_dict:
-            status_dict[currentIP][currentTime] = status
-        else:
-            newIPDict = {}
-            status_dict[currentIP] = newIPDict
-            status_dict[currentIP][currentTime] = status
+        requestIDRaw = currentIP + "_" + currentTime
+        requestIDProcessed = currentTime.replace(":", "-").replace(".", "_")
+
+        if not db.exists(requestIDProcessed):
+            entry = {'stage': 0, 'page' : 0, 'total' : 0}
+            db.insert(entry, requestIDProcessed)
 
         # main(filename, status)
 
         print("Forking....")
-        requestIDRaw = currentIP + "_" + currentTime
-        requestIDProcessed = currentTime.replace(":", "-").replace(".", "_")
-        thread = threading.Thread(target=main, args=(filename, status, requestIDProcessed))
+        thread = threading.Thread(target=main, args=(filename, db, requestIDProcessed))
         thread.start()
         return jsonify({"Succeeded": "yes", "YourIP" : str(currentIP), "YourTime" : currentTime})
 

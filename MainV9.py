@@ -18,48 +18,8 @@ import ast
 import shutil
 import json
 from wand.image import Image as wandImage
-import time
-import threading
+from dbj import dbj
 
-class Status:
-    def __init__(self):
-        self.lock = threading.Lock()
-        self.stage = 1
-        self.page = 1
-        self.total = -1
-
-    def __repr__(self):
-        return "stage: " + str(self.stage) + "; " + "page: " + str(self.page) + "; " + "total: " + str(self.total)
-
-    def set_stage(self, stage):
-        self.lock.acquire()
-        self.stage = stage
-        self.lock.release()
-
-    def set_page(self, page):
-        self.lock.acquire()
-        self.page = page
-        self.lock.release()
-
-    def set_total(self, total):
-        self.lock.acquire()
-        self.total = total
-        self.lock.release()
-
-    def get_stage(self):
-        self.lock.acquire()
-        return self.stage
-
-    def get_page(self):
-        self.lock.acquire()
-        return self.page
-
-    def get_total(self):
-        self.lock.acquire()
-        return self.total
-    
-    def release_lock(self):
-        self.lock.release()
 
 def get_image(image_path):
     """Get a numpy array of an image so that one can access values[x][y]."""
@@ -439,17 +399,15 @@ def write_data_to_document(document_data_list, document, qn_coord):
             image_count += 1
 
 
-def generate_document(imagefilename, documentdir, qn_coord, status):
+def generate_document(imagefilename, documentdir, qn_coord, db, requestIDProcessed):
     global pg_num
     global total_pages
     global filename
     global requestID
 
     print("Step 2 (Output Generation): PG " + str(pg_num) + "/" + str(total_pages))
-    status.set_stage(2)
-    status.set_page(pg_num)
-    status.set_total(total_pages)
-    time.sleep(0)
+    entry = {'stage': 2, 'page' : pg_num, 'total' : total_pages}
+    db.update(requestIDProcessed, entry)
 
     image_name = imagefilename.replace(".jpg", "")
     document = Document()
@@ -543,7 +501,7 @@ def copytree(src, dst, symlinks=False, ignore=None):
 
 
 # Map the page number and y coordinates of each question
-def find_qn_coords(filenames_list, status):
+def find_qn_coords(filenames_list, db, requestIDProcessed):
     global total_pages
     global requestID
     qn_coord = []
@@ -554,11 +512,9 @@ def find_qn_coords(filenames_list, status):
 
     for filename in filenames_list:
         print("Step 1 (Preprocessing): PG " + str(pg_num) + "/" + str(total_pages))
-        status.set_stage(1)
-        status.set_page(pg_num)
-        status.set_total(total_pages)
 
-        time.sleep(0)
+        entry = {'stage': 1, 'page' : pg_num, 'total' : total_pages}
+        db.update(requestIDProcessed, entry)
 
         # if pg_num < 24:
         #     continue
@@ -688,7 +644,7 @@ def acc_matrix(image_count, verifier, pdfname):
         pass
 
 
-def main(pdfname, status, requestIDProcessed):
+def main(pdfname, db, requestIDProcessed):
     global qn_num
     global pg_num
     global diagram_count
@@ -748,11 +704,11 @@ def main(pdfname, status, requestIDProcessed):
 
 
     total_pages = len(filenames_list)
-    qn_coord = find_qn_coords(filenames_list, status)
+    qn_coord = find_qn_coords(filenames_list, db, requestIDProcessed)
     # qn_coord = ast.literal_eval("[(0, 0, 0, 0), (2, 1365, 1, ''), (2, 1703, 2, ''), (3, 1131, 3, ''), (3, 1819, 4, ''), (4, 966, 5, ''), (4, 1779, 6, ''), (5, 2056, 7, ''), (6, 744, 8, ''), (6, 1934, 9, ''), (7, 757, 10, ''), (7, 1924, 11, ''), (8, 905, 12, ''), (8, 1710, 13, ''), (9, 1077, 14, ''), (9, 1914, 15, ''), (10, 1256, 16, ''), (11, 1630, 17, ''), (12, 1385, 18, ''), (13, 1432, 19, ''), (14, 1401, 20, ''), (15, 1292, 21, ''), (16, 1047, 22, ''), (17, 1295, 23, ''), (18, 1169, 24, ''), (19, 1005, 25, ''), (19, 1527, 26, ''), (20, 1535, 27, ''), (21, 1186, 28, ''), (21, 1968, 29, ''), (24, 1630, 30, 2), (26, 1591, 31, 2), (27, 1584, 32, 2), (29, 268, 33, 3), (30, 1935, 34, 2), (31, 1858, 35, 3), (32, 1035, 36, 3), (33, 1711, 37, 1), (34, 1553, 38, 1), (35, 1395, 39, 1), (36, 1739, 40, 3)]")
 
     for filename in filenames_list:
-        generate_document(filename, requestID + "/OutputDocuments", qn_coord, status)
+        generate_document(filename, requestID + "/OutputDocuments", qn_coord, db, requestIDProcessed)
 
     # df = pd.read_csv("Sample Resources/pdfverifier.csv")
     # verifier = df.set_index("Paper Name", drop=False)
@@ -779,7 +735,8 @@ def main(pdfname, status, requestIDProcessed):
     shutil.rmtree(dirpath + "/" +requestID + "/TempImages")
     shutil.rmtree(dirpath + "/" +requestID + "/images/")
 
-    status.stage = 3
+    entry = {'stage': 3, 'page' : 0, 'total' : 0}
+    db.update(requestIDProcessed, entry)
 
 
 qn_num = 1
@@ -794,12 +751,11 @@ file_attribute_list = []
 found_ans_options = False
 requestID = ""
 global_df = pd.DataFrame(columns=['Level', 'Question', 'isMCQ', 'A', 'B', 'C', 'D', 'Subject', 'Year', 'School', 'Exam', 'Number', 'Image', 'Image File'])
-status = Status()
 
 # for curFilename in os.listdir("Sample Resources"):
 #     if curFilename.endswith(".pdf"):
 #         filename = curFilename
-#         main(curFilename, status)
+#         main(curFilename)
 #         qn_num = 1
 #         pg_num = 1
 #         diagram_count = 1
