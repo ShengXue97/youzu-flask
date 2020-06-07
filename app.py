@@ -17,6 +17,10 @@ app = Flask(__name__)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 db = dbj('mydb.json')
+currentObj = {}
+
+def setObj(newObj):
+    currentObj = newObj
 
 @app.route("/")
 def home():
@@ -82,7 +86,7 @@ def uploadfile():
             db.insert(entry, requestIDProcessed)
 
         print("Forking....")
-        thread = threading.Thread(target=main, args=(filename, db, requestIDProcessed))
+        thread = threading.Thread(target=main, args=(filename, db, requestIDProcessed, setObj))
         thread.start()
         return jsonify({"Succeeded": "yes", "YourIP" : str(currentIP), "YourTime" : currentTime})
 
