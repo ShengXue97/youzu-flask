@@ -102,7 +102,7 @@ def getresult():
     # Iterate over each row 
     for index, rows in df.iterrows(): 
         # Create list for the current row 
-        my_list =[rows["Level"], rows["Question"], rows["isMCQ"], rows["A"], rows["B"], rows["C"], rows["D"], rows["Subject"], rows["Year"], rows["School"], rows["Exam"], rows["Number"], rows["Image"], rows["Image File"]] 
+        my_list =[rows["Level"], rows["Page"], rows["Question"], rows['Comment'], rows["A"], rows["B"], rows["C"], rows["D"], rows["Subject"], rows["Year"], rows["School"], rows["Exam"], rows["Number"], rows["Image"], rows["Image File"]] 
         # append the list to the final list 
         row_json.append(my_list)
 
