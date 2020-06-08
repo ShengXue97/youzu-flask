@@ -132,7 +132,7 @@ def merge_contours(thresh, cntrs, x_tolerance, y_tolerance):
     return thresh, cntrs
 
 
-def draw_contours(result, img, cntrs, image_name):
+def draw_contours(result, img, cntrs, image_name, requestID):
     global diagram_count
     global texted
     global filename
@@ -193,9 +193,9 @@ def draw_contours(result, img, cntrs, image_name):
                     if h / height > 0.1 and w / h < 10:
                         # Likely to be an image
                         new_image = img[y:y + h, x:x + w]
-                        cv2.imwrite("TempImages/" + str(diagram_count) + ".jpg", new_image)
+                        cv2.imwrite("TempImages/" + requestID + "_"  + str(diagram_count) + ".jpg", new_image)
                         document_data_list.append(
-                            ("TempImages/" + str(diagram_count) + ".jpg", "image", y, pseudo_text))
+                            ("TempImages/" + requestID + "_"  + str(diagram_count) + ".jpg", "image", y, pseudo_text))
                         diagram_count = diagram_count + 1
                     else:
                         # Likely to be text, just small regions like "Go on to the next page"
@@ -231,8 +231,8 @@ def draw_contours(result, img, cntrs, image_name):
                 dst = cv2.Canny(new_image, 50, 200, None, 3)
                 linesp = cv2.HoughLinesP(dst, 1, np.pi / 180, 50, None, 50, 2)
                 if linesp is not None or is_gibberish(text):
-                    cv2.imwrite("TempImages/" + str(diagram_count) + ".jpg", new_image)
-                    document_data_list.append(("TempImages/" + str(diagram_count) + ".jpg", "image", y, pseudo_text))
+                    cv2.imwrite("TempImages/" + requestID + "_"  + str(diagram_count) + ".jpg", new_image)
+                    document_data_list.append(("TempImages/" + requestID + "_"  + str(diagram_count) + ".jpg", "image", y, pseudo_text))
                     diagram_count = diagram_count + 1
                 else:
                     # large chunk that resembles diagram, but really is text
@@ -464,28 +464,8 @@ def generate_document(imagefilename, documentdir, qn_coord, db, requestID):
     # data contains actual string if it is a text, and the image path in TempImages if it contains an image.
     # type is "text" or "image"
     # y_coord contains y coordinates of the text or image
-    document_data_list = draw_contours(result, img, cntrs, image_name)
+    document_data_list = draw_contours(result, img, cntrs, image_name, requestID)
     # cv2.imwrite("contour_img/" + str(file_count) + ".jpg", result)
-
-    ###### Step 5: Write and Save to a new Microsoft Word Document
-    write_data_to_document(document_data_list, document, qn_coord)
-    # Remove /images from image_name. example image_name is images/P6_English_2019_CA1_CHIJ/pg_1_P6_English_2019_CA1_CHIJ.jpg
-    image_name = image_name.split('/', 1)[1]
-    # Test paper name found in /images, example parentdir is P6_English_2019_CA1_CHIJ
-    parentdir = image_name.split('/', 1)[0]
-
-    # put this under documentdir
-    if not os.path.exists(documentdir + "/" + parentdir):
-        os.makedirs(documentdir + "/" + parentdir)
-
-    document.save(documentdir + "/" + image_name + ".docx")
-
-    # cv2.imshow("THRESH", thresh)
-    # cv2.imshow("MORPH", morph)
-
-    ####### Step 6: Display results
-    ims = cv2.resize(result, (700, 850))
-    cv2.imwrite("TempContours/" + str(pg_num) + ".jpg", ims)
     pg_num = pg_num + 1
     # cv2.imshow("RESULT", ims)
     # cv2.waitKey(0)
@@ -592,9 +572,9 @@ def find_qn_coords(filenames_list, db, requestID):
                 new_image = img[y:y + h, x:x + w]
             else:
                 new_image = img[y:y + h, xw:xw + w]
-            cv2.imwrite("TempImages/small_" + str(diagram_count) + ".jpg", new_image)
+            cv2.imwrite("TempImages/"  + requestID + "_"  + "small_" + str(diagram_count) + ".jpg", new_image)
             # Read as binary image - only if we want to test what small image was read as (DEBUGGING)
-            small_image = cv2.imread("TempImages/small_" + str(diagram_count) + ".jpg", 0)
+            small_image = cv2.imread("TempImages/" + requestID + "_"  + "small_" + str(diagram_count) + ".jpg", 0)
             small_cntrs.append((pg_number, y))
             diagram_count = diagram_count + 1
 
@@ -693,7 +673,7 @@ def main(pdfname, db, requestID):
     filenames_list = []
     file_attribute_list = find_paper_attributes(paper_name)
 
-    sub_dir = str("images/" + pdf_path.split('/')[-1].replace('.pdf', '') + "/")
+    sub_dir = str("images/" + requestID + "_"  + pdf_path.split('/')[-1].replace('.pdf', '') + "/")
     if not os.path.exists(sub_dir):
         os.makedirs(sub_dir)
 
@@ -712,21 +692,9 @@ def main(pdfname, db, requestID):
         generate_document(filename, "OutputDocuments", qn_coord, db, requestID)
 
     global_df.to_csv(requestID + "_output.csv")
-
-    # Copies all the output to a new folder under Output/PDF NAME
-    dirpath = os.getcwd()
-    copytree(dirpath + "/TempContours", dirpath + "/Output/" + paper_name + "/TempContours")
-    copytree(dirpath + "/TempImages", dirpath + "/Output/" + paper_name + "/TempImages")
-    copytree(dirpath + "/images/" + paper_name, dirpath + "/Output/" + paper_name + "/images")
-    #shutil.copyfile(dirpath + requestID + "_output.csv", dirpath + "/Output/" + paper_name + requestID + "_output.csv")
-
     global_df = pd.DataFrame(
         columns=['Level', 'Page', 'Question', 'Comment', 'A', 'B', 'C', 'D', 'Subject', 'Year', 'School', 'Exam', 'Number',
                  'Image', 'Image File'])
-    shutil.rmtree(dirpath + "/TempContours")
-    shutil.rmtree(dirpath + "/TempImages")
-    shutil.rmtree(dirpath + "/images/")
-
     # Create an empty list 
     row_json = []
     
