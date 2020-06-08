@@ -102,7 +102,7 @@ def getresult():
     # Iterate over each row 
     for index, rows in df.iterrows(): 
         # Create list for the current row 
-        page = rows["Page"] if rows["Page"] != "" else "-"
+        page = rows["Question"] if rows["Question"] != "" else "-"
         ans_a = rows["A"] if rows["A"] != "" else "-"
         ans_b = rows["B"] if rows["B"] != "" else "-"
         ans_c = rows["C"] if rows["C"] != "" else "-"
