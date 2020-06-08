@@ -10,12 +10,12 @@ import flask
 import itertools
 from dbj import dbj
 from datetime import datetime
-
+import settings
 
 app = Flask(__name__)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
-db = {"test": "hi"}
+settings.init()
 
 @app.route("/")
 def home():
@@ -27,16 +27,16 @@ def get_message(currentIP, currentTime):
     requestIDRaw = currentIP + "_" + currentTime
     requestIDProcessed = currentTime.replace(":", "-").replace(".", "_")
     print(requestIDProcessed)
-    print(db)
+    print(settings.db)
 
-    if not requestIDProcessed in db:
+    if not requestIDProcessed in settings.db:
         out_dict["ipExists"] = "no"
         out_dict["timeStampExists"] = "no"
         out_dict["currentIP"] = currentIP
         out_dict["curentTimeStamp"] = currentTime
         return json.dumps(out_dict)
     else:
-        val = db.get(requestIDProcessed)
+        val = settings.db.get(requestIDProcessed)
         print(val)
         out_dict["ipExists"] = "yes"
         out_dict["timeStampExists"] = "yes"
@@ -77,12 +77,12 @@ def uploadfile():
         requestIDRaw = currentIP + "_" + currentTime
         requestIDProcessed = currentTime.replace(":", "-").replace(".", "_")
 
-        if not requestIDProcessed in db:
+        if not requestIDProcessed in settings.db:
             entry = {'stage': 0, 'page' : 0, 'total' : 0, 'output' : []}
-            db[requestIDProcessed] = entry
+            settings.db[requestIDProcessed] = entry
 
         print("Forking....")
-        thread = threading.Thread(target=main, args=(filename, db, requestIDProcessed))
+        thread = threading.Thread(target=main, args=(filename, requestIDProcessed))
         thread.start()
         return jsonify({"Succeeded": "yes", "YourIP" : str(currentIP), "YourTime" : currentTime})
 
