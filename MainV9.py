@@ -711,6 +711,7 @@ def main(pdfname, db, requestID):
         # append the list to the final list 
         row_json.append(my_list)
 
+    dirpath = os.getcwd()
     shutil.rmtree(dirpath + "/TempContours")
     shutil.rmtree(dirpath + "/TempImages")
     shutil.rmtree(dirpath + "/images/")
