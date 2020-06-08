@@ -656,9 +656,15 @@ def acc_matrix(image_count, verifier, pdfname):
 
 def main(pdfname, db, requestID):
     global total_pages
+    global qn_num
+    global pg_num
     global global_df
     global file_attribute_list
     print(pdfname)
+
+    qn_num = 1
+    pg_num = 1
+    total_pages = -1
 
     if not os.path.exists("TempImages"):
         os.makedirs("TempImages")
@@ -705,6 +711,10 @@ def main(pdfname, db, requestID):
         # append the list to the final list 
         row_json.append(my_list)
 
+    shutil.rmtree(dirpath + "/TempContours")
+    shutil.rmtree(dirpath + "/TempImages")
+    shutil.rmtree(dirpath + "/images/")
+    
     entry = {'stage': 3, 'page' : 0, 'total' : 0, 'output' : row_json}
     db[requestID] = entry
 
