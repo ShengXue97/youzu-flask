@@ -16,7 +16,7 @@ from datetime import datetime
 app = Flask(__name__)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
-db = dbj('mydb.json')
+db = {}
 
 @app.route("/")
 def home():
@@ -28,9 +28,9 @@ def get_message(currentIP, currentTime):
     requestIDRaw = currentIP + "_" + currentTime
     requestIDProcessed = currentTime.replace(":", "-").replace(".", "_")
     print(requestIDProcessed)
-    print(db.getall())
+    print(db)
 
-    if not db.exists(requestIDProcessed):
+    if not requestIDProcessed in db:
         out_dict["ipExists"] = "no"
         out_dict["timeStampExists"] = "no"
         out_dict["currentIP"] = currentIP
@@ -78,9 +78,9 @@ def uploadfile():
         requestIDRaw = currentIP + "_" + currentTime
         requestIDProcessed = currentTime.replace(":", "-").replace(".", "_")
 
-        if not db.exists(requestIDProcessed):
+        if not requestIDProcessed in db:
             entry = {'stage': 0, 'page' : 0, 'total' : 0, 'output' : []}
-            db.insert(entry, requestIDProcessed)
+            db[requestIDProcessed] = entry
 
         print("Forking....")
         thread = threading.Thread(target=main, args=(filename, db, requestIDProcessed))
@@ -96,7 +96,7 @@ def getresult():
     requestIDRaw = currentIP + "_" + currentTime
     requestIDProcessed = currentTime.replace(":", "-").replace(".", "_")
     val = db.get(requestIDProcessed)
-    print(db.getall())
+    print(db)
     print(val)
     return jsonify(val['output'])
 

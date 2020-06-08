@@ -407,7 +407,7 @@ def generate_document(imagefilename, documentdir, qn_coord, db, requestIDProcess
 
     print("Step 2 (Output Generation): PG " + str(pg_num) + "/" + str(total_pages))
     entry = {'stage': 2, 'page' : pg_num, 'total' : total_pages, 'output' : []}
-    db.update(requestIDProcessed, entry)
+    db[requestIDProcessed] = entry
 
     time.sleep(0)
 
@@ -516,7 +516,7 @@ def find_qn_coords(filenames_list, db, requestIDProcessed):
         print("Step 1 (Preprocessing): PG " + str(pg_num) + "/" + str(total_pages))
 
         entry = {'stage': 1, 'page' : pg_num, 'total' : total_pages, 'output' : []}
-        db.update(requestIDProcessed, entry)
+        db[requestIDProcessed] = entry
 
         time.sleep(0)
         # if pg_num < 24:
@@ -735,7 +735,7 @@ def main(pdfname, db, requestIDProcessed):
         row_json.append(my_list)
 
     entry = {'stage': 3, 'page' : 0, 'total' : 0, 'output' : row_json}
-    db.update(requestIDProcessed, entry)
+    db[requestIDProcessed] = entry
 
     # Copies all the output to a new folder under Output/PDF NAME
     dirpath = os.getcwd()
