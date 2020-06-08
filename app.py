@@ -8,6 +8,7 @@ import pandas as pd
 import threading, time
 import flask
 import itertools
+from dbj import dbj
 from datetime import datetime
 
 
@@ -19,16 +20,8 @@ db = {"test": "hi"}
 @app.route("/")
 def home():
     return "<h1>Welcome man, enjoy your stay<h1>"
-
-@app.route("/update")
-def update():
-    key = request.form['key']
-    value = request.form['value']
-
-    return jsonify({"Succeeded": "yes"})
     
 def get_message(currentIP, currentTime):
-    global db
     out_dict = {}
     # Unique entry for each request using timestamp!
     requestIDRaw = currentIP + "_" + currentTime
@@ -69,7 +62,6 @@ def index():
 
 @app.route('/uploadfile', methods = ['GET', 'POST'])
 def uploadfile():
-    global db
     print("called1")
     response = None
     if request.method == 'POST':
