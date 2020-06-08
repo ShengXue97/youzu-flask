@@ -718,7 +718,7 @@ def main(pdfname, db, requestID):
     copytree(dirpath + "/TempContours", dirpath + "/Output/" + paper_name + "/TempContours")
     copytree(dirpath + "/TempImages", dirpath + "/Output/" + paper_name + "/TempImages")
     copytree(dirpath + "/images/" + paper_name, dirpath + "/Output/" + paper_name + "/images")
-    shutil.copyfile(dirpath + requestID + "_output.csv", dirpath + "/Output/" + paper_name + requestID + "_output.csv")
+    #shutil.copyfile(dirpath + requestID + "_output.csv", dirpath + "/Output/" + paper_name + requestID + "_output.csv")
 
     global_df = pd.DataFrame(
         columns=['Level', 'Page', 'Question', 'Comment', 'A', 'B', 'C', 'D', 'Subject', 'Year', 'School', 'Exam', 'Number',
