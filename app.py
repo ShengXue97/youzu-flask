@@ -20,6 +20,13 @@ db = {"test": "hi"}
 @app.route("/")
 def home():
     return "<h1>Welcome man, enjoy your stay<h1>"
+
+@app.route("/update")
+def update():
+    key = request.form['key']
+    value = request.form['value']
+
+    return jsonify({"Succeeded": "yes"})
     
 def get_message(currentIP, currentTime):
     out_dict = {}
