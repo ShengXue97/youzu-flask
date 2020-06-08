@@ -406,7 +406,7 @@ def generate_document(imagefilename, documentdir, qn_coord, db, requestIDProcess
     global requestID
 
     print("Step 2 (Output Generation): PG " + str(pg_num) + "/" + str(total_pages))
-    entry = {'stage': 2, 'page' : pg_num, 'total' : total_pages}
+    entry = {'stage': 2, 'page' : pg_num, 'total' : total_pages, 'output' : []}
     db.update(requestIDProcessed, entry)
 
     time.sleep(0)
@@ -515,7 +515,7 @@ def find_qn_coords(filenames_list, db, requestIDProcessed):
     for filename in filenames_list:
         print("Step 1 (Preprocessing): PG " + str(pg_num) + "/" + str(total_pages))
 
-        entry = {'stage': 1, 'page' : pg_num, 'total' : total_pages}
+        entry = {'stage': 1, 'page' : pg_num, 'total' : total_pages, 'output' : []}
         db.update(requestIDProcessed, entry)
 
         time.sleep(0)
