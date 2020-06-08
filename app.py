@@ -96,7 +96,7 @@ def getresult():
     requestIDRaw = currentIP + "_" + currentTime
     requestIDProcessed = currentTime.replace(":", "-").replace(".", "_")
     val = db.get(requestIDProcessed)
-    
+    print(val)
     return jsonify(val['output'])
 
 if __name__ == '__main__':
