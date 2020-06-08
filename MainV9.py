@@ -656,9 +656,15 @@ def acc_matrix(image_count, verifier, pdfname):
 
 def main(pdfname, db, requestID):
     global total_pages
+    global qn_num
+    global pg_num
     global global_df
     global file_attribute_list
     print(pdfname)
+
+    qn_num = 1
+    pg_num = 1
+    total_pages = -1
 
     if not os.path.exists("TempImages"):
         os.makedirs("TempImages")
