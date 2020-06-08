@@ -38,7 +38,7 @@ def get_message(currentIP, currentTime):
         return json.dumps(out_dict)
     else:
         val = db.get(requestIDProcessed)
-
+        print(val)
         out_dict["ipExists"] = "yes"
         out_dict["timeStampExists"] = "yes"
         out_dict["currentIP"] = currentIP
