@@ -102,7 +102,13 @@ def getresult():
     # Iterate over each row 
     for index, rows in df.iterrows(): 
         # Create list for the current row 
-        my_list =[rows["Level"], rows["Page"], rows["Question"], rows['Comment'], rows["A"], rows["B"], rows["C"], rows["D"], rows["Subject"], rows["Year"], rows["School"], rows["Exam"], rows["Number"], rows["Image"], rows["Image File"]] 
+        page = rows["Page"] if rows["Page"] != "" else "-"
+        ans_a = rows["A"] if rows["A"] != "" else "-"
+        ans_b = rows["B"] if rows["B"] != "" else "-"
+        ans_c = rows["C"] if rows["C"] != "" else "-"
+        ans_d = rows["D"] if rows["D"] != "" else "-"
+
+        my_list =[page, ans_a, ans_b, ans_c, ans_d] 
         # append the list to the final list 
         row_json.append(my_list)
 

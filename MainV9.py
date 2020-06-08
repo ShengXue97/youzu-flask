@@ -342,10 +342,10 @@ def write_data_to_document(document_data_list, document, qn_coord):
             else:
                 break
 
-        ans_a = "" if len(current_ans_list) <= 0 else current_ans_list[0]
-        ans_b = "" if len(current_ans_list) <= 1 else current_ans_list[1]
-        ans_c = "" if len(current_ans_list) <= 2 else current_ans_list[2]
-        ans_d = "" if len(current_ans_list) <= 3 else current_ans_list[3]
+        ans_a = "-" if len(current_ans_list) <= 0 else current_ans_list[0]
+        ans_b = "-" if len(current_ans_list) <= 1 else current_ans_list[1]
+        ans_c = "-" if len(current_ans_list) <= 2 else current_ans_list[2]
+        ans_d = "-" if len(current_ans_list) <= 3 else current_ans_list[3]
 
         # file_attribute_list -> [paper_level, paper_subject, paper_year, paper_school, paper_exam_type]
         paper_level = file_attribute_list[0].upper()
@@ -369,11 +369,11 @@ def write_data_to_document(document_data_list, document, qn_coord):
                     if contains_mcq_identifier or ans_a != "" or ans_b != "" or ans_c != "" or ans_d != "":
                         global_df.loc[qn_num] = [paper_level, pg_num, item, "MCQ", ans_a, ans_b, ans_c, ans_d,
                                                  paper_subject,
-                                                 paper_year, paper_school, paper_exam_type, qn_num, "No", ""]
+                                                 paper_year, paper_school, paper_exam_type, qn_num, "No", "-"]
                     else:
-                        global_df.loc[qn_num] = [paper_level, pg_num, item, "", ans_a, ans_b,
+                        global_df.loc[qn_num] = [paper_level, pg_num, item, "-", ans_a, ans_b,
                                                  ans_c, ans_d, paper_subject,
-                                                 paper_year, paper_school, paper_exam_type, qn_num, "No", ""]
+                                                 paper_year, paper_school, paper_exam_type, qn_num, "No", "-"]
 
                 else:
                     if len(current_ans_list) != 0 and not found_ans_options:
@@ -392,7 +392,7 @@ def write_data_to_document(document_data_list, document, qn_coord):
 
         elif typeof == "image":
             if qn_num not in global_df.index:
-                global_df.loc[qn_num] = [paper_level, pg_num, "", "", ans_a, ans_b, ans_c, ans_d, paper_subject, paper_year,
+                global_df.loc[qn_num] = [paper_level, pg_num, "-", "-", ans_a, ans_b, ans_c, ans_d, paper_subject, paper_year,
                                          paper_school, paper_exam_type, qn_num, "Yes", item]
             else:
                 global_df.loc[qn_num, 'A'] = ans_a
