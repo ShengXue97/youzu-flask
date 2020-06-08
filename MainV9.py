@@ -19,6 +19,19 @@ import ast
 import shutil
 import time
 
+class Status(self):
+    def __init__(self):
+        self.db = {}
+    
+    def update(self, key, value):
+        self.db[key] = value
+    
+    def get(self, key):
+        return self.db[key]
+
+    def exists(self, key):
+        return key in self.db
+        
 def get_image(image_path):
     """Get a numpy array of an image so that one can access values[x][y]."""
     image = Image.open(image_path, 'r')
@@ -406,14 +419,14 @@ def write_data_to_document(document_data_list, document, qn_coord):
             image_count += 1
 
 
-def generate_document(imagefilename, documentdir, qn_coord, db, requestID):
+def generate_document(imagefilename, documentdir, qn_coord, status, requestID):
     global pg_num
     global total_pages
     global filename
 
     print("Step 2 (Output Generation): PG " + str(pg_num) + "/" + str(total_pages))
     entry = {'stage': 2, 'page' : pg_num, 'total' : total_pages, 'output' : []}
-    db[requestID] = entry
+    status.update(requestID, entry)
 
     time.sleep(0)
 
@@ -507,7 +520,7 @@ def copytree(src, dst, symlinks=False, ignore=None):
 
 
 # Map the page number and y coordinates of each question
-def find_qn_coords(filenames_list, db, requestID):
+def find_qn_coords(filenames_list, status, requestID):
     global total_pages
     qn_coord = []
     qn_coord.append((0, 0))
@@ -518,7 +531,7 @@ def find_qn_coords(filenames_list, db, requestID):
     for filename in filenames_list:
         print("Step 1 (Preprocessing): PG " + str(pg_number) + "/" + str(total_pages))
         entry = {'stage': 1, 'page' : pg_num, 'total' : total_pages, 'output' : []}
-        db[requestID] = entry
+        status.update(requestID, entry)
 
         time.sleep(0)
 
@@ -674,7 +687,7 @@ def acc_matrix(image_count, verifier, pdfname):
         pass
 
 
-def main(pdfname, db, requestID):
+def main(pdfname, status, requestID):
     global total_pages
     global global_df
     global file_attribute_list
@@ -705,11 +718,11 @@ def main(pdfname, db, requestID):
         filenames_list.append(sub_dir + filename)
 
     total_pages = len(filenames_list)
-    qn_coord = find_qn_coords(filenames_list, db, requestID)
+    qn_coord = find_qn_coords(filenames_list, status, requestID)
     # qn_coord = ast.literal_eval("[(0, 0, 0, 0), (2, 1365, 1, ''), (2, 1703, 2, ''), (3, 1131, 3, ''), (3, 1819, 4, ''), (4, 966, 5, ''), (4, 1779, 6, ''), (5, 2056, 7, ''), (6, 744, 8, ''), (6, 1934, 9, ''), (7, 757, 10, ''), (7, 1924, 11, ''), (8, 905, 12, ''), (8, 1710, 13, ''), (9, 1077, 14, ''), (9, 1914, 15, ''), (10, 1256, 16, ''), (11, 1630, 17, ''), (12, 1385, 18, ''), (13, 1432, 19, ''), (14, 1401, 20, ''), (15, 1292, 21, ''), (16, 1047, 22, ''), (17, 1295, 23, ''), (18, 1169, 24, ''), (19, 1005, 25, ''), (19, 1527, 26, ''), (20, 1535, 27, ''), (21, 1186, 28, ''), (21, 1968, 29, ''), (24, 1630, 30, 2), (26, 1591, 31, 2), (27, 1584, 32, 2), (29, 268, 33, 3), (30, 1935, 34, 2), (31, 1858, 35, 3), (32, 1035, 36, 3), (33, 1711, 37, 1), (34, 1553, 38, 1), (35, 1395, 39, 1), (36, 1739, 40, 3)]")
 
     for filename in filenames_list:
-        generate_document(filename, "OutputDocuments", qn_coord, db, requestID)
+        generate_document(filename, "OutputDocuments", qn_coord, status, requestID)
 
     global_df.to_csv(requestID + "_output.csv")
 
@@ -738,7 +751,7 @@ def main(pdfname, db, requestID):
         row_json.append(my_list)
 
     entry = {'stage': 3, 'page' : 0, 'total' : 0, 'output' : row_json}
-    db[requestID] = entry
+    status.update(requestID, entry)
 
 
 qn_num = 1
