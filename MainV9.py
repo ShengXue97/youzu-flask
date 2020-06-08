@@ -4,7 +4,6 @@ import cv2
 import numpy as np
 import pytesseract
 from PIL import Image, ImageOps
-from langdetect import detect
 from docx import Document
 from docx.shared import Inches
 from GibberishDetector import classify
