@@ -17,7 +17,7 @@ import platform
 import math as m
 import ast
 import shutil
-
+import time
 
 def get_image(image_path):
     """Get a numpy array of an image so that one can access values[x][y]."""
