@@ -408,10 +408,6 @@ def generate_document(imagefilename, documentdir, qn_coord, db, requestIDProcess
     print("Step 2 (Output Generation): PG " + str(pg_num) + "/" + str(total_pages))
     entry = {'stage': 2, 'page' : pg_num, 'total' : total_pages}
     db.update(requestIDProcessed, entry)
-    
-    f = open("myout.txt", "w")
-    f.write(json.dumps(entry))
-    f.close()
 
     time.sleep(0)
 
@@ -521,10 +517,6 @@ def find_qn_coords(filenames_list, db, requestIDProcessed):
 
         entry = {'stage': 1, 'page' : pg_num, 'total' : total_pages}
         db.update(requestIDProcessed, entry)
-
-        f = open("myout.txt", "w")
-        f.write(json.dumps(entry))
-        f.close()
 
         time.sleep(0)
         # if pg_num < 24:
@@ -734,6 +726,17 @@ def main(pdfname, db, requestIDProcessed):
     print("Saving to: " + str(pathNew))
     global_df.to_csv(pathNew)
 
+    row_json = []
+    # Iterate over each row 
+    for index, rows in global_df.iterrows(): 
+        # Create list for the current row 
+        my_list =[rows["Level"], rows["Question"], rows["isMCQ"], rows["A"], rows["B"], rows["C"], rows["D"], rows["Subject"], rows["Year"], rows["School"], rows["Exam"], rows["Number"], rows["Image"], rows["Image File"]] 
+        # append the list to the final list 
+        row_json.append(my_list)
+
+    entry = {'stage': 3, 'page' : 0, 'total' : 0, 'output' : row_json}
+    db.update(requestIDProcessed, entry)
+
     # Copies all the output to a new folder under Output/PDF NAME
     dirpath = os.getcwd()
     copytree(dirpath + "/" + requestID + "/TempContours", dirpath + "/Output/" + paper_name + "/TempContours")
@@ -746,8 +749,6 @@ def main(pdfname, db, requestIDProcessed):
     shutil.rmtree(dirpath + "/" +requestID + "/TempImages")
     shutil.rmtree(dirpath + "/" +requestID + "/images/")
 
-    entry = {'stage': 3, 'page' : 0, 'total' : 0}
-    db.update(requestIDProcessed, entry)
 
 
 qn_num = 1

@@ -28,10 +28,7 @@ def get_message(currentIP, currentTime):
     requestIDRaw = currentIP + "_" + currentTime
     requestIDProcessed = currentTime.replace(":", "-").replace(".", "_")
     print(requestIDProcessed)
-    #print(db.getall())
-    with open("myout.txt", "w+") as file:
-        for line in file:
-            print(line)
+    print(db.getall())
 
     if not db.exists(requestIDProcessed):
         out_dict["ipExists"] = "no"
@@ -82,7 +79,7 @@ def uploadfile():
         requestIDProcessed = currentTime.replace(":", "-").replace(".", "_")
 
         if not db.exists(requestIDProcessed):
-            entry = {'stage': 0, 'page' : 0, 'total' : 0}
+            entry = {'stage': 0, 'page' : 0, 'total' : 0, 'output' : []}
             db.insert(entry, requestIDProcessed)
 
         print("Forking....")
@@ -98,20 +95,9 @@ def getresult():
 
     requestIDRaw = currentIP + "_" + currentTime
     requestIDProcessed = currentTime.replace(":", "-").replace(".", "_")
-
-    df = pd.read_csv(requestIDProcessed + "/output.csv")
-
-    # Create an empty list 
-    row_json = []
+    val = db.get(requestIDProcessed)
     
-    # Iterate over each row 
-    for index, rows in df.iterrows(): 
-        # Create list for the current row 
-        my_list =[rows["Level"], rows["Question"], rows["isMCQ"], rows["A"], rows["B"], rows["C"], rows["D"], rows["Subject"], rows["Year"], rows["School"], rows["Exam"], rows["Number"], rows["Image"], rows["Image File"]] 
-        # append the list to the final list 
-        row_json.append(my_list)
-    
-    return jsonify(row_json)
+    return jsonify(val['output'])
 
 if __name__ == '__main__':
     app.run(threaded=True, port=5000)
