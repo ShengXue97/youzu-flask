@@ -711,14 +711,14 @@ def main(pdfname, db, requestID):
     for filename in filenames_list:
         generate_document(filename, "OutputDocuments", qn_coord, db, requestID)
 
-    global_df.to_csv("output.csv")
+    global_df.to_csv(requestID + "_output.csv")
 
     # Copies all the output to a new folder under Output/PDF NAME
     dirpath = os.getcwd()
     copytree(dirpath + "/TempContours", dirpath + "/Output/" + paper_name + "/TempContours")
     copytree(dirpath + "/TempImages", dirpath + "/Output/" + paper_name + "/TempImages")
     copytree(dirpath + "/images/" + paper_name, dirpath + "/Output/" + paper_name + "/images")
-    shutil.copyfile(dirpath + "/output.csv", dirpath + "/Output/" + paper_name + "/output.csv")
+    shutil.copyfile(dirpath + requestID + "_output.csv", dirpath + "/Output/" + paper_name + requestID + "_output.csv")
 
     global_df = pd.DataFrame(
         columns=['Level', 'Page', 'Question', 'Comment', 'A', 'B', 'C', 'D', 'Subject', 'Year', 'School', 'Exam', 'Number',

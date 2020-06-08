@@ -94,10 +94,19 @@ def getresult():
 
     requestIDRaw = currentIP + "_" + currentTime
     requestIDProcessed = currentTime.replace(":", "-").replace(".", "_")
-    val = db.get(requestIDProcessed)
-    print(db)
-    print(val)
-    return jsonify(val['output'])
+    
+    df = pd.read_csv(requestIDProcessed + "_output.csv")
+    # Create an empty list 
+    row_json = []
+    
+    # Iterate over each row 
+    for index, rows in df.iterrows(): 
+        # Create list for the current row 
+        my_list =[rows["Level"], rows["Question"], rows["isMCQ"], rows["A"], rows["B"], rows["C"], rows["D"], rows["Subject"], rows["Year"], rows["School"], rows["Exam"], rows["Number"], rows["Image"], rows["Image File"]] 
+        # append the list to the final list 
+        row_json.append(my_list)
+
+    return jsonify(row_json)
 
 if __name__ == '__main__':
     app.run(threaded=True, port=5000)
