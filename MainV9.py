@@ -19,7 +19,7 @@ import ast
 import shutil
 import time
 
-class Status(self):
+class Status():
     def __init__(self):
         self.db = {}
     
