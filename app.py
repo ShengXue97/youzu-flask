@@ -2,19 +2,20 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS, cross_origin
 import json
 import ast
-from MainV9 import main, Status
+from MainV9 import main
 import os
 import pandas as pd
 import threading, time
 import flask
 import itertools
+from dbj import dbj
 from datetime import datetime
 
 
 app = Flask(__name__)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
-status = Status()
+db = {"test": "hi"}
 
 @app.route("/")
 def home():
@@ -25,16 +26,17 @@ def get_message(currentIP, currentTime):
     # Unique entry for each request using timestamp!
     requestIDRaw = currentIP + "_" + currentTime
     requestIDProcessed = currentTime.replace(":", "-").replace(".", "_")
-    print(status.db)
+    print(requestIDProcessed)
+    print(db)
 
-    if not status.exists(requestIDProcessed):
+    if not requestIDProcessed in db:
         out_dict["ipExists"] = "no"
         out_dict["timeStampExists"] = "no"
         out_dict["currentIP"] = currentIP
         out_dict["curentTimeStamp"] = currentTime
         return json.dumps(out_dict)
     else:
-        val = status.get(requestIDProcessed)
+        val = db.get(requestIDProcessed)
         print(val)
         out_dict["ipExists"] = "yes"
         out_dict["timeStampExists"] = "yes"
@@ -75,12 +77,12 @@ def uploadfile():
         requestIDRaw = currentIP + "_" + currentTime
         requestIDProcessed = currentTime.replace(":", "-").replace(".", "_")
 
-        if not status.exists(requestIDProcessed):
+        if not requestIDProcessed in db:
             entry = {'stage': 0, 'page' : 0, 'total' : 0, 'output' : []}
-            status.update(requestIDProcessed, entry)
+            db[requestIDProcessed] = entry
 
         print("Forking....")
-        thread = threading.Thread(target=main, args=(filename, status, requestIDProcessed))
+        thread = threading.Thread(target=main, args=(filename, db, requestIDProcessed))
         thread.start()
         return jsonify({"Succeeded": "yes", "YourIP" : str(currentIP), "YourTime" : currentTime})
 
