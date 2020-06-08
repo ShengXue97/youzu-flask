@@ -687,7 +687,7 @@ def main(pdfname, db, requestID):
         os.makedirs("TempContours")
 
     paper_name = pdfname.replace(".pdf", "")
-    pdf_path = "Sample Resources/" + paper_name + ".pdf"
+    pdf_path = "ReactPDF/" + paper_name + ".pdf"
     pages = convert_from_path(pdf_path)
     pg_cntr = 1
     filenames_list = []
@@ -711,15 +711,6 @@ def main(pdfname, db, requestID):
     for filename in filenames_list:
         generate_document(filename, "OutputDocuments", qn_coord, db, requestID)
 
-    df = pd.read_csv("Sample Resources/pdfverifier.csv")
-    verifier = df.set_index("Paper Name", drop=False)
-    qn_acc, img_acc = acc_matrix(image_count, verifier, pdfname)
-    print("\n" + "Accuracy of Question Numbers: " + str(qn_acc) + "%")
-    if img_acc > 100:
-        print("Accuracy of Images : " + str(img_acc) + "%")
-        print("There could be too much noise being recognized as images, consider improving the filter" + "\n")
-    else:
-        print("Accuracy of Images : " + str(img_acc) + "%" + "\n")
     global_df.to_csv("output.csv")
 
     # Copies all the output to a new folder under Output/PDF NAME
@@ -764,15 +755,15 @@ global_df = pd.DataFrame(
     columns=['Level', 'Page', 'Question', 'Comment', 'A', 'B', 'C', 'D', 'Subject', 'Year', 'School', 'Exam', 'Number', 'Image',
              'Image File'])
 
-for curFilename in os.listdir("Sample Resources"):
-    if curFilename.endswith("P6_2019_English_SA1_Catholic_High.pdf"):
-        filename = curFilename
-        main(curFilename)
-        qn_num = 1
-        pg_num = 1
-        diagram_count = 1
-        total_pages = -1
-        image_count = 0
-        current_section = ""
-        current_ans_list = []
-        found_ans_options = False
+# for curFilename in os.listdir("Sample Resources"):
+#     if curFilename.endswith("P6_2019_English_SA1_Catholic_High.pdf"):
+#         filename = curFilename
+#         main(curFilename)
+#         qn_num = 1
+#         pg_num = 1
+#         diagram_count = 1
+#         total_pages = -1
+#         image_count = 0
+#         current_section = ""
+#         current_ans_list = []
+#         found_ans_options = False
