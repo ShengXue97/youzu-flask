@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, session
 from flask_cors import CORS, cross_origin
 import json
 import ast
@@ -8,44 +8,42 @@ import pandas as pd
 import threading, time
 import flask
 import itertools
-from dbj import dbj
 from datetime import datetime
-
+import os.path
 
 app = Flask(__name__)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
-db = {"test": "hi"}
-
+app.secret_key = "EFWM@!R@!@MF!!@$#^@#%#@^"
 @app.route("/")
 def home():
     return "<h1>Welcome man, enjoy your stay<h1>"
     
-def get_message(currentIP, currentTime):
+def get_message(currentIP, currentTime, requestIDProcessed):
     out_dict = {}
     # Unique entry for each request using timestamp!
-    requestIDRaw = currentIP + "_" + currentTime
-    requestIDProcessed = currentTime.replace(":", "-").replace(".", "_")
-    print(requestIDProcessed)
-    print(db)
+    entry = None
+    foundSession = False
+    if os.path.exists('Sessions/' + requestIDProcessed + ".json"):
+        with open('Sessions/' + requestIDProcessed + ".json") as json_file:
+            entry = json.load(json_file)
+            foundSession = True
 
-    if not requestIDProcessed in db:
+    if not foundSession:
         out_dict["ipExists"] = "no"
         out_dict["timeStampExists"] = "no"
         out_dict["currentIP"] = currentIP
         out_dict["curentTimeStamp"] = currentTime
         return json.dumps(out_dict)
     else:
-        val = db.get(requestIDProcessed)
-        print(val)
         out_dict["ipExists"] = "yes"
         out_dict["timeStampExists"] = "yes"
         out_dict["currentIP"] = currentIP
         out_dict["curentTimeStamp"] = currentTime
 
-        out_dict["stage"] = val['stage']
-        out_dict["page"] = val['page']
-        out_dict["total"] = val['total']
+        out_dict["stage"] = entry['stage']
+        out_dict["page"] = entry['page']
+        out_dict["total"] = entry['total']
         return json.dumps(out_dict)
     
 
@@ -53,10 +51,13 @@ def get_message(currentIP, currentTime):
 def index():
     currentIP = request.args.get("currentIP")
     currentTime = request.args.get("currentTime")
+    requestIDRaw = currentIP + "_" + currentTime
+    requestIDProcessed = currentTime.replace(":", "-").replace(".", "_")
+
     if request.headers.get('accept') == 'text/event-stream':
         def events():
             time.sleep(.1)  # an artificial delay
-            yield 'data: {}\n\n'.format(get_message(currentIP, currentTime))
+            yield 'data: {}\n\n'.format(get_message(currentIP, currentTime, requestIDProcessed))
         return flask.Response(events(), content_type='text/event-stream')
 
 
@@ -77,12 +78,12 @@ def uploadfile():
         requestIDRaw = currentIP + "_" + currentTime
         requestIDProcessed = currentTime.replace(":", "-").replace(".", "_")
 
-        if not requestIDProcessed in db:
+        if not requestIDProcessed in session:
             entry = {'stage': 0, 'page' : 0, 'total' : 0, 'output' : []}
-            db[requestIDProcessed] = entry
+            session[requestIDProcessed] = entry
 
         print("Forking....")
-        thread = threading.Thread(target=main, args=(filename, db, requestIDProcessed))
+        thread = threading.Thread(target=main, args=(filename, entry, requestIDProcessed))
         thread.start()
         return jsonify({"Succeeded": "yes", "YourIP" : str(currentIP), "YourTime" : currentTime})
 
@@ -112,6 +113,7 @@ def getresult():
         # append the list to the final list 
         row_json.append(my_list)
 
+    os.remove(requestIDProcessed + "_output.csv")
     return jsonify(row_json)
 
 if __name__ == '__main__':

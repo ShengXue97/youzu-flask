@@ -17,6 +17,7 @@ import math as m
 import ast
 import shutil
 import time
+import json
 
 def get_image(image_path):
     """Get a numpy array of an image so that one can access values[x][y]."""
@@ -166,12 +167,7 @@ def draw_contours(result, img, cntrs, image_name):
             area = cv2.contourArea(c) / 10000
             x, y, w, h = cv2.boundingRect(c)
             cv2.rectangle(result, (x - 10, y - 10), (x + w + 5, y + h + 5), (0, 0, 255), 2)
-            if "texted" in locals():
-                grayish = cv2.cvtColor(texted, cv2.COLOR_BGR2GRAY)
-                #image = cv2.imread(img, 0)
-            else:
-                grayish = cv2.cvtColor(result_1, cv2.COLOR_BGR2GRAY)
-                # image = cv2.imread(img, 0)
+            grayish = cv2.cvtColor(texted, cv2.COLOR_BGR2GRAY)
             thresh = 255 - cv2.threshold(grayish, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1][1]
             ###cropping out image and convert to text
             ROI = thresh[y:y + h, x:x + w]
@@ -405,14 +401,15 @@ def write_data_to_document(document_data_list, document, qn_coord):
             image_count += 1
 
 
-def generate_document(imagefilename, documentdir, qn_coord, db, requestID):
+def generate_document(imagefilename, documentdir, qn_coord, entry, requestID):
     global pg_num
     global total_pages
     global filename
 
     print("Step 2 (Output Generation): PG " + str(pg_num) + "/" + str(total_pages))
     entry = {'stage': 2, 'page' : pg_num, 'total' : total_pages, 'output' : []}
-    db[requestID] = entry
+    with open('Sessions/' + requestID + ".json", 'w') as outfile:
+        json.dump(entry, outfile)
 
     time.sleep(0)
 
@@ -468,23 +465,11 @@ def generate_document(imagefilename, documentdir, qn_coord, db, requestID):
 
     ###### Step 5: Write and Save to a new Microsoft Word Document
     write_data_to_document(document_data_list, document, qn_coord)
-    # Remove /images from image_name. example image_name is images/P6_English_2019_CA1_CHIJ/pg_1_P6_English_2019_CA1_CHIJ.jpg
-    image_name = image_name.split('/', 1)[1]
-    # Test paper name found in /images, example parentdir is P6_English_2019_CA1_CHIJ
-    parentdir = image_name.split('/', 1)[0]
-
-    # put this under documentdir
-    if not os.path.exists(documentdir + "/" + parentdir):
-        os.makedirs(documentdir + "/" + parentdir)
-
-    document.save(documentdir + "/" + image_name + ".docx")
-
     # cv2.imshow("THRESH", thresh)
     # cv2.imshow("MORPH", morph)
 
     ####### Step 6: Display results
     ims = cv2.resize(result, (700, 850))
-    cv2.imwrite("TempContours/" + str(pg_num) + ".jpg", ims)
     pg_num = pg_num + 1
     # cv2.imshow("RESULT", ims)
     # cv2.waitKey(0)
@@ -506,7 +491,7 @@ def copytree(src, dst, symlinks=False, ignore=None):
 
 
 # Map the page number and y coordinates of each question
-def find_qn_coords(filenames_list, db, requestID):
+def find_qn_coords(filenames_list, entry, requestID):
     global total_pages
     qn_coord = []
     qn_coord.append((0, 0))
@@ -516,8 +501,9 @@ def find_qn_coords(filenames_list, db, requestID):
 
     for filename in filenames_list:
         print("Step 1 (Preprocessing): PG " + str(pg_number) + "/" + str(total_pages))
-        entry = {'stage': 1, 'page' : pg_num, 'total' : total_pages, 'output' : []}
-        db[requestID] = entry
+        entry = {'stage': 1, 'page' : pg_number, 'total' : total_pages, 'output' : []}
+        with open('Sessions/' + requestID + ".json", 'w') as outfile:
+            json.dump(entry, outfile)
 
         time.sleep(0)
 
@@ -673,7 +659,7 @@ def acc_matrix(image_count, verifier, pdfname):
         pass
 
 
-def main(pdfname, db, requestID):
+def main(pdfname, entry, requestID):
     global total_pages
     global global_df
     global file_attribute_list
@@ -704,27 +690,22 @@ def main(pdfname, db, requestID):
         filenames_list.append(sub_dir + filename)
 
     total_pages = len(filenames_list)
-    qn_coord = find_qn_coords(filenames_list, db, requestID)
+    qn_coord = find_qn_coords(filenames_list, entry, requestID)
     # qn_coord = ast.literal_eval("[(0, 0, 0, 0), (2, 1365, 1, ''), (2, 1703, 2, ''), (3, 1131, 3, ''), (3, 1819, 4, ''), (4, 966, 5, ''), (4, 1779, 6, ''), (5, 2056, 7, ''), (6, 744, 8, ''), (6, 1934, 9, ''), (7, 757, 10, ''), (7, 1924, 11, ''), (8, 905, 12, ''), (8, 1710, 13, ''), (9, 1077, 14, ''), (9, 1914, 15, ''), (10, 1256, 16, ''), (11, 1630, 17, ''), (12, 1385, 18, ''), (13, 1432, 19, ''), (14, 1401, 20, ''), (15, 1292, 21, ''), (16, 1047, 22, ''), (17, 1295, 23, ''), (18, 1169, 24, ''), (19, 1005, 25, ''), (19, 1527, 26, ''), (20, 1535, 27, ''), (21, 1186, 28, ''), (21, 1968, 29, ''), (24, 1630, 30, 2), (26, 1591, 31, 2), (27, 1584, 32, 2), (29, 268, 33, 3), (30, 1935, 34, 2), (31, 1858, 35, 3), (32, 1035, 36, 3), (33, 1711, 37, 1), (34, 1553, 38, 1), (35, 1395, 39, 1), (36, 1739, 40, 3)]")
 
     for filename in filenames_list:
-        generate_document(filename, "OutputDocuments", qn_coord, db, requestID)
+        generate_document(filename, "OutputDocuments", qn_coord, entry, requestID)
 
     global_df.to_csv(requestID + "_output.csv")
-
-    # Copies all the output to a new folder under Output/PDF NAME
-    dirpath = os.getcwd()
-    copytree(dirpath + "/TempContours", dirpath + "/Output/" + paper_name + "/TempContours")
-    copytree(dirpath + "/TempImages", dirpath + "/Output/" + paper_name + "/TempImages")
-    copytree(dirpath + "/images/" + paper_name, dirpath + "/Output/" + paper_name + "/images")
-    #shutil.copyfile(dirpath + requestID + "_output.csv", dirpath + "/Output/" + paper_name + requestID + "_output.csv")
 
     global_df = pd.DataFrame(
         columns=['Level', 'Page', 'Question', 'Comment', 'A', 'B', 'C', 'D', 'Subject', 'Year', 'School', 'Exam', 'Number',
                  'Image', 'Image File'])
-    shutil.rmtree(dirpath + "/TempContours")
-    shutil.rmtree(dirpath + "/TempImages")
-    shutil.rmtree(dirpath + "/images/")
+
+    dirpath = os.getcwd()
+    # shutil.rmtree(dirpath + "/TempContours")
+    # shutil.rmtree(dirpath + "/TempImages")
+    # shutil.rmtree(dirpath + "/images/")
 
     # Create an empty list 
     row_json = []
@@ -737,7 +718,8 @@ def main(pdfname, db, requestID):
         row_json.append(my_list)
 
     entry = {'stage': 3, 'page' : 0, 'total' : 0, 'output' : row_json}
-    db[requestID] = entry
+    with open('Sessions/' + requestID + ".json", 'w') as outfile:
+        json.dump(entry, outfile)
 
 
 qn_num = 1
@@ -754,10 +736,10 @@ global_df = pd.DataFrame(
     columns=['Level', 'Page', 'Question', 'Comment', 'A', 'B', 'C', 'D', 'Subject', 'Year', 'School', 'Exam', 'Number', 'Image',
              'Image File'])
 
-# for curFilename in os.listdir("Sample Resources"):
-#     if curFilename.endswith("P6_2019_English_SA1_Catholic_High.pdf"):
+# for curFilename in os.listdir("ReactPDF"):
+#     if curFilename.endswith("P6_English_2019_CA1_CHIJ.pdf"):
 #         filename = curFilename
-#         main(curFilename)
+#         main(curFilename, {}, 1)
 #         qn_num = 1
 #         pg_num = 1
 #         diagram_count = 1
