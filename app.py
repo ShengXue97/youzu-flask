@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify, session
 from flask_cors import CORS, cross_origin
 import json
 import ast
-from MainV9 import main
+from MainV9 import Process
 import os
 import pandas as pd
 import threading, time
@@ -21,6 +21,7 @@ def home():
     
 def get_message(currentIP, currentTime, requestIDProcessed):
     out_dict = {}
+    time.sleep(1)
     # Unique entry for each request using timestamp!
     entry = None
     foundSession = False
@@ -83,7 +84,8 @@ def uploadfile():
             session[requestIDProcessed] = entry
 
         print("Forking....")
-        thread = threading.Thread(target=main, args=(filename, entry, requestIDProcessed))
+        process = Process()
+        thread = threading.Thread(target=process.main, args=(filename, requestIDProcessed))
         thread.start()
         return jsonify({"Succeeded": "yes", "YourIP" : str(currentIP), "YourTime" : currentTime})
 
