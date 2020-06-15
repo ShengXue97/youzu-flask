@@ -11,12 +11,28 @@ import itertools
 from datetime import datetime
 import os.path
 
+# install the following 2 libs first
+from flask_sqlalchemy import SQLAlchemy
+from flask_marshmallow import Marshmallow
+from models.question import Question
+
 app = Flask(__name__)
 cors = CORS(app)
+
+db = SQLAlchemy(app)
+ma = Marshmallow(app)
+# change to your mysql settings here,create an empty schema before you run the code.
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://your_account_name:your_password@your_mysql_address/your_database_name'
+
 app.config['CORS_HEADERS'] = 'Content-Type'
 app.secret_key = "EFWM@!R@!@MF!!@$#^@#%#@^"
 @app.route("/")
 def home():
+    # this step is to create a table defined in models,can put it somewhere else and add on better try except.
+    try:
+        db.create_all()
+    except:
+        print("create wrong")
     return "<h1>Welcome man, enjoy your stay<h1>"
     
 def get_message(currentIP, currentTime, requestIDProcessed):
