@@ -341,7 +341,6 @@ class Process:
 
         for i in range(len(document_data_list)):
             data = document_data_list[i]
-            print('printing data:',data[0])
             item = data[0]
             typeof = data[1]
             y_coord = data[2]
@@ -356,7 +355,6 @@ class Process:
             match_list = []
             for match in matches:
                 match_list.append(match)
-            print(match_list)
             for i in range(len(match_list)):
                 match = match_list[i]
                 lineno = pseudo_text.count('\n', 0, match.start())
@@ -378,7 +376,6 @@ class Process:
                         current_ans_list.append(substr)
                 else:
                     break
-            print(current_ans_list)
             ans_a = "-" if len(current_ans_list) <= 0 else current_ans_list[0]
             ans_b = "-" if len(current_ans_list) <= 1 else current_ans_list[1]
             ans_c = "-" if len(current_ans_list) <= 2 else current_ans_list[2]
@@ -694,7 +691,6 @@ class Process:
 
             for c in cntrs:
                 area = cv2.contourArea(c) / 10000
-                # print(area)
                 x, y, w, h = cv2.boundingRect(c)
                 cv2.rectangle(result, (x, y), (x + w, y + h), (0, 0, 255), 2)
 
@@ -737,14 +733,12 @@ class Process:
 
             for c, self.pg_number, y, w, h, xw in sorted_cntr_tuples:
                 qn_coord.append((self.pg_number, y))
-                # print((pg_num, y))
             # page number will increment with every /small_ image appended to TempContours/
             cv2.imwrite("TempContours/" + self.requestID + "_" + str(self.pg_num) + ".jpg", result)
 
 
             self.pg_number = self.pg_number + 1
 
-        # print(self.pg_cnt_ls)
         return qn_coord
 
     def find_paper_attributes(self, paper_name):
@@ -859,7 +853,6 @@ class Process:
         self.total_pages = len(self.filenames_list)
         qn_coord = self.find_qn_coords(self.filenames_list)
         # qn_coord = ast.literal_eval("[(0, 0, 0, 0), (2, 1365, 1, ''), (2, 1703, 2, ''), (3, 1131, 3, ''), (3, 1819, 4, ''), (4, 966, 5, ''), (4, 1779, 6, ''), (5, 2056, 7, ''), (6, 744, 8, ''), (6, 1934, 9, ''), (7, 757, 10, ''), (7, 1924, 11, ''), (8, 905, 12, ''), (8, 1710, 13, ''), (9, 1077, 14, ''), (9, 1914, 15, ''), (10, 1256, 16, ''), (11, 1630, 17, ''), (12, 1385, 18, ''), (13, 1432, 19, ''), (14, 1401, 20, ''), (15, 1292, 21, ''), (16, 1047, 22, ''), (17, 1295, 23, ''), (18, 1169, 24, ''), (19, 1005, 25, ''), (19, 1527, 26, ''), (20, 1535, 27, ''), (21, 1186, 28, ''), (21, 1968, 29, ''), (24, 1630, 30, 2), (26, 1591, 31, 2), (27, 1584, 32, 2), (29, 268, 33, 3), (30, 1935, 34, 2), (31, 1858, 35, 3), (32, 1035, 36, 3), (33, 1711, 37, 1), (34, 1553, 38, 1), (35, 1395, 39, 1), (36, 1739, 40, 3)]")
-        print(qn_coord)
         self.save_qn_images(qn_coord)
 
         self.qn_num = 1
