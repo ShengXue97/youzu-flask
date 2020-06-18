@@ -423,6 +423,7 @@ class Process:
         with open('Sessions/' + self.requestID + ".json", 'w') as outfile:
             json.dump(entry, outfile)
 
+        image_name = filename.replace(".jpg", "")
         ###### Step 1: Get the initial thresh and contours
         img = cv2.imread(image_name + ".jpg")
         height, width, channels = img.shape
