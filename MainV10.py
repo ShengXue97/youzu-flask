@@ -396,6 +396,11 @@ class Process:
         contains_image = "No"
         if final_image != "":
             contains_image = "Yes"
+        if final_text == "":
+            final_text = "-"
+        if final_image == "":
+            final_image = "-"
+
         self.global_df.loc[self.qn_num] = [paper_level, qn_coord[self.qn_num][0], final_text, "-", ans_a, ans_b, ans_c, ans_d,
                                            paper_subject,
                                            paper_year, paper_school, paper_exam_type, self.qn_num, contains_image,
