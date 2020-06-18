@@ -585,19 +585,19 @@ class Process:
             qn = qn_coord[qn_num]
             # For last qn
             if qn_num == len(qn_coord) - 1:
-                new_image_path = "TempImages/qn_" + str(qn_num) + ".jpg"
+                new_image_path = "TempImages/" + self.requestID + "_" + qn_" + str(qn_num) + ".jpg"
             else:
                 next_qn = qn_coord[qn_num + 1]
                 if qn[0] == next_qn[0]:
                     # Current qn on same page as next qn
                     image_path = self.filenames_list[qn[0] - 1]
-                    new_image_path = "TempImages/qn_" + str(qn_num) + ".jpg"
+                    new_image_path = "TempImages/" + self.requestID + "_" + str(qn_num) + ".jpg"
                     self.crop_image(image_path, new_image_path, qn[1], next_qn[1], False, False)
                 else:
                     # Current qn on different page from next qn, means qn spans across
                     # multiple pages
                     image_path = self.filenames_list[qn[0] - 1]
-                    new_image_path = "TempImages/qn_" + str(qn_num) + ".jpg"
+                    new_image_path = "TempImages/" + self.requestID + "_" + str(qn_num) + ".jpg"
                     self.crop_image(image_path, new_image_path, qn[1], 0, True, False)
                     for pg_num in range(qn[0] + 1, next_qn[0] + 1):
                         if pg_num == next_qn[0]:
