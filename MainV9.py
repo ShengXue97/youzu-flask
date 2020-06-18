@@ -554,7 +554,7 @@ class Process:
         qn_coord.append((0, 0))
         self.pg_num = 1
         self.qn_num = 1
-        self.diagram_count = 1
+        self.diagram_count = 1 
 
         for filename in filenames_list:
             print("Step 1 (Preprocessing): PG " + str(self.pg_num) + "/" + str(self.total_pages))
