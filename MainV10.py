@@ -829,7 +829,7 @@ class Process:
             os.makedirs("TempContours")
 
         paper_name = pdfname.replace(".pdf", "")
-        pdf_path = "Sample Resources/" + paper_name + ".pdf"
+        pdf_path = "ReactPDF/" + paper_name + ".pdf"
         pages = convert_from_path(pdf_path)
         pg_cntr = 1
         self.filenames_list = []
@@ -866,7 +866,7 @@ class Process:
             self.generate_document(filename, qn_coord)
             self.qn_num = self.qn_num + 1
 
-        '''df = pd.read_csv("Sample Resources/pdfverifier.csv")
+        '''df = pd.read_csv("ReactPDF/pdfverifier.csv")
         verifier = df.set_index("Paper Name", drop=False)
         qn_acc, img_acc = acc_matrix(self.image_count, verifier, pdfname)
         print("\n" + "Accuracy of Question Numbers: " + str(qn_acc) + "%")
@@ -892,7 +892,7 @@ class Process:
         # shutil.rmtree(dirpath + "/images/")
 
 
-'''for curFilename in os.listdir("Sample Resources"):
+'''for curFilename in os.listdir("ReactPDF"):
     if curFilename.endswith("P6_English_2019_CA1_CHIJ.pdf"):
         filename = curFilename
         main(curFilename)
