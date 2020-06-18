@@ -690,8 +690,8 @@ class Process:
 
             ###### Step 2: Merge contours that are close together
             # Modify the x and y tolerance to change how far it must be before it will merge!
-            x_tolerance = m.floor(0.005 * width)  # previously 0.02138
-            y_tolerance = m.floor(0.005 * height)  # previously 0.024964
+            x_tolerance = m.floor(0.01 * width)  # previously 0.02138
+            y_tolerance = m.floor(0.01 * height)  # previously 0.024964
             thresh, cntrs = self.merge_contours(thresh, cntrs, x_tolerance, y_tolerance)
 
             for c in cntrs:
