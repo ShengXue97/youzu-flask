@@ -12,8 +12,6 @@ import cv2
 import numpy as np
 import pytesseract
 from PIL import Image, ImageOps
-from langdetect import lang_detect_exception
-from docx.shared import Inches
 from GibberishDetector import classify
 import os
 import sys
