@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify, session
 from flask_cors import CORS, cross_origin
 import json
 import ast
-from MainV10 import Process
+from MainV9 import Process
 import os
 import pandas as pd
 import threading, time
@@ -11,7 +11,7 @@ import itertools
 from datetime import datetime
 import os.path
 
-# # install the following 2 libs first
+# install the following 2 libs first
 # from flask_sqlalchemy import SQLAlchemy
 # from flask_marshmallow import Marshmallow
 # from models.question import Question
@@ -23,7 +23,7 @@ cors = CORS(app)
 # ma = Marshmallow(app)
 # # change to your mysql settings here,create an empty schema before you run the code.
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://your_account_name:your_password@your_mysql_address/your_database_name'
-#
+
 app.config['CORS_HEADERS'] = 'Content-Type'
 app.secret_key = "EFWM@!R@!@MF!!@$#^@#%#@^"
 @app.route("/")
@@ -121,20 +121,20 @@ def getresult():
     df = pd.read_csv(requestIDProcessed + "_output.csv")
     # Create required qn or pg lists
     thisPageList = []
-    row_json = [] #[[[]]]
-    # Iterate over each row
+    row_json = []  # [[[]]]
+    # Iterate over each row 
     currentPageNum = 1
-    for index, rows in df.iterrows(): 
+    for index, rows in df.iterrows():
         # Create list for the current row
         pageNum = rows["Page"]
-        qnNum = rows["Number"]
         if pageNum == currentPageNum:
             page = rows["Question"] if rows["Question"] != "" else "-"
             ans_a = rows["A"] if rows["A"] != "" else "-"
             ans_b = rows["B"] if rows["B"] != "" else "-"
             ans_c = rows["C"] if rows["C"] != "" else "-"
             ans_d = rows["D"] if rows["D"] != "" else "-"
-            qn_list =[pageNum, page, ans_a, ans_b, ans_c, ans_d, qnNum]
+            qnNum = rows["Number"]
+            qn_list = [pageNum, page, ans_a, ans_b, ans_c, ans_d, qnNum]
             # append question list to page list
             thisPageList.append(qn_list)
         # once page changes, append previous page list to the final list
@@ -142,6 +142,7 @@ def getresult():
             row_json.append(thisPageList)
             currentPageNum += 1
             thisPageList = []
+            pageNum = rows["Page"]
             # append that particular first qn on the new page to the now empty PageList
             if pageNum == currentPageNum:
                 page = rows["Question"] if rows["Question"] != "" else "-"
@@ -149,15 +150,15 @@ def getresult():
                 ans_b = rows["B"] if rows["B"] != "" else "-"
                 ans_c = rows["C"] if rows["C"] != "" else "-"
                 ans_d = rows["D"] if rows["D"] != "" else "-"
+                qnNum = rows["Number"]
                 qn_list = [pageNum, page, ans_a, ans_b, ans_c, ans_d, qnNum]
                 # append question list to page list
                 thisPageList.append(qn_list)
 
     row_json.append(thisPageList)
-
-
     os.remove(requestIDProcessed + "_output.csv")
     return jsonify(row_json)
+
 
 if __name__ == '__main__':
     app.run(threaded=True, host='0.0.0.0', port=3001)
