@@ -837,7 +837,7 @@ class Process:
         if len(pages) == 1:
             paige=pages
         else:
-            paige=pages[1:]
+            paige=pages
         for index, page in enumerate(paige):
             filename = "pg_" + str(pg_cntr) + '_' + pdf_path.split('/')[-1].replace('.pdf', '.jpg')
             page.save(sub_dir + filename)
