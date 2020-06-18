@@ -699,7 +699,7 @@ class Process:
                 x, y, w, h = cv2.boundingRect(c)
                 cv2.rectangle(result, (x, y), (x + w, y + h), (0, 0, 255), 2)
 
-                if (0.01 < area < 0.1) and y / height < 0.855 and (0 < x / width < 0.25) and (0.6 < w / h < 2):
+                if (0.01 < area < 0.1) and y / height < 0.855 and (0 < x / width < 0.25) and (0.2 < w / h < 2):
                     if y - 5 > 0 and y + h + 5 < height and x - 5 > 0 and x + w + 5 < width:
                         new_image = img[y - 5: y + h + 5, x - 5: x + w + 5]
                     else:
@@ -842,7 +842,7 @@ class Process:
         if len(pages) == 1:
             paige=pages
         else:
-            paige=pages[1:]
+            paige=pages
         for index, page in enumerate(paige):
             filename = "pg_" + str(pg_cntr) + '_' + pdf_path.split('/')[-1].replace('.pdf', '.jpg')
             page.save(sub_dir + filename)
