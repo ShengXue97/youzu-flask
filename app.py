@@ -160,4 +160,4 @@ def getresult():
     return jsonify(row_json)
 
 if __name__ == '__main__':
-    app.run(threaded=True, port=3001)
+    app.run(threaded=True, host='0.0.0.0', port=3001)
