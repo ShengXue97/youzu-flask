@@ -26,6 +26,10 @@ cors = CORS(app)
 
 app.config['CORS_HEADERS'] = 'Content-Type'
 app.secret_key = "EFWM@!R@!@MF!!@$#^@#%#@^"
+@app.route("/")
+def home():
+    return "<h1>Welcome man, enjoy your stay<h1>"
+
 # @app.route("/")
 # def home():
 #     # this step is to create a table defined in models,can put it somewhere else and add on better try except.
