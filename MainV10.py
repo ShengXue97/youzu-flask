@@ -577,7 +577,7 @@ class Process:
             if not new_image_path in self.qn_images_list:
                 self.qn_images_list.append(new_image_path)
         else:
-            im1.save("temp.jpg",dpi=(500,500))
+            im1.save(self.requestID + "_" + "temp.jpg",dpi=(500,500))
 
     def save_qn_images(self, qn_coord):
         self.total_qns = len(qn_coord) - 2
@@ -603,13 +603,13 @@ class Process:
                         if pg_num == next_qn[0]:
                             im1 = cv2.imread(new_image_path)
                             self.crop_image(self.filenames_list[pg_num - 1], "", 0, next_qn[1], False, False)
-                            im2 = cv2.imread("temp.jpg")
+                            im2 = cv2.imread(self.requestID + "_" + "temp.jpg")
                             im_v = cv2.vconcat([im1, im2])
                             cv2.imwrite(new_image_path, im_v)
                         else:
                             im1 = cv2.imread(new_image_path)
                             self.crop_image(self.filenames_list[pg_num - 1], "", 0, 0, True, True)
-                            im2 = cv2.imread("temp.jpg")
+                            im2 = cv2.imread(self.requestID + "_" + "temp.jpg")
                             im_v = cv2.vconcat([im1, im2])
                             cv2.imwrite(new_image_path, im_v)
 
@@ -846,8 +846,6 @@ class Process:
             if not self.is_white_image(image_name):
                 image_name = image_name + "_inverted"
             self.filenames_list.append(image_name + ".jpg")
-            if index == 9:
-                break
 
 
         self.total_pages = len(self.filenames_list)
@@ -901,8 +899,8 @@ class Process:
 
 # process = Process()
 
-# filename = "P6_Science_2019_SA2_CHIJ"
-# process.main(filename)
+# filename = "nanyang-1to5"
+# process.main(filename, "2")
 
 
 
