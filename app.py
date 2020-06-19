@@ -124,27 +124,13 @@ def getresult():
     row_json = []  # [[[]]]
     # Iterate over each row 
     currentPageNum = 1
-    for index, rows in df.iterrows():
+        for index, rows in df.iterrows():
+        check = False
         # Create list for the current row
-        pageNum = rows["Page"]
-        if pageNum == currentPageNum:
-            page = rows["Question"] if rows["Question"] != "" else "-"
-            ans_a = rows["A"] if rows["A"] != "" else "-"
-            ans_b = rows["B"] if rows["B"] != "" else "-"
-            ans_c = rows["C"] if rows["C"] != "" else "-"
-            ans_d = rows["D"] if rows["D"] != "" else "-"
-            qnNum = rows["Number"]
-            qn_list = [pageNum, page, ans_a, ans_b, ans_c, ans_d, qnNum]
-            # append question list to page list
-            thisPageList.append(qn_list)
-        # once page changes, append previous page list to the final list
-        elif pageNum > currentPageNum:
-            row_json.append(thisPageList)
-            currentPageNum += 1
-            thisPageList = []
+        while check is False:
             pageNum = rows["Page"]
-            # append that particular first qn on the new page to the now empty PageList
             if pageNum == currentPageNum:
+                check = True
                 page = rows["Question"] if rows["Question"] != "" else "-"
                 ans_a = rows["A"] if rows["A"] != "" else "-"
                 ans_b = rows["B"] if rows["B"] != "" else "-"
@@ -154,6 +140,24 @@ def getresult():
                 qn_list = [pageNum, page, ans_a, ans_b, ans_c, ans_d, qnNum]
                 # append question list to page list
                 thisPageList.append(qn_list)
+            # once page changes, append previous page list to the final list
+            elif pageNum > currentPageNum:
+                row_json.append(thisPageList)
+                currentPageNum += 1
+                thisPageList = []
+                pageNum = rows["Page"]
+                # append that particular first qn on the new page to the now empty PageList
+                if pageNum == currentPageNum:
+                    check = True
+                    page = rows["Question"] if rows["Question"] != "" else "-"
+                    ans_a = rows["A"] if rows["A"] != "" else "-"
+                    ans_b = rows["B"] if rows["B"] != "" else "-"
+                    ans_c = rows["C"] if rows["C"] != "" else "-"
+                    ans_d = rows["D"] if rows["D"] != "" else "-"
+                    qnNum = rows["Number"]
+                    qn_list = [pageNum, page, ans_a, ans_b, ans_c, ans_d, qnNum]
+                    # append question list to page list
+                    thisPageList.append(qn_list)
 
     row_json.append(thisPageList)
     os.remove(requestIDProcessed + "_output.csv")
