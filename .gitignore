@@ -1,3 +1,9 @@
 .venv
 __pycache__
 .vscode
+images
+ReactPDF
+Sessions
+TempContours
+TempImages
+venv
