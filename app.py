@@ -124,7 +124,7 @@ def getresult():
     row_json = []  # [[[]]]
     # Iterate over each row 
     currentPageNum = 1
-        for index, rows in df.iterrows():
+    for index, rows in df.iterrows():
         check = False
         # Create list for the current row
         while check is False:

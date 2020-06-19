@@ -922,10 +922,10 @@ class Process:
         current_ans_list = []
         found_ans_options = False'''
 
-process = Process()
+# process = Process()
 
-filename = "P6_English_2019_CA1_CHIJ_2Pages"
-process.main(filename, "2")
+# filename = "P6_English_2019_CA1_CHIJ_2Pages"
+# process.main(filename, "2")
 
 
 
