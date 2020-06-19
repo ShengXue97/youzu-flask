@@ -590,7 +590,9 @@ class Process:
             qn = qn_coord[qn_num]
             # For last qn
             if qn_num == len(qn_coord) - 1:
+                image_path = self.filenames_list[qn[0] - 1]
                 new_image_path = "TempImages/" + self.requestID + "_" + "qn_" + str(qn_num) + ".jpg"
+                self.crop_image(image_path, new_image_path,qn[1], 0, True, False)
             else:
                 next_qn = qn_coord[qn_num + 1]
                 if qn[0] == next_qn[0]:
