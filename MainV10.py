@@ -22,7 +22,8 @@ import platform
 import math as m
 import ast
 import shutil
-
+import os.path
+from os import path
 import json
 
 class Process:
@@ -813,9 +814,9 @@ class Process:
             pass'''
 
     def main(self, pdfname, requestID):
-        # global total_pages
-        # global global_df
-        # global file_attribute_list
+        global total_pages
+        global global_df
+        global file_attribute_list
         print(pdfname)
         self.requestID = requestID
         self.global_df = pd.DataFrame(
@@ -879,8 +880,8 @@ class Process:
         with open('Sessions/' + self.requestID + ".json", 'w') as outfile:
             json.dump(entry, outfile)
 
-        # # Copies all the output to a new folder under Output/PDF NAME
-        # dirpath = os.getcwd()
+        # Copies all the output to a new folder under Output/PDF NAME
+        dirpath = os.getcwd()
         # self.copytree(dirpath + "/TempContours", dirpath + "/Output/" + paper_name + "/TempContours")
         # self.copytree(dirpath + "/TempImages", dirpath + "/Output/" + paper_name + "/TempImages")
         # self.copytree(dirpath + "/images/" + paper_name, dirpath + "/Output/" + paper_name + "/images")
@@ -889,6 +890,23 @@ class Process:
         # shutil.rmtree(dirpath + "/TempContours")
         # shutil.rmtree(dirpath + "/TempImages")
         # shutil.rmtree(dirpath + "/images/")
+        items = os.listdir(dirpath + "/TempImages")
+        for item in items:
+            if requestID in item:
+                os.remove(os.path.join(dirpath + "/TempImages", item))
+
+        items = os.listdir(dirpath + "/TempContours")
+        for item in items:
+            if requestID in item:
+                os.remove(os.path.join(dirpath + "/TempContours", item))
+        
+        items = os.listdir(dirpath + "/Sessions")
+        for item in items:
+            if requestID in item:
+                os.remove(os.path.join(dirpath + "/Sessions", item))
+
+        if path.exists(dirpath + "/images/" + requestID + "_" + pdfname):
+            shutil.rmtree(dirpath + "/images/" + requestID + "_" + pdfname)
 
 
 '''for curFilename in os.listdir("ReactPDF"):
@@ -904,10 +922,10 @@ class Process:
         current_ans_list = []
         found_ans_options = False'''
 
-# process = Process()
+process = Process()
 
-# filename = "nanyang-1to5"
-# process.main(filename, "2")
+filename = "P6_English_2019_CA1_CHIJ_2Pages"
+process.main(filename, "2")
 
 
 
