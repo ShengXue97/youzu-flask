@@ -378,9 +378,13 @@ class Process:
                 else:
                     break
             ans_a = "-" if len(current_ans_list) <= 0 else current_ans_list[0]
+            ans_a = re.sub('\(1\)', '', ans_a)
             ans_b = "-" if len(current_ans_list) <= 1 else current_ans_list[1]
+            ans_b = re.sub('\(2\)', '', ans_b)
             ans_c = "-" if len(current_ans_list) <= 2 else current_ans_list[2]
+            ans_c = re.sub('\(3\)', '', ans_c)
             ans_d = "-" if len(current_ans_list) <= 3 else current_ans_list[3]
+            ans_d = re.sub('\(4\)', '', ans_d)
 
             # STEP 3: Add question to dataframe
             if typeof == "text" and item != "":
