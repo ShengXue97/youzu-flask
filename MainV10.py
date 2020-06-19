@@ -904,10 +904,6 @@ class Process:
             if requestID in item:
                 os.remove(os.path.join(dirpath + "/TempContours", item))
         
-        items = os.listdir(dirpath + "/Sessions")
-        for item in items:
-            if requestID in item:
-                os.remove(os.path.join(dirpath + "/Sessions", item))
 
         if path.exists(dirpath + "/images/" + requestID + "_" + pdfname):
             shutil.rmtree(dirpath + "/images/" + requestID + "_" + pdfname)
