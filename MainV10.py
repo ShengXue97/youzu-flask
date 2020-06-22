@@ -378,13 +378,13 @@ class Process:
                 else:
                     break
             ans_a = "-" if len(current_ans_list) <= 0 else current_ans_list[0]
-            ans_a = re.sub('\(1\)', '', ans_a)
+            ans_a = re.sub('[\[\(\|\{]1[\]\)\}\|]', '', ans_a)
             ans_b = "-" if len(current_ans_list) <= 1 else current_ans_list[1]
-            ans_b = re.sub('\(2\)', '', ans_b)
+            ans_b = re.sub('[\[\(\|\{]2[\]\)\}\|]', '', ans_b)
             ans_c = "-" if len(current_ans_list) <= 2 else current_ans_list[2]
-            ans_c = re.sub('\(3\)', '', ans_c)
+            ans_c = re.sub('[\[\(\|\{]3[\]\)\}\|]', '', ans_c)
             ans_d = "-" if len(current_ans_list) <= 3 else current_ans_list[3]
-            ans_d = re.sub('\(4\)', '', ans_d)
+            ans_d = re.sub('[\[\(\|\{]4[\]\)\}\|]', '', ans_d)
 
             # STEP 3: Add question to dataframe
             if typeof == "text" and item != "":
@@ -616,12 +616,20 @@ class Process:
                             im1 = cv2.imread(new_image_path)
                             self.crop_image(self.filenames_list[pg_num - 1], "", 0, next_qn[1], False, False)
                             im2 = cv2.imread(self.requestID + "_" + "temp.jpg")
+                            h1, w1, channels = im1.shape
+                            h2, w2, channels1 = im2.shape
+                            ### resize 2nd image if imgs are of different sizes
+                            im2 = cv2.resize(im2, (w1, h2))
                             im_v = cv2.vconcat([im1, im2])
                             cv2.imwrite(new_image_path, im_v)
                         else:
                             im1 = cv2.imread(new_image_path)
                             self.crop_image(self.filenames_list[pg_num - 1], "", 0, 0, True, True)
                             im2 = cv2.imread(self.requestID + "_" + "temp.jpg")
+                            h1, w1, channels = im1.shape
+                            h2, w2, channels1 = im2.shape
+                            ### resize 2nd image if imgs are of different sizes
+                            im2 = cv2.resize(im2, (w1, h2))
                             im_v = cv2.vconcat([im1, im2])
                             cv2.imwrite(new_image_path, im_v)
 
