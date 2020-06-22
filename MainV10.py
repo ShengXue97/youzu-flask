@@ -22,7 +22,6 @@ import platform
 import math as m
 import ast
 import shutil
-<<<<<<< HEAD
 import base64
 import os.path
 from os import path
@@ -235,7 +234,7 @@ class Process:
                         cv2.imwrite("TempImages/" + self.requestID + "_" + str(self.diagram_count) + ".jpg", new_image)
                         # store in base64 as well into document_data_list
                         with open("TempImages/" + self.requestID + "_" + str(self.diagram_count) + ".jpg", "rb") as image_file:
-                            encoded_string = str(base64.b64encode(image_file.read()))
+                            encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
                         document_data_list.append(
                             ("TempImages/" + self.requestID + "_" + str(self.diagram_count) + ".jpg", "image", y,
                              pseudo_text, encoded_string))
