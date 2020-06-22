@@ -138,7 +138,7 @@ def getresult():
                 ans_d = rows["D"] if rows["D"] != "" else "-"
                 qnNum = rows["Number"]
                 base64imgs = rows["Image File"]
-                print("base64: " + base64imgs)
+                # print("base64: " + base64imgs)
                 qn_list = [pageNum, page, ans_a, ans_b, ans_c, ans_d, qnNum, base64imgs]
                 # append question list to page list
                 thisPageList.append(qn_list)
@@ -158,7 +158,7 @@ def getresult():
                     ans_d = rows["D"] if rows["D"] != "" else "-"
                     qnNum = rows["Number"]
                     base64imgs = rows["Image File"]
-                    print("base64: " + base64imgs.split(" ")[0])
+                    # print("base64: " + base64imgs.split(" ")[0])
                     qn_list = [pageNum, page, ans_a, ans_b, ans_c, ans_d, qnNum, base64imgs]
                     # append question list to page list
                     thisPageList.append(qn_list)
@@ -171,9 +171,9 @@ def getresult():
             os.remove(os.path.join(dirpath + "/Sessions", item))
 
     row_json.append(thisPageList)
-    print(row_json)
-    for page in row_json:
-        print("Page " + str(row_json.index(page) + 1) + ": " + str(len(page)) + " questions")
+    # print(row_json)
+    # for page in row_json:
+    #     print("Page " + str(row_json.index(page) + 1) + ": " + str(len(page)) + " questions")
     os.remove(requestIDProcessed + "_output.csv")
     return jsonify(row_json)
 
