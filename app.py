@@ -163,6 +163,13 @@ def getresult():
                     # append question list to page list
                     thisPageList.append(qn_list)
 
+
+    dirpath = os.getcwd()
+    items = os.listdir(dirpath + "/Sessions")
+    for item in items:
+        if requestIDProcessed in item:
+            os.remove(os.path.join(dirpath + "/Sessions", item))
+
     row_json.append(thisPageList)
     print(row_json)
     for page in row_json:

@@ -22,8 +22,12 @@ import platform
 import math as m
 import ast
 import shutil
+<<<<<<< HEAD
 import base64
+import os.path
+from os import path
 import json
+
 
 class Process:
     def __init__(self):
@@ -382,9 +386,13 @@ class Process:
                 else:
                     break
             ans_a = "-" if len(current_ans_list) <= 0 else current_ans_list[0]
+            ans_a = re.sub('\(1\)', '', ans_a)
             ans_b = "-" if len(current_ans_list) <= 1 else current_ans_list[1]
+            ans_b = re.sub('\(2\)', '', ans_b)
             ans_c = "-" if len(current_ans_list) <= 2 else current_ans_list[2]
+            ans_c = re.sub('\(3\)', '', ans_c)
             ans_d = "-" if len(current_ans_list) <= 3 else current_ans_list[3]
+            ans_d = re.sub('\(4\)', '', ans_d)
 
             # STEP 3: Add question to dataframe
             if typeof == "text" and item != "":
@@ -697,8 +705,8 @@ class Process:
 
             ###### Step 2: Merge contours that are close together
             # Modify the x and y tolerance to change how far it must be before it will merge!
-            x_tolerance = m.floor(0.005 * width)  # previously 0.02138
-            y_tolerance = m.floor(0.005 * height)  # previously 0.024964
+            x_tolerance = m.floor(0.01 * width)  # previously 0.02138
+            y_tolerance = m.floor(0.01 * height)  # previously 0.024964
             thresh, cntrs = self.merge_contours(thresh, cntrs, x_tolerance, y_tolerance)
 
             for c in cntrs:
@@ -818,9 +826,9 @@ class Process:
             pass'''
 
     def main(self, pdfname, requestID):
-        # global total_pages
-        # global global_df
-        # global file_attribute_list
+        global total_pages
+        global global_df
+        global file_attribute_list
         print(pdfname)
         self.requestID = requestID
         self.global_df = pd.DataFrame(
@@ -884,8 +892,8 @@ class Process:
         with open('Sessions/' + self.requestID + ".json", 'w') as outfile:
             json.dump(entry, outfile)
 
-        # # Copies all the output to a new folder under Output/PDF NAME
-        # dirpath = os.getcwd()
+        # Copies all the output to a new folder under Output/PDF NAME
+        dirpath = os.getcwd()
         # self.copytree(dirpath + "/TempContours", dirpath + "/Output/" + paper_name + "/TempContours")
         # self.copytree(dirpath + "/TempImages", dirpath + "/Output/" + paper_name + "/TempImages")
         # self.copytree(dirpath + "/images/" + paper_name, dirpath + "/Output/" + paper_name + "/images")
@@ -894,6 +902,19 @@ class Process:
         # shutil.rmtree(dirpath + "/TempContours")
         # shutil.rmtree(dirpath + "/TempImages")
         # shutil.rmtree(dirpath + "/images/")
+        items = os.listdir(dirpath + "/TempImages")
+        for item in items:
+            if requestID in item:
+                os.remove(os.path.join(dirpath + "/TempImages", item))
+
+        items = os.listdir(dirpath + "/TempContours")
+        for item in items:
+            if requestID in item:
+                os.remove(os.path.join(dirpath + "/TempContours", item))
+        
+
+        if path.exists(dirpath + "/images/" + requestID + "_" + pdfname):
+            shutil.rmtree(dirpath + "/images/" + requestID + "_" + pdfname)
 
 
 '''for curFilename in os.listdir("ReactPDF"):
@@ -911,7 +932,7 @@ class Process:
 
 # process = Process()
 
-# filename = "nanyang-1to5"
+# filename = "P6_English_2019_CA1_CHIJ_2Pages"
 # process.main(filename, "2")
 
 
