@@ -22,7 +22,7 @@ import platform
 import math as m
 import ast
 import shutil
-
+import base64
 import json
 
 class Process:
@@ -229,15 +229,19 @@ class Process:
                         # Likely to be an image
                         new_image = img[y:y + h, x:x + w]
                         cv2.imwrite("TempImages/" + self.requestID + "_" + str(self.diagram_count) + ".jpg", new_image)
+                        # store in base64 as well into document_data_list
+                        with open("TempImages/" + self.requestID + "_" + str(self.diagram_count) + ".jpg", "rb") as image_file:
+                            encoded_string = str(base64.b64encode(image_file.read()))
                         document_data_list.append(
-                            ("TempImages/" + self.requestID + "_" + str(self.diagram_count) + ".jpg", "image", y, pseudo_text))
+                            ("TempImages/" + self.requestID + "_" + str(self.diagram_count) + ".jpg", "image", y,
+                             pseudo_text, encoded_string))
                         self.diagram_count = self.diagram_count + 1
                     else:
                         # Likely to be text, just small regions like "Go on to the next page"
-                        document_data_list.append((text, "text", y, pseudo_text))
+                        document_data_list.append((text, "text", y, pseudo_text, ""))
                 else:
                     # Likely to be a text
-                    document_data_list.append((text, "text", y, pseudo_text))
+                    document_data_list.append((text, "text", y, pseudo_text, ""))
         # for non english papers, no blank line detection required
         # else:
         #     for c in cntrs:
@@ -341,10 +345,11 @@ class Process:
 
         for i in range(len(document_data_list)):
             data = document_data_list[i]
-            item = data[0]
+            item = data[0]  # TempImages/5.jpg
             typeof = data[1]
             y_coord = data[2]
             pseudo_text = data[3]
+            base64img = data[4]
 
             # STEP 2: Find ans sections
             #regex = re.compile('[\[\(\|\{][0-9]?[0-9][\]\)\}\|]')
@@ -391,7 +396,7 @@ class Process:
                     final_text = final_text + item[:first_ans_pos]
 
             elif typeof == "image":
-                final_image = final_image + item
+                final_image = final_image + base64img + " "
 
         contains_image = "No"
         if final_image != "":
@@ -590,7 +595,9 @@ class Process:
             qn = qn_coord[qn_num]
             # For last qn
             if qn_num == len(qn_coord) - 1:
+                image_path = self.filenames_list[qn[0] - 1]
                 new_image_path = "TempImages/" + self.requestID + "_" + "qn_" + str(qn_num) + ".jpg"
+                self.crop_image(image_path, new_image_path, qn[1], 0, True, False)
             else:
                 next_qn = qn_coord[qn_num + 1]
                 if qn[0] == next_qn[0]:

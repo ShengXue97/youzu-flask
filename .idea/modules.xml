@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/youzu-flask.iml" filepath="$PROJECT_DIR$/.idea/youzu-flask.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../youzu-react/.idea/youzu-react.iml" filepath="$PROJECT_DIR$/../youzu-react/.idea/youzu-react.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../youzusummer2020/.idea/youzusummer2020.iml" filepath="$PROJECT_DIR$/../youzusummer2020/.idea/youzusummer2020.iml" />
+    </modules>
+  </component>
+</project>
