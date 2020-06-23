@@ -55,6 +55,7 @@ def get_message(currentIP, currentTime, requestIDProcessed):
         out_dict["timeStampExists"] = "no"
         out_dict["currentIP"] = currentIP
         out_dict["curentTimeStamp"] = currentTime
+        out_dict["filename"] = ""
         return json.dumps(out_dict)
     else:
         out_dict["ipExists"] = "yes"
@@ -65,6 +66,7 @@ def get_message(currentIP, currentTime, requestIDProcessed):
         out_dict["stage"] = entry['stage']
         out_dict["page"] = entry['page']
         out_dict["total"] = entry['total']
+        out_dict["filename"] = entry['filename']
         return json.dumps(out_dict)
     
 
@@ -80,7 +82,104 @@ def index():
             time.sleep(.1)  # an artificial delay
             yield 'data: {}\n\n'.format(get_message(currentIP, currentTime, requestIDProcessed))
         return flask.Response(events(), content_type='text/event-stream')
+@app.route('/findworkspace', methods = ['GET', 'POST'])
+def findworkspace():
+    name = request.args.get("name") + ".txt"
+    data = ""
+    fileData = ""
+    if os.path.exists('Workspaces/csv/' + name):
+        return jsonify({"Exists": "yes"})
+    else:
+        return jsonify({"Exists": "no"})
+        
+@app.route('/savecsv', methods = ['GET', 'POST'])
+def savecsv():
+    name = request.args.get("name")
+    if not os.path.exists("Workspaces/csv"):
+        os.makedirs("Workspaces/csv")
+    file1 = open("Workspaces/csv/" + name + ".txt","wb") 
+    file1.write(request.data) 
 
+    
+    currentIP = request.remote_addr
+    currentTime = str(datetime.now())
+
+    return jsonify({"Succeeded": "yes", "YourIP" : str(currentIP), "YourTime" : currentTime})
+
+@app.route('/savepdf', methods = ['GET', 'POST'])
+def savepdf():
+    name = request.args.get("name")
+    if not os.path.exists("Workspaces/pdf"):
+        os.makedirs("Workspaces/pdf")
+    file1 = open("Workspaces/pdf/" + name + ".txt","wb") 
+    file1.write(request.data) 
+    
+    currentIP = request.remote_addr
+    currentTime = str(datetime.now())
+
+    return jsonify({"Succeeded": "yes", "YourIP" : str(currentIP), "YourTime" : currentTime})
+
+@app.route('/openworkspace', methods = ['GET', 'POST'])
+def openworkspace():
+    name = request.args.get("name") + ".txt"
+    data = ""
+    fileData = ""
+    if os.path.exists('Workspaces/csv/' + name):
+        with open('Workspaces/csv/' + name, 'r', encoding="utf8") as file1:
+            data = file1.read()
+        if os.path.exists('Workspaces/pdf/' + name):
+            with open('Workspaces/pdf/' + name, 'r', encoding="utf8") as file2:
+                fileData = file2.read()
+            return jsonify({"Succeeded": "yes", "data" : data, "fileData" : fileData})
+        else:
+            return jsonify({"Succeeded": "yes", "data" : "", "fileData" : ""})
+    else:
+        return jsonify({"Succeeded": "yes", "data" : "", "fileData" : ""})
+
+@app.route('/deleteworkspace', methods = ['GET', 'POST'])
+def deleteworkspace():
+    name = request.args.get("name") + ".txt"
+    if os.path.exists('Workspaces/pdf/' + name):
+        os.remove('Workspaces/pdf/' + name)
+        if os.path.exists('Workspaces/csv/' + name):
+            os.remove('Workspaces/csv/' + name)
+            return jsonify({"Succeeded": "yes"})
+        else:
+            return jsonify({"Succeeded": "no"})
+    else:
+        return jsonify({"Succeeded": "no"})
+
+
+@app.route('/renameworkspace', methods = ['GET', 'POST'])
+def renameworkspace():
+    oldname = request.args.get("oldName") + ".txt"
+    newname = request.args.get("newName") + ".txt"
+    print(oldname + ";" + newname)
+    if os.path.exists('Workspaces/csv/' + oldname):
+        os.rename('Workspaces/csv/' + oldname, 'Workspaces/csv/' + newname)
+        if os.path.exists('Workspaces/pdf/' + oldname):
+            os.rename('Workspaces/pdf/' + oldname, 'Workspaces/pdf/' + newname)
+            return jsonify({"Succeeded": "yes"})
+        else:
+            return jsonify({"Succeeded": "no"})
+    else:
+        return jsonify({"Succeeded": "no"})
+
+@app.route('/listworkspace', methods = ['GET', 'POST'])
+def listworkspace():
+    workspaces = []
+    if os.path.exists("Workspaces/csv"):
+        items = os.listdir("Workspaces/csv")
+        for item in items:
+            name = item.replace(".txt", "")
+            lastModified = datetime.fromtimestamp(os.path.getmtime("Workspaces/csv/" + item))
+            newFile = {
+                'name' : name,
+                'lastModified' : lastModified,
+            }
+            workspaces.append(newFile)
+
+    return jsonify({"Succeeded": "yes", "Workspaces" : workspaces})
 
 @app.route('/uploadfile', methods = ['GET', 'POST'])
 def uploadfile():
@@ -100,14 +199,14 @@ def uploadfile():
         requestIDProcessed = currentTime.replace(":", "-").replace(".", "_")
 
         if not requestIDProcessed in session:
-            entry = {'stage': 0, 'page' : 0, 'total' : 0, 'output' : []}
+            entry = {'stage': 0, 'page' : 0, 'total' : 0, 'output' : [], 'filename' : ""}
             session[requestIDProcessed] = entry
 
         print("Forking....")
         process = Process()
         thread = threading.Thread(target=process.main, args=(filename, requestIDProcessed))
         thread.start()
-        return jsonify({"Succeeded": "yes", "YourIP" : str(currentIP), "YourTime" : currentTime})
+        return jsonify({"Succeeded": "yes", "YourIP" : str(currentIP), "YourTime" : currentTime, 'filename': filename})
 
 
 @app.route('/getresult', methods = ['GET', 'POST'])

@@ -433,7 +433,7 @@ class Process:
 
     def generate_document(self, filename, qn_coord):
         print("STAGE 2 (Output Generation): PG " + str(self.qn_num) + "/" + str(self.total_qns))
-        entry = {'stage': 2, 'page' : self.qn_num, 'total' : self.total_qns, 'output' : []}
+        entry = {'stage': 2, 'page' : self.qn_num, 'total' : self.total_qns, 'output' : [], 'filename' : self.filename}
         with open('Sessions/' + self.requestID + ".json", 'w') as outfile:
             json.dump(entry, outfile)
 
@@ -649,7 +649,7 @@ class Process:
 
         for filename in filenames_list:
             print("STAGE 1 (Digitisation): PG " + str(self.pg_number - 1) + "/" + str(self.total_pages))
-            entry = {'stage': 1, 'page' : str(self.pg_number - 1), 'total' : self.total_pages, 'output' : []}
+            entry = {'stage': 1, 'page' : str(self.pg_number - 1), 'total' : self.total_pages, 'output' : [], 'filename' : self.filename}
             with open('Sessions/' + self.requestID + ".json", 'w') as outfile:
                 json.dump(entry, outfile)
             
@@ -837,6 +837,7 @@ class Process:
         global global_df
         global file_attribute_list
         print(pdfname)
+        
         self.requestID = requestID
         self.global_df = pd.DataFrame(
             columns=['Level', 'Page', 'Question', 'Comment', 'A', 'B', 'C', 'D', 'Subject', 'Year', 'School',
@@ -851,6 +852,7 @@ class Process:
             os.makedirs("TempContours")
 
         paper_name = pdfname.replace(".pdf", "")
+        self.filename = paper_name
         pdf_path = "ReactPDF/" + paper_name + ".pdf"
         pages = convert_from_path(pdf_path)
         pg_cntr = 1
@@ -895,7 +897,7 @@ class Process:
         else:
             print("Accuracy of Images : " + str(img_acc) + "%" + "\n")'''
         self.global_df.to_csv(self.requestID + "_output.csv")
-        entry = {'stage': 3, 'page' : 0, 'total' : 0, 'output' : []}
+        entry = {'stage': 3, 'page' : 0, 'total' : 0, 'output' : [], 'filename' : self.filename}
         with open('Sessions/' + self.requestID + ".json", 'w') as outfile:
             json.dump(entry, outfile)
 
