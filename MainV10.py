@@ -47,7 +47,7 @@ class Process:
         self.filenames_list = []
         self.qn_images_list = []
         self.global_df = pd.DataFrame(
-            columns=['Level', 'Page', 'Question', 'Comment', 'A', 'B', 'C', 'D', 'Subject', 'Year', 'School', 'Exam',
+            columns=['Level', 'Page', 'Question', 'Comment', 'A', 'B', 'C', 'D', 'Answer', 'Subject', 'Year', 'School', 'Exam',
                      'Number', 'Image',
                      'Image File'])
 
@@ -345,6 +345,7 @@ class Process:
         ans_b = "-"
         ans_c = "-"
         ans_d = "-"
+        answer = "-"
 
         for i in range(len(document_data_list)):
             data = document_data_list[i]
@@ -393,6 +394,7 @@ class Process:
             ans_c = re.sub('[\[\(\|\{].{1,3}[\]\)\}\|]', '', ans_c,1)
             ans_d = "-" if len(current_ans_list) <= 3 else current_ans_list[3]
             ans_d = re.sub('[\[\(\|\{].{1,3}[\]\)\}\|]', '', ans_d,1)
+            answer = "-"
 
             # STEP 3: Add question to dataframe
             if typeof == "text" and item != "":
@@ -417,7 +419,7 @@ class Process:
             final_image = "-"
 
         self.global_df.loc[self.qn_num] = [paper_level, qn_coord[self.qn_num][0], final_text, "-", ans_a, ans_b, ans_c, ans_d,
-                                           paper_subject,
+                                           answer, paper_subject,
                                            paper_year, paper_school, paper_exam_type, self.qn_num, contains_image,
                                            final_image]
 
@@ -843,7 +845,7 @@ class Process:
         
         self.requestID = requestID
         self.global_df = pd.DataFrame(
-            columns=['Level', 'Page', 'Question', 'Comment', 'A', 'B', 'C', 'D', 'Subject', 'Year', 'School',
+            columns=['Level', 'Page', 'Question', 'Comment', 'A', 'B', 'C', 'D', 'Answer', 'Subject', 'Year', 'School',
                      'Exam',
                      'Number',
                      'Image', 'Image File'])
