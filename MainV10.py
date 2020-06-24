@@ -47,7 +47,7 @@ class Process:
         self.filenames_list = []
         self.qn_images_list = []
         self.global_df = pd.DataFrame(
-            columns=['Level', 'Page', 'Question', 'Comment', 'A', 'B', 'C', 'D', 'Answer', 'Subject', 'Year', 'School', 'Exam',
+            columns=['Level', 'Page', 'Question', 'question_type', 'A', 'B', 'C', 'D', 'Subject', 'Year', 'School', 'Exam',
                      'Number', 'Image',
                      'Image File'])
 
@@ -426,15 +426,15 @@ class Process:
         ## insert question type under comments column
         for index, row in self.global_df.iterrows():
             if len(self.pg_cnt_ls) == 0:
-                self.global_df.at[index, 'Comment'] = 'MCQ'
+                self.global_df.at[index, 'question_type'] = 'MCQ'
             else:
                 if row['Page'] < min(self.pg_cnt_ls):
-                    self.global_df.at[index, 'Comment'] = 'MCQ'
+                    self.global_df.at[index, 'question_type'] = 'MCQ'
                 elif row['Page'] > max(self.pg_cnt_ls):
-                    self.global_df.at[index, 'Comment'] = 'Structured Qn'
+                    self.global_df.at[index, 'question_type'] = 'Structured Qn'
                 for x in self.pg_cnt_ls:
                     if row['Page'] == x:
-                        self.global_df.at[index, 'Comment'] = 'Unsupported Question Type'
+                        self.global_df.at[index, 'question_type'] = 'Unsupported Question Type'
 
     def generate_document(self, filename, qn_coord):
         print("STAGE 2 (Output Generation): PG " + str(self.qn_num) + "/" + str(self.total_qns))
@@ -845,7 +845,7 @@ class Process:
         
         self.requestID = requestID
         self.global_df = pd.DataFrame(
-            columns=['Level', 'Page', 'Question', 'Comment', 'A', 'B', 'C', 'D', 'Answer', 'Subject', 'Year', 'School',
+            columns=['Level', 'Page', 'Question', 'question_type', 'A', 'B', 'C', 'D', 'Subject', 'Year', 'School',
                      'Exam',
                      'Number',
                      'Image', 'Image File'])
