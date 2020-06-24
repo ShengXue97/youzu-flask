@@ -899,7 +899,10 @@ class Process:
         else:
             print("Accuracy of Images : " + str(img_acc) + "%" + "\n")'''
         self.global_df.to_csv(self.requestID + "_output.csv")
-        entry = {'stage': 3, 'page' : 0, 'total' : 0, 'output' : [], 'filename' : self.filename}
+        entry = {'stage': 3, 'page': 0, 'total': 0, 'output': [], 'filename': self.filename,
+                 'level': self.file_attribute_list[0], 'subject': self.file_attribute_list[1],
+                 'year': self.file_attribute_list[2], 'school': self.file_attribute_list[3],
+                 'exam': self.file_attribute_list[4]}
         with open('Sessions/' + self.requestID + ".json", 'w') as outfile:
             json.dump(entry, outfile)
 

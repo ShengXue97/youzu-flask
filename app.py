@@ -54,19 +54,29 @@ def get_message(currentIP, currentTime, requestIDProcessed):
         out_dict["ipExists"] = "no"
         out_dict["timeStampExists"] = "no"
         out_dict["currentIP"] = currentIP
-        out_dict["curentTimeStamp"] = currentTime
+        out_dict["currentTimeStamp"] = currentTime
         out_dict["filename"] = ""
+        out_dict["level"] = ""
+        out_dict["subject"] = ""
+        out_dict["year"] = ""
+        out_dict["school"] = ""
+        out_dict["exam"] = ""
         return json.dumps(out_dict)
     else:
         out_dict["ipExists"] = "yes"
         out_dict["timeStampExists"] = "yes"
         out_dict["currentIP"] = currentIP
-        out_dict["curentTimeStamp"] = currentTime
+        out_dict["currentTimeStamp"] = currentTime
 
         out_dict["stage"] = entry['stage']
         out_dict["page"] = entry['page']
         out_dict["total"] = entry['total']
         out_dict["filename"] = entry['filename']
+        out_dict["level"] = entry['level']
+        out_dict["subject"] = entry['subject']
+        out_dict["year"] = entry['year']
+        out_dict["school"] = entry['school']
+        out_dict["exam"] = entry['exam']
         return json.dumps(out_dict)
     
 
@@ -257,7 +267,7 @@ def getresult():
                     ans_d = rows["D"] if rows["D"] != "" else "-"
                     qnNum = rows["Number"]
                     base64imgs = rows["Image File"]
-                    # print("base64: " + base64imgs.split(" ")[0])
+                    # print("base64: " + base64imgs)
                     qn_list = [pageNum, page, ans_a, ans_b, ans_c, ans_d, qnNum, base64imgs]
                     # append question list to page list
                     thisPageList.append(qn_list)
