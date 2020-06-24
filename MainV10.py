@@ -436,7 +436,11 @@ class Process:
 
     def generate_document(self, filename, qn_coord):
         print("STAGE 2 (Output Generation): PG " + str(self.qn_num) + "/" + str(self.total_qns))
-        entry = {'stage': 2, 'page' : self.qn_num, 'total' : self.total_qns, 'output' : [], 'filename' : self.filename}
+        entry = {'stage': 2, 'page' : self.qn_num, 'total' : self.total_qns, 'output' : [],
+                 'filename' : self.filename, 'level': self.file_attribute_list[0], 'subject': self.file_attribute_list[1],
+                 'year': self.file_attribute_list[2], 'school': self.file_attribute_list[3],
+                 'exam': self.file_attribute_list[4]}
+                 
         with open('Sessions/' + self.requestID + ".json", 'w') as outfile:
             json.dump(entry, outfile)
 
@@ -652,7 +656,11 @@ class Process:
 
         for filename in filenames_list:
             print("STAGE 1 (Digitisation): PG " + str(self.pg_number - 1) + "/" + str(self.total_pages))
-            entry = {'stage': 1, 'page' : str(self.pg_number - 1), 'total' : self.total_pages, 'output' : [], 'filename' : self.filename}
+            entry = {'stage': 1, 'page' : str(self.pg_number - 1), 'total' : self.total_pages, 'output' : [],
+                     'filename' : self.filename, 'level': self.file_attribute_list[0], 'subject': self.file_attribute_list[1],
+                    'year': self.file_attribute_list[2], 'school': self.file_attribute_list[3],
+                    'exam': self.file_attribute_list[4]}
+
             with open('Sessions/' + self.requestID + ".json", 'w') as outfile:
                 json.dump(entry, outfile)
             
@@ -856,7 +864,13 @@ class Process:
 
         paper_name = pdfname.replace(".pdf", "")
         self.filename = paper_name
-        pdf_path = "ReactPDF/" + paper_name + ".pdf"
+
+        pdf_path = ""
+        if os.path.exists("ReactPDF/" + paper_name + ".pdf"):
+            pdf_path = "ReactPDF/" + paper_name + ".pdf"
+        else:
+            pdf_path = "pdfs/" + paper_name + ".pdf"
+
         pages = convert_from_path(pdf_path)
         pg_cntr = 1
         self.filenames_list = []

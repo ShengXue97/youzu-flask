@@ -10,6 +10,7 @@ import flask
 import itertools
 from datetime import datetime
 import os.path
+import base64
 
 # install the following 2 libs first
 # from flask_sqlalchemy import SQLAlchemy
@@ -92,6 +93,23 @@ def index():
             time.sleep(.1)  # an artificial delay
             yield 'data: {}\n\n'.format(get_message(currentIP, currentTime, requestIDProcessed))
         return flask.Response(events(), content_type='text/event-stream')
+
+@app.route('/listpdf', methods = ['GET', 'POST'])
+def listpdf():
+    pdfs = []
+    if os.path.exists("pdfs"):
+        items = os.listdir("pdfs")
+        for item in items:
+            name = item.replace(".pdf", "")
+            lastModified = datetime.fromtimestamp(os.path.getmtime("pdfs/" + item))
+            newFile = {
+                'name' : name,
+                'lastModified' : lastModified,
+            }
+            pdfs.append(newFile)
+
+    return jsonify({"Succeeded": "yes", "Pdfs" : pdfs})
+
 @app.route('/findworkspace', methods = ['GET', 'POST'])
 def findworkspace():
     name = request.args.get("name") + ".txt"
@@ -128,6 +146,17 @@ def savepdf():
     currentTime = str(datetime.now())
 
     return jsonify({"Succeeded": "yes", "YourIP" : str(currentIP), "YourTime" : currentTime})
+
+@app.route('/openpdf', methods = ['GET', 'POST'])
+def openpdf():
+    name = request.args.get("name") + ".pdf"
+    if os.path.exists('pdfs/' + name):
+        encoded_string = ""
+        with open('pdfs/' + name, "rb") as pdf_file:
+            encoded_string = "data:application/pdf;base64," + base64.b64encode(pdf_file.read()).decode("utf-8") 
+        return jsonify({"Succeeded": "yes", "fileData" : encoded_string})
+    else:
+        return jsonify({"Succeeded": "no", "fileData" : ""})
 
 @app.route('/openworkspace', methods = ['GET', 'POST'])
 def openworkspace():
@@ -190,6 +219,31 @@ def listworkspace():
             workspaces.append(newFile)
 
     return jsonify({"Succeeded": "yes", "Workspaces" : workspaces})
+
+@app.route('/pushfile', methods = ['GET', 'POST'])
+def pushfile():
+    print("called1")
+    filename = request.args.get("name") + ".pdf"
+    if os.path.exists('pdfs/' + filename):
+        response = None
+        if request.method == 'POST':
+            currentIP = request.remote_addr
+            print(currentIP)
+            currentTime = str(datetime.now())
+
+            # Unique entry for each request using timestamp!
+            requestIDRaw = currentIP + "_" + currentTime
+            requestIDProcessed = currentTime.replace(":", "-").replace(".", "_")
+
+            if not requestIDProcessed in session:
+                entry = {'stage': 0, 'page' : 0, 'total' : 0, 'output' : [], 'filename' : ""}
+                session[requestIDProcessed] = entry
+
+            print("Forking....")
+            process = Process()
+            thread = threading.Thread(target=process.main, args=(filename, requestIDProcessed))
+            thread.start()
+            return jsonify({"Succeeded": "yes", "YourIP" : str(currentIP), "YourTime" : currentTime, 'filename': filename})
 
 @app.route('/uploadfile', methods = ['GET', 'POST'])
 def uploadfile():
