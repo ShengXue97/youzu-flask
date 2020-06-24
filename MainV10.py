@@ -47,7 +47,7 @@ class Process:
         self.filenames_list = []
         self.qn_images_list = []
         self.global_df = pd.DataFrame(
-            columns=['Level', 'Page', 'Question', 'Comment', 'A', 'B', 'C', 'D', 'Subject', 'Year', 'School', 'Exam',
+            columns=['Level', 'Page', 'Question', 'question_type', 'A', 'B', 'C', 'D', 'Subject', 'Year', 'School', 'Exam',
                      'Number', 'Image',
                      'Image File'])
 
@@ -345,6 +345,7 @@ class Process:
         ans_b = "-"
         ans_c = "-"
         ans_d = "-"
+        answer = "-"
 
         for i in range(len(document_data_list)):
             data = document_data_list[i]
@@ -384,25 +385,27 @@ class Process:
                         current_ans_list.append(substr)
                 else:
                     break
+           
             ans_a = "-" if len(current_ans_list) <= 0 else current_ans_list[0]
-            ans_a = re.sub('[\[\(\|\{]1[\]\)\}\|]', '', ans_a)
+            ans_a = re.sub('[\[\(\|\{].{1,3}[\]\)\}\|]', '', ans_a,1)
             ans_b = "-" if len(current_ans_list) <= 1 else current_ans_list[1]
-            ans_b = re.sub('[\[\(\|\{]2[\]\)\}\|]', '', ans_b)
+            ans_b = re.sub('[\[\(\|\{].{1,3}[\]\)\}\|]', '', ans_b,1)
             ans_c = "-" if len(current_ans_list) <= 2 else current_ans_list[2]
-            ans_c = re.sub('[\[\(\|\{]3[\]\)\}\|]', '', ans_c)
+            ans_c = re.sub('[\[\(\|\{].{1,3}[\]\)\}\|]', '', ans_c,1)
             ans_d = "-" if len(current_ans_list) <= 3 else current_ans_list[3]
-            ans_d = re.sub('[\[\(\|\{]4[\]\)\}\|]', '', ans_d)
+            ans_d = re.sub('[\[\(\|\{].{1,3}[\]\)\}\|]', '', ans_d,1)
+            answer = "-"
 
             # STEP 3: Add question to dataframe
             if typeof == "text" and item != "":
                 if first_ans_pos == -1:
                     # Ans options not found yet
                     final_text = final_text + item
-                    final_text = re.sub(r'[0-9][0-9]|[0-9]', '',final_text,1)
+                    final_text = re.sub(r'[0-9][0-9]\.|[0-9]\.|[0-9][0-9]|[0-9]', '',final_text,1)
                 else:
                     # Ans options found
                     final_text = final_text + item[:first_ans_pos]
-                    final_text = re.sub(r'[0-9][0-9]|[0-9]', '',final_text,1)
+                    final_text = re.sub(r'[0-9][0-9]\.|[0-9]\.|[0-9][0-9]|[0-9]', '',final_text,1)
 
             elif typeof == "image":
                 final_image = final_image + base64img + " "
@@ -416,26 +419,30 @@ class Process:
             final_image = "-"
 
         self.global_df.loc[self.qn_num] = [paper_level, qn_coord[self.qn_num][0], final_text, "-", ans_a, ans_b, ans_c, ans_d,
-                                           paper_subject,
+                                           answer, paper_subject,
                                            paper_year, paper_school, paper_exam_type, self.qn_num, contains_image,
                                            final_image]
 
         ## insert question type under comments column
         for index, row in self.global_df.iterrows():
             if len(self.pg_cnt_ls) == 0:
-                self.global_df.at[index, 'Comment'] = 'MCQ'
+                self.global_df.at[index, 'question_type'] = 'MCQ'
             else:
                 if row['Page'] < min(self.pg_cnt_ls):
-                    self.global_df.at[index, 'Comment'] = 'MCQ'
+                    self.global_df.at[index, 'question_type'] = 'MCQ'
                 elif row['Page'] > max(self.pg_cnt_ls):
-                    self.global_df.at[index, 'Comment'] = 'Structured Qn'
+                    self.global_df.at[index, 'question_type'] = 'Structured Qn'
                 for x in self.pg_cnt_ls:
                     if row['Page'] == x:
-                        self.global_df.at[index, 'Comment'] = 'Unsupported Question Type'
+                        self.global_df.at[index, 'question_type'] = 'Unsupported Question Type'
 
     def generate_document(self, filename, qn_coord):
         print("STAGE 2 (Output Generation): PG " + str(self.qn_num) + "/" + str(self.total_qns))
-        entry = {'stage': 2, 'page' : self.qn_num, 'total' : self.total_qns, 'output' : [], 'filename' : self.filename}
+        entry = {'stage': 2, 'page' : self.qn_num, 'total' : self.total_qns, 'output' : [],
+                 'filename' : self.filename, 'level': self.file_attribute_list[0], 'subject': self.file_attribute_list[1],
+                 'year': self.file_attribute_list[2], 'school': self.file_attribute_list[3],
+                 'exam': self.file_attribute_list[4]}
+                 
         with open('Sessions/' + self.requestID + ".json", 'w') as outfile:
             json.dump(entry, outfile)
 
@@ -651,7 +658,11 @@ class Process:
 
         for filename in filenames_list:
             print("STAGE 1 (Digitisation): PG " + str(self.pg_number - 1) + "/" + str(self.total_pages))
-            entry = {'stage': 1, 'page' : str(self.pg_number - 1), 'total' : self.total_pages, 'output' : [], 'filename' : self.filename}
+            entry = {'stage': 1, 'page' : str(self.pg_number - 1), 'total' : self.total_pages, 'output' : [],
+                     'filename' : self.filename, 'level': self.file_attribute_list[0], 'subject': self.file_attribute_list[1],
+                    'year': self.file_attribute_list[2], 'school': self.file_attribute_list[3],
+                    'exam': self.file_attribute_list[4]}
+
             with open('Sessions/' + self.requestID + ".json", 'w') as outfile:
                 json.dump(entry, outfile)
             
@@ -842,7 +853,7 @@ class Process:
         
         self.requestID = requestID
         self.global_df = pd.DataFrame(
-            columns=['Level', 'Page', 'Question', 'Comment', 'A', 'B', 'C', 'D', 'Subject', 'Year', 'School',
+            columns=['Level', 'Page', 'Question', 'question_type', 'A', 'B', 'C', 'D', 'Subject', 'Year', 'School',
                      'Exam',
                      'Number',
                      'Image', 'Image File'])
@@ -855,7 +866,13 @@ class Process:
 
         paper_name = pdfname.replace(".pdf", "")
         self.filename = paper_name
-        pdf_path = "ReactPDF/" + paper_name + ".pdf"
+
+        pdf_path = ""
+        if os.path.exists("ReactPDF/" + paper_name + ".pdf"):
+            pdf_path = "ReactPDF/" + paper_name + ".pdf"
+        else:
+            pdf_path = "pdfs/" + paper_name + ".pdf"
+
         pages = convert_from_path(pdf_path)
         pg_cntr = 1
         self.filenames_list = []
@@ -899,7 +916,10 @@ class Process:
         else:
             print("Accuracy of Images : " + str(img_acc) + "%" + "\n")'''
         self.global_df.to_csv(self.requestID + "_output.csv")
-        entry = {'stage': 3, 'page' : 0, 'total' : 0, 'output' : [], 'filename' : self.filename}
+        entry = {'stage': 3, 'page': 0, 'total': 0, 'output': [], 'filename': self.filename,
+                 'level': self.file_attribute_list[0], 'subject': self.file_attribute_list[1],
+                 'year': self.file_attribute_list[2], 'school': self.file_attribute_list[3],
+                 'exam': self.file_attribute_list[4]}
         with open('Sessions/' + self.requestID + ".json", 'w') as outfile:
             json.dump(entry, outfile)
 
