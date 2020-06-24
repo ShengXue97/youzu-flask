@@ -47,9 +47,9 @@ class Process:
         self.filenames_list = []
         self.qn_images_list = []
         self.global_df = pd.DataFrame(
-            columns=['Level', 'Page', 'Question', 'question_type', 'A', 'B', 'C', 'D', 'Subject', 'Year', 'School', 'Exam',
+            columns=['Level', 'Page', 'Question', 'question_type', 'A', 'B', 'C', 'D', 'Answer', 'Subject', 'Year', 'School', 'Exam',
                      'Number', 'Image',
-                     'Image File'])
+                     'Image File', 'Answer'])
 
     def get_image(self, image_path):
         """Get a numpy array of an image so that one can access values[x][y]."""
@@ -853,7 +853,7 @@ class Process:
         
         self.requestID = requestID
         self.global_df = pd.DataFrame(
-            columns=['Level', 'Page', 'Question', 'question_type', 'A', 'B', 'C', 'D', 'Subject', 'Year', 'School',
+            columns=['Level', 'Page', 'Question', 'question_type', 'A', 'B', 'C', 'D', 'Answer', 'Subject', 'Year', 'School',
                      'Exam',
                      'Number',
                      'Image', 'Image File'])
