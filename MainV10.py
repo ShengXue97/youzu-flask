@@ -47,7 +47,7 @@ class Process:
         self.filenames_list = []
         self.qn_images_list = []
         self.global_df = pd.DataFrame(
-            columns=['Level', 'Page', 'Question', 'Comment', 'A', 'B', 'C', 'D', 'Subject', 'Year', 'School', 'Exam',
+            columns=['Level', 'Page', 'Question', 'question_type', 'A', 'B', 'C', 'D', 'Subject', 'Year', 'School', 'Exam',
                      'Number', 'Image',
                      'Image File'])
 
@@ -345,6 +345,7 @@ class Process:
         ans_b = "-"
         ans_c = "-"
         ans_d = "-"
+        answer = "-"
 
         for i in range(len(document_data_list)):
             data = document_data_list[i]
@@ -393,6 +394,7 @@ class Process:
             ans_c = re.sub('[\[\(\|\{].{1,3}[\]\)\}\|]', '', ans_c,1)
             ans_d = "-" if len(current_ans_list) <= 3 else current_ans_list[3]
             ans_d = re.sub('[\[\(\|\{].{1,3}[\]\)\}\|]', '', ans_d,1)
+            answer = "-"
 
             # STEP 3: Add question to dataframe
             if typeof == "text" and item != "":
@@ -417,22 +419,22 @@ class Process:
             final_image = "-"
 
         self.global_df.loc[self.qn_num] = [paper_level, qn_coord[self.qn_num][0], final_text, "-", ans_a, ans_b, ans_c, ans_d,
-                                           paper_subject,
+                                           answer, paper_subject,
                                            paper_year, paper_school, paper_exam_type, self.qn_num, contains_image,
                                            final_image]
 
         ## insert question type under comments column
         for index, row in self.global_df.iterrows():
             if len(self.pg_cnt_ls) == 0:
-                self.global_df.at[index, 'Comment'] = 'MCQ'
+                self.global_df.at[index, 'question_type'] = 'MCQ'
             else:
                 if row['Page'] < min(self.pg_cnt_ls):
-                    self.global_df.at[index, 'Comment'] = 'MCQ'
+                    self.global_df.at[index, 'question_type'] = 'MCQ'
                 elif row['Page'] > max(self.pg_cnt_ls):
-                    self.global_df.at[index, 'Comment'] = 'Structured Qn'
+                    self.global_df.at[index, 'question_type'] = 'Structured Qn'
                 for x in self.pg_cnt_ls:
                     if row['Page'] == x:
-                        self.global_df.at[index, 'Comment'] = 'Unsupported Question Type'
+                        self.global_df.at[index, 'question_type'] = 'Unsupported Question Type'
 
     def generate_document(self, filename, qn_coord):
         print("STAGE 2 (Output Generation): PG " + str(self.qn_num) + "/" + str(self.total_qns))
@@ -851,7 +853,7 @@ class Process:
         
         self.requestID = requestID
         self.global_df = pd.DataFrame(
-            columns=['Level', 'Page', 'Question', 'Comment', 'A', 'B', 'C', 'D', 'Subject', 'Year', 'School',
+            columns=['Level', 'Page', 'Question', 'question_type', 'A', 'B', 'C', 'D', 'Subject', 'Year', 'School',
                      'Exam',
                      'Number',
                      'Image', 'Image File'])

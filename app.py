@@ -301,8 +301,10 @@ def getresult():
                 ans_d = rows["D"] if rows["D"] != "" else "-"
                 qnNum = rows["Number"]
                 base64imgs = rows["Image File"]
+                answer = rows["Answer"]
+                question_type = rows["question_type"]
                 # print("base64: " + base64imgs)
-                qn_list = [pageNum, page, ans_a, ans_b, ans_c, ans_d, qnNum, base64imgs]
+                qn_list = [pageNum, page, ans_a, ans_b, ans_c, ans_d, qnNum, base64imgs, answer, question_type]
                 # append question list to page list
                 thisPageList.append(qn_list)
             # once page changes, append previous page list to the final list
@@ -321,8 +323,10 @@ def getresult():
                     ans_d = rows["D"] if rows["D"] != "" else "-"
                     qnNum = rows["Number"]
                     base64imgs = rows["Image File"]
+                    answer = rows["Answer"]
+                    question_type = rows["question_type"]
                     # print("base64: " + base64imgs)
-                    qn_list = [pageNum, page, ans_a, ans_b, ans_c, ans_d, qnNum, base64imgs]
+                    qn_list = [pageNum, page, ans_a, ans_b, ans_c, ans_d, qnNum, base64imgs, answer, question_type]
                     # append question list to page list
                     thisPageList.append(qn_list)
 
