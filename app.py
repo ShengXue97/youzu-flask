@@ -394,14 +394,14 @@ def updatedatabase():
 
     mydb = mysql.connector.connect(
     host="localhost",
-    user="snow",
-    password="Aa04369484911",
-    database="mydatabase"
+    user="root",
+    password="Youzu2020!",
+    database="youzu"
     )
     mycursor = mydb.cursor()
 
     try:
-        mycursor.execute("CREATE TABLE bank (pg_num VARCHAR(255), title VARCHAR(255)\
+        mycursor.execute("CREATE TABLE qbank (pg_num VARCHAR(255), title VARCHAR(255)\
                     , option1 VARCHAR(255), option2 VARCHAR(255), option3 VARCHAR(255)\
                     , option4 VARCHAR(255), qn_num VARCHAR(255), images VARCHAR(255)\
                     , answer VARCHAR(255), question_type VARCHAR(255), hasImage VARCHAR(255))")
@@ -428,7 +428,7 @@ def updatedatabase():
             val.append(new_val)
             i = i + 1
 
-    sql = "INSERT INTO bank (pg_num, title, option1, option2, option3,\
+    sql = "INSERT INTO qbank (pg_num, title, option1, option2, option3,\
                                         option4, qn_num, images, answer, question_type, hasImage) \
                                         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
     mycursor.executemany(sql, val)
