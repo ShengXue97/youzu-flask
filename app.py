@@ -282,11 +282,9 @@ def getresult():
     requestIDProcessed = currentTime.replace(":", "-").replace(".", "_")
     
     df = pd.read_csv(requestIDProcessed + "_output.csv")
-    droppeddf = df.dropna()
-    if not droppeddf.empty:
-        print("Dropped DF!")
-        print(droppeddf)
-        
+    df = df.fillna("-")
+
+
     # Create required qn or pg lists
     thisPageList = []
     row_json = []  # [[[]]]
