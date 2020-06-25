@@ -401,10 +401,10 @@ def updatedatabase():
     mycursor = mydb.cursor()
 
     try:
-        mycursor.execute("CREATE TABLE qbank (pg_num VARCHAR(255), title VARCHAR(255)\
-                    , option1 VARCHAR(255), option2 VARCHAR(255), option3 VARCHAR(255)\
-                    , option4 VARCHAR(255), qn_num VARCHAR(255), images VARCHAR(255)\
-                    , answer VARCHAR(255), question_type VARCHAR(255), hasImage VARCHAR(255))")
+        mycursor.execute("CREATE TABLE qbank (pg_num VARCHAR(8000), title VARCHAR(8000)\
+                    , option1 VARCHAR(8000), option2 VARCHAR(8000), option3 VARCHAR(8000)\
+                    , option4 VARCHAR(8000), qn_num VARCHAR(8000), images VARCHAR(8000)\
+                    , answer VARCHAR(8000), question_type VARCHAR(8000), hasImage VARCHAR(8000))")
     except:
         pass
     
