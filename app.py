@@ -320,7 +320,7 @@ def getresult():
             pageNum = rows["Page"]
             if pageNum == currentPageNum:
                 check = True
-                page = rows["Question"] if rows["Question"] != "" else "-"
+                page = rows["Question"].replace('"', "'" ) if rows["Question"] != "" else "-"
                 ans_a = rows["A"] if rows["A"] != "" else "-"
                 ans_b = rows["B"] if rows["B"] != "" else "-"
                 ans_c = rows["C"] if rows["C"] != "" else "-"
@@ -342,7 +342,7 @@ def getresult():
                 # append that particular first qn on the new page to the now empty PageList
                 if pageNum == currentPageNum:
                     check = True
-                    page = rows["Question"] if rows["Question"] != "" else "-"
+                    page = rows["Question"] if rows["Question"].replace('"', "'") != "" else "-"
                     ans_a = rows["A"] if rows["A"] != "" else "-"
                     ans_b = rows["B"] if rows["B"] != "" else "-"
                     ans_c = rows["C"] if rows["C"] != "" else "-"
