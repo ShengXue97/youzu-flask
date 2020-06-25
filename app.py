@@ -13,7 +13,9 @@ import os.path
 import base64
 import string
 import random
-
+from sqlalchemy import create_engine
+import pymysql
+import ast
 # install the following 2 libs first
 # from flask_sqlalchemy import SQLAlchemy
 # from flask_marshmallow import Marshmallow
@@ -320,7 +322,7 @@ def getresult():
             pageNum = rows["Page"]
             if pageNum == currentPageNum:
                 check = True
-                page = rows["Question"] if rows["Question"] != "" else "-"
+                page = rows["Question"].replace('"', "'" ) if rows["Question"] != "" else "-"
                 ans_a = rows["A"] if rows["A"] != "" else "-"
                 ans_b = rows["B"] if rows["B"] != "" else "-"
                 ans_c = rows["C"] if rows["C"] != "" else "-"
@@ -329,8 +331,9 @@ def getresult():
                 base64imgs = rows["Image File"]
                 answer = rows["Answer"]
                 question_type = rows["question_type"]
+                image = rows["Image"]
                 # print("base64: " + base64imgs)
-                qn_list = [pageNum, page, ans_a, ans_b, ans_c, ans_d, qnNum, base64imgs, answer, question_type]
+                qn_list = [pageNum, page, ans_a, ans_b, ans_c, ans_d, qnNum, base64imgs, answer, question_type, image]
                 # append question list to page list
                 thisPageList.append(qn_list)
             # once page changes, append previous page list to the final list
@@ -342,7 +345,7 @@ def getresult():
                 # append that particular first qn on the new page to the now empty PageList
                 if pageNum == currentPageNum:
                     check = True
-                    page = rows["Question"] if rows["Question"] != "" else "-"
+                    page = rows["Question"] if rows["Question"].replace('"', "'") != "" else "-"
                     ans_a = rows["A"] if rows["A"] != "" else "-"
                     ans_b = rows["B"] if rows["B"] != "" else "-"
                     ans_c = rows["C"] if rows["C"] != "" else "-"
@@ -351,8 +354,9 @@ def getresult():
                     base64imgs = rows["Image File"]
                     answer = rows["Answer"]
                     question_type = rows["question_type"]
+                    image = rows["Image"]
                     # print("base64: " + base64imgs)
-                    qn_list = [pageNum, page, ans_a, ans_b, ans_c, ans_d, qnNum, base64imgs, answer, question_type]
+                    qn_list = [pageNum, page, ans_a, ans_b, ans_c, ans_d, qnNum, base64imgs, answer, question_type, image]
                     # append question list to page list
                     thisPageList.append(qn_list)
 
@@ -369,6 +373,88 @@ def getresult():
     #     print("Page " + str(row_json.index(page) + 1) + ": " + str(len(page)) + " questions")
     os.remove(sessionID + "_output.csv")
     return jsonify(row_json)
+
+@app.route('/updatedatabase', methods = ['GET', 'POST'])
+def updatedatabase():
+    school = request.args.get("school")       
+    subject = request.args.get("subject")     
+    level = request.args.get("level")     
+    year = request.args.get("year")     
+    exam = request.args.get("exam")     
+
+    decoded_data = request.data.decode("utf-8")
+    list_data = ast.literal_eval(decoded_data)
+    df = pd.DataFrame(
+            columns=['Level', 'Page', 'Question', 'question_type', 'A', 'B', 'C', 'D',
+                     'Answer', 'Subject', 'Year', 'School', 'Exam',
+                     'Number', 'Image',
+                     'Image File', 'Answer'])
+
+    i = 0
+    for page in list_data:
+        for row in page:
+            pg_num = row[0]
+            title = row[1]
+            option1 = row[2]
+            option2 = row[3]
+            option3 = row[4]
+            option4 = row[5]
+            qn_num = row[6],
+            images = row[7]
+            answer = row[8]
+            question_type = row[9]
+            hasImage = "Yes"
+            if images == "-":
+                hasImage = "No"
+
+            newRow = [level, pg_num, title,question_type, option1, option2
+                        , option3, option4, answer, subject, year, school,
+                        exam, qn_num, hasImage, images, answer]
+            df.loc[i] = newRow
+            i = i + 1
+    
+    #clean df
+    df1=df.drop(df.columns[0], axis=1)
+    df1 = df1.fillna('-')
+
+    #create json object output_list
+    output_list=[]
+    colname = list(df1)
+    # print(colname)
+    for index, row in df1.iterrows():
+        row_dict = {}
+        choice_dict = {}
+        for col in colname:
+            if col == 'A' or col == 'B' or col == 'C' or col == 'D':
+                choice_dict[col] = row[col]
+            else:
+                row_dict[col] = row[col]
+        row_dict['Choices'] = choice_dict
+        output_list.append(row_dict)
+
+    con = pymysql.connect(host = 'localhost',user = 'root',passwd = 'Youzu2020!',db = 'youzu')
+    cursor = con.cursor()
+
+    create_table_query = """create table if not exists bank2(
+    id int auto_increment primary key,
+    question json
+    )"""
+    insert_query = """insert into bank2(question) values (%s)"""
+
+    try:
+        cursor.execute(create_table_query)
+        for x in output_list:
+            cursor.execute(insert_query, json.dumps(x))
+        con.commit()
+        print('successfully inserted values')
+
+    except Exception as e:
+        con.rollback()
+        print("exception occured:", e)
+
+    con.close()
+    return jsonify({"Succeeded": "yes"})
+
 
 def randomString(stringLength=8):
     letters = string.ascii_lowercase
