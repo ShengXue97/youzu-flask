@@ -16,6 +16,8 @@ import random
 from sqlalchemy import create_engine
 import pymysql
 import ast
+import mysql.connector
+
 # install the following 2 libs first
 # from flask_sqlalchemy import SQLAlchemy
 # from flask_marshmallow import Marshmallow
@@ -390,7 +392,24 @@ def updatedatabase():
                      'Number', 'Image',
                      'Image File', 'Answer'])
 
+    mydb = mysql.connector.connect(
+    host="localhost",
+    user="snow",
+    password="Aa04369484911",
+    database="mydatabase"
+    )
+    mycursor = mydb.cursor()
+
+    try:
+        mycursor.execute("CREATE TABLE bank (pg_num VARCHAR(255), title VARCHAR(255)\
+                    , option1 VARCHAR(255), option2 VARCHAR(255), option3 VARCHAR(255)\
+                    , option4 VARCHAR(255), qn_num VARCHAR(255), images VARCHAR(255)\
+                    , answer VARCHAR(255), question_type VARCHAR(255), hasImage VARCHAR(255))")
+    except:
+        pass
+    
     i = 0
+    val = []
     for page in list_data:
         for row in page:
             pg_num = row[0]
@@ -399,60 +418,22 @@ def updatedatabase():
             option2 = row[3]
             option3 = row[4]
             option4 = row[5]
-            qn_num = row[6],
-            images = row[7]
+            qn_num = row[6]
+            images = ""
             answer = row[8]
             question_type = row[9]
             hasImage = "Yes"
-            if images == "-":
-                hasImage = "No"
 
-            newRow = [level, pg_num, title,question_type, option1, option2
-                        , option3, option4, answer, subject, year, school,
-                        exam, qn_num, hasImage, images, answer]
-            df.loc[i] = newRow
+            new_val = (pg_num, title, option1, option2, option3, option4, qn_num, images, answer, question_type, hasImage)
+            val.append(new_val)
             i = i + 1
-    
-    #clean df
-    df1=df.drop(df.columns[0], axis=1)
-    df1 = df1.fillna('-')
 
-    #create json object output_list
-    output_list=[]
-    colname = list(df1)
-    # print(colname)
-    for index, row in df1.iterrows():
-        row_dict = {}
-        choice_dict = {}
-        for col in colname:
-            if col == 'A' or col == 'B' or col == 'C' or col == 'D':
-                choice_dict[col] = row[col]
-            else:
-                row_dict[col] = row[col]
-        row_dict['Choices'] = choice_dict
-        output_list.append(row_dict)
+    sql = "INSERT INTO bank (pg_num, title, option1, option2, option3,\
+                                        option4, qn_num, images, answer, question_type, hasImage) \
+                                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+    mycursor.executemany(sql, val)
+    mydb.commit()
 
-    con = pymysql.connect(host = 'localhost',user = 'root',passwd = 'Youzu2020!',db = 'youzu')
-    cursor = con.cursor()
-
-    create_table_query = """create table if not exists bank2(
-    id int auto_increment primary key,
-    question json
-    )"""
-    insert_query = """insert into bank2(question) values (%s)"""
-
-    try:
-        cursor.execute(create_table_query)
-        for x in output_list:
-            cursor.execute(insert_query, json.dumps(x))
-        con.commit()
-        print('successfully inserted values')
-
-    except Exception as e:
-        con.rollback()
-        print("exception occured:", e)
-
-    con.close()
     return jsonify({"Succeeded": "yes"})
 
 
