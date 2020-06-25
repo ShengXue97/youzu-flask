@@ -33,7 +33,7 @@ class Process:
         self.pg_number = 1
         self.pg_cnt_ls = []
         self.pg_num_1 = 2
-        self.requestID = ""
+        self.sessionID = ""
         
         self.qn_num = 1
         self.total_qns = 0
@@ -50,6 +50,18 @@ class Process:
             columns=['Level', 'Page', 'Question', 'question_type', 'A', 'B', 'C', 'D', 'Answer', 'Subject', 'Year', 'School', 'Exam',
                      'Number', 'Image',
                      'Image File', 'Answer'])
+    
+    def is_session_killed(self):
+        if os.path.exists('Sessions/' + self.sessionID + "_kill" + ".json"):
+            # This session is killed!
+            os.remove('Sessions/' + self.sessionID + "_kill" + ".json")
+            if os.path.exists('Sessions/' + self.sessionID + ".json"):
+                os.remove('Sessions/' + self.sessionID + ".json")
+
+            print("Killed " + self.sessionID)
+            return True
+        else:
+            return False
 
     def get_image(self, image_path):
         """Get a numpy array of an image so that one can access values[x][y]."""
@@ -231,12 +243,12 @@ class Process:
                     if h / height > 0.1 and w / h < 5:
                         # Likely to be an image
                         new_image = img[y:y + h, x:x + w]
-                        cv2.imwrite("TempImages/" + self.requestID + "_" + str(self.diagram_count) + ".jpg", new_image)
+                        cv2.imwrite("TempImages/" + self.sessionID + "_" + str(self.diagram_count) + ".jpg", new_image)
                         # store in base64 as well into document_data_list
-                        with open("TempImages/" + self.requestID + "_" + str(self.diagram_count) + ".jpg", "rb") as image_file:
+                        with open("TempImages/" + self.sessionID + "_" + str(self.diagram_count) + ".jpg", "rb") as image_file:
                             encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
                         document_data_list.append(
-                            ("TempImages/" + self.requestID + "_" + str(self.diagram_count) + ".jpg", "image", y,
+                            ("TempImages/" + self.sessionID + "_" + str(self.diagram_count) + ".jpg", "image", y,
                              pseudo_text, encoded_string))
                         self.diagram_count = self.diagram_count + 1
                     else:
@@ -437,13 +449,17 @@ class Process:
                         self.global_df.at[index, 'question_type'] = 'Unsupported Question Type'
 
     def generate_document(self, filename, qn_coord):
-        print("STAGE 2 (Output Generation): PG " + str(self.qn_num) + "/" + str(self.total_qns))
-        entry = {'stage': 2, 'page' : self.qn_num, 'total' : self.total_qns, 'output' : [],
+        if self.is_session_killed():
+            return True
+
+        print("STAGE 3 (Output Generation): QN " + str(self.qn_num - 1) + "/" + str(self.total_qns) +
+                ", Filename: " + self.filename + ", SessionID: " + self.sessionID)
+        entry = {'stage': 3, 'page' : self.qn_num - 1, 'total' : self.total_qns, 'output' : [],
                  'filename' : self.filename, 'level': self.file_attribute_list[0], 'subject': self.file_attribute_list[1],
                  'year': self.file_attribute_list[2], 'school': self.file_attribute_list[3],
                  'exam': self.file_attribute_list[4]}
                  
-        with open('Sessions/' + self.requestID + ".json", 'w') as outfile:
+        with open('Sessions/' + self.sessionID + ".json", 'w') as outfile:
             json.dump(entry, outfile)
 
         image_name = filename.replace(".jpg", "")
@@ -506,11 +522,12 @@ class Process:
 
         ####### Step 5: Display results
         ims = cv2.resize(result, (700, 850))
-        cv2.imwrite("TempContours/" + self.requestID + "_" + str(self.pg_num) + ".jpg", ims)
+        cv2.imwrite("TempContours/" + self.sessionID + "_" + str(self.pg_num) + ".jpg", ims)
         self.pg_num = self.pg_num + 1
         # cv2.imshow("RESULT", ims)
         # cv2.waitKey(0)
         # cv2.destroyAllWindows()
+        return False
 
     # Copies all files from src directory to dest directory
     def copytree(self, src, dst, symlinks=False, ignore=None):
@@ -603,7 +620,7 @@ class Process:
             if not new_image_path in self.qn_images_list:
                 self.qn_images_list.append(new_image_path)
         else:
-            im1.save(self.requestID + "_" + "temp.jpg",dpi=(500,500))
+            im1.save(self.sessionID + "_" + "temp.jpg",dpi=(500,500))
 
     def save_qn_images(self, qn_coord):
         self.total_qns = len(qn_coord) - 2
@@ -612,26 +629,26 @@ class Process:
             # For last qn
             if qn_num == len(qn_coord) - 1:
                 image_path = self.filenames_list[qn[0] - 1]
-                new_image_path = "TempImages/" + self.requestID + "_" + "qn_" + str(qn_num) + ".jpg"
+                new_image_path = "TempImages/" + self.sessionID + "_" + "qn_" + str(qn_num) + ".jpg"
                 self.crop_image(image_path, new_image_path, qn[1], 0, True, False)
             else:
                 next_qn = qn_coord[qn_num + 1]
                 if qn[0] == next_qn[0]:
                     # Current qn on same page as next qn
                     image_path = self.filenames_list[qn[0] - 1]
-                    new_image_path = "TempImages/" + self.requestID + "_" + "qn_" + str(qn_num) + ".jpg"
+                    new_image_path = "TempImages/" + self.sessionID + "_" + "qn_" + str(qn_num) + ".jpg"
                     self.crop_image(image_path, new_image_path, qn[1], next_qn[1], False, False)
                 else:
                     # Current qn on different page from next qn, means qn spans across
                     # multiple pages
                     image_path = self.filenames_list[qn[0] - 1]
-                    new_image_path = "TempImages/" + self.requestID + "_" + "qn_" + str(qn_num) + ".jpg"
+                    new_image_path = "TempImages/" + self.sessionID + "_" + "qn_" + str(qn_num) + ".jpg"
                     self.crop_image(image_path, new_image_path, qn[1], 0, True, False)
                     for pg_num in range(qn[0] + 1, next_qn[0] + 1):
                         if pg_num == next_qn[0]:
                             im1 = cv2.imread(new_image_path)
                             self.crop_image(self.filenames_list[pg_num - 1], "", 0, next_qn[1], False, False)
-                            im2 = cv2.imread(self.requestID + "_" + "temp.jpg")
+                            im2 = cv2.imread(self.sessionID + "_" + "temp.jpg")
                             h1, w1, channels = im1.shape
                             h2, w2, channels1 = im2.shape
                             ### resize 2nd image if imgs are of different sizes
@@ -641,7 +658,7 @@ class Process:
                         else:
                             im1 = cv2.imread(new_image_path)
                             self.crop_image(self.filenames_list[pg_num - 1], "", 0, 0, True, True)
-                            im2 = cv2.imread(self.requestID + "_" + "temp.jpg")
+                            im2 = cv2.imread(self.sessionID + "_" + "temp.jpg")
                             h1, w1, channels = im1.shape
                             h2, w2, channels1 = im2.shape
                             ### resize 2nd image if imgs are of different sizes
@@ -657,13 +674,17 @@ class Process:
         self.diagram_count = 1
 
         for filename in filenames_list:
-            print("STAGE 1 (Digitisation): PG " + str(self.pg_number - 1) + "/" + str(self.total_pages))
-            entry = {'stage': 1, 'page' : str(self.pg_number - 1), 'total' : self.total_pages, 'output' : [],
+            if self.is_session_killed():
+                return True
+            print("STAGE 2 (Digitisation): PG " + str(self.pg_number) + "/" + str(self.total_pages) +
+                ", Filename: " + self.filename + ", SessionID: " + self.sessionID)
+                
+            entry = {'stage': 2, 'page' : str(self.pg_number), 'total' : self.total_pages, 'output' : [],
                      'filename' : self.filename, 'level': self.file_attribute_list[0], 'subject': self.file_attribute_list[1],
                     'year': self.file_attribute_list[2], 'school': self.file_attribute_list[3],
                     'exam': self.file_attribute_list[4]}
 
-            with open('Sessions/' + self.requestID + ".json", 'w') as outfile:
+            with open('Sessions/' + self.sessionID + ".json", 'w') as outfile:
                 json.dump(entry, outfile)
             
             image_name = filename.replace(".jpg", "")
@@ -765,16 +786,16 @@ class Process:
                     new_image = img[y:y + h, x:x + w]
                 else:
                     new_image = img[y:y + h, xw:xw + w]
-                cv2.imwrite("TempImages/" + self.requestID + "_" + "small_" + str(self.diagram_count) + ".jpg", new_image)
+                cv2.imwrite("TempImages/" + self.sessionID + "_" + "small_" + str(self.diagram_count) + ".jpg", new_image)
                 # Read as binary image - only if we want to test what small image was read as (DEBUGGING)
-                small_image = cv2.imread("TempImages/" + self.requestID + "_" + "small_" + str(self.diagram_count) + ".jpg", 0)
+                small_image = cv2.imread("TempImages/" + self.sessionID + "_" + "small_" + str(self.diagram_count) + ".jpg", 0)
                 small_cntrs.append((self.pg_number, y))
                 self.diagram_count = self.diagram_count + 1
 
             for c, self.pg_number, y, w, h, xw in sorted_cntr_tuples:
                 qn_coord.append((self.pg_number, y))
             # page number will increment with every /small_ image appended to TempContours/
-            cv2.imwrite("TempContours/" + self.requestID + "_" + str(self.pg_num) + ".jpg", result)
+            cv2.imwrite("TempContours/" + self.sessionID + "_" + str(self.pg_num) + ".jpg", result)
 
 
             self.pg_number = self.pg_number + 1
@@ -845,13 +866,13 @@ class Process:
         else:
             pass'''
 
-    def main(self, pdfname, requestID):
+    def main(self, pdfname, sessionID):
         global total_pages
         global global_df
         global file_attribute_list
         print(pdfname)
         
-        self.requestID = requestID
+        self.sessionID = sessionID
         self.global_df = pd.DataFrame(
             columns=['Level', 'Page', 'Question', 'question_type', 'A', 'B', 'C', 'D', 'Answer', 'Subject', 'Year', 'School',
                      'Exam',
@@ -878,7 +899,7 @@ class Process:
         self.filenames_list = []
         self.file_attribute_list = self.find_paper_attributes(paper_name)
 
-        sub_dir = str("images/" + self.requestID + "_" + pdf_path.split('/')[-1].replace('.pdf', '') + "/")
+        sub_dir = str("images/" + self.sessionID + "_" + pdf_path.split('/')[-1].replace('.pdf', '') + "/")
         if not os.path.exists(sub_dir):
             os.makedirs(sub_dir)
 
@@ -887,6 +908,20 @@ class Process:
         else:
             paige=pages
         for index, page in enumerate(paige):
+            if self.is_session_killed():
+                return True
+
+            print("STAGE 1 (Converting to images): PG " + str(index + 1) + "/" + str(len(paige)) +
+                ", Filename: " + self.filename + ", SessionID: " + self.sessionID)
+
+            entry = {'stage': 1, 'page' : str(index + 1), 'total' : str(len(paige)), 'output' : [],
+                     'filename' : self.filename, 'level': self.file_attribute_list[0], 'subject': self.file_attribute_list[1],
+                    'year': self.file_attribute_list[2], 'school': self.file_attribute_list[3],
+                    'exam': self.file_attribute_list[4]}
+
+            with open('Sessions/' + self.sessionID + ".json", 'w') as outfile:
+                json.dump(entry, outfile)
+                    
             filename = "pg_" + str(pg_cntr) + '_' + pdf_path.split('/')[-1].replace('.pdf', '.jpg')
             page.save(sub_dir + filename)
             pg_cntr = pg_cntr + 1
@@ -898,12 +933,18 @@ class Process:
 
         self.total_pages = len(self.filenames_list)
         qn_coord = self.find_qn_coords(self.filenames_list)
+        if qn_coord == True:
+            # Session is killed
+            return
         # qn_coord = ast.literal_eval("[(0, 0, 0, 0), (2, 1365, 1, ''), (2, 1703, 2, ''), (3, 1131, 3, ''), (3, 1819, 4, ''), (4, 966, 5, ''), (4, 1779, 6, ''), (5, 2056, 7, ''), (6, 744, 8, ''), (6, 1934, 9, ''), (7, 757, 10, ''), (7, 1924, 11, ''), (8, 905, 12, ''), (8, 1710, 13, ''), (9, 1077, 14, ''), (9, 1914, 15, ''), (10, 1256, 16, ''), (11, 1630, 17, ''), (12, 1385, 18, ''), (13, 1432, 19, ''), (14, 1401, 20, ''), (15, 1292, 21, ''), (16, 1047, 22, ''), (17, 1295, 23, ''), (18, 1169, 24, ''), (19, 1005, 25, ''), (19, 1527, 26, ''), (20, 1535, 27, ''), (21, 1186, 28, ''), (21, 1968, 29, ''), (24, 1630, 30, 2), (26, 1591, 31, 2), (27, 1584, 32, 2), (29, 268, 33, 3), (30, 1935, 34, 2), (31, 1858, 35, 3), (32, 1035, 36, 3), (33, 1711, 37, 1), (34, 1553, 38, 1), (35, 1395, 39, 1), (36, 1739, 40, 3)]")
         self.save_qn_images(qn_coord)
 
         self.qn_num = 1
         for filename in self.qn_images_list:
-            self.generate_document(filename, qn_coord)
+            isKilled = self.generate_document(filename, qn_coord)
+            if isKilled == True:
+                # Session is killed
+                return
             self.qn_num = self.qn_num + 1
 
         '''df = pd.read_csv("ReactPDF/pdfverifier.csv")
@@ -915,12 +956,12 @@ class Process:
             print("There could be too much noise being recognized as images, consider improving the filter" + "\n")
         else:
             print("Accuracy of Images : " + str(img_acc) + "%" + "\n")'''
-        self.global_df.to_csv(self.requestID + "_output.csv")
-        entry = {'stage': 3, 'page': 0, 'total': 0, 'output': [], 'filename': self.filename,
+        self.global_df.to_csv(self.sessionID + "_output.csv")
+        entry = {'stage': 4, 'page': 0, 'total': 0, 'output': [], 'filename': self.filename,
                  'level': self.file_attribute_list[0], 'subject': self.file_attribute_list[1],
                  'year': self.file_attribute_list[2], 'school': self.file_attribute_list[3],
                  'exam': self.file_attribute_list[4]}
-        with open('Sessions/' + self.requestID + ".json", 'w') as outfile:
+        with open('Sessions/' + self.sessionID + ".json", 'w') as outfile:
             json.dump(entry, outfile)
 
         # Copies all the output to a new folder under Output/PDF NAME
@@ -935,17 +976,17 @@ class Process:
         # shutil.rmtree(dirpath + "/images/")
         items = os.listdir(dirpath + "/TempImages")
         for item in items:
-            if requestID in item:
+            if sessionID in item:
                 os.remove(os.path.join(dirpath + "/TempImages", item))
 
         items = os.listdir(dirpath + "/TempContours")
         for item in items:
-            if requestID in item:
+            if sessionID in item:
                 os.remove(os.path.join(dirpath + "/TempContours", item))
         
 
-        if path.exists(dirpath + "/images/" + requestID + "_" + pdfname):
-            shutil.rmtree(dirpath + "/images/" + requestID + "_" + pdfname)
+        if path.exists(dirpath + "/images/" + sessionID + "_" + pdfname):
+            shutil.rmtree(dirpath + "/images/" + sessionID + "_" + pdfname)
 
 
 '''for curFilename in os.listdir("ReactPDF"):

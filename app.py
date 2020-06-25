@@ -11,12 +11,27 @@ import itertools
 from datetime import datetime
 import os.path
 import base64
+import string
+import random
 
 # install the following 2 libs first
 # from flask_sqlalchemy import SQLAlchemy
 # from flask_marshmallow import Marshmallow
 # from models.question import Question
+class StoppableThread(threading.Thread):
+    """Thread class with a stop() method. The thread itself has to check
+    regularly for the stopped() condition."""
 
+    def __init__(self,  *args, **kwargs):
+        super(StoppableThread, self).__init__(*args, **kwargs)
+        self._stop_event = threading.Event()
+
+    def stop(self):
+        self._stop_event.set()
+
+    def stopped(self):
+        return self._stop_event.is_set()
+        
 app = Flask(__name__)
 cors = CORS(app)
 
@@ -40,18 +55,19 @@ def home():
 #         print("create wrong")
 #     return "<h1>Welcome man, enjoy your stay<h1>"
     
-def get_message(currentIP, currentTime, requestIDProcessed):
+def get_message(currentIP, currentTime, sessionID, curRequestNo):
     out_dict = {}
     time.sleep(1)
     # Unique entry for each request using timestamp!
     entry = None
     foundSession = False
-    if os.path.exists('Sessions/' + requestIDProcessed + ".json"):
-        with open('Sessions/' + requestIDProcessed + ".json") as json_file:
+    if os.path.exists('Sessions/' + sessionID + ".json"):
+        with open('Sessions/' + sessionID + ".json") as json_file:
             entry = json.load(json_file)
             foundSession = True
 
     if not foundSession:
+        out_dict["curRequestNo"] = curRequestNo
         out_dict["ipExists"] = "no"
         out_dict["timeStampExists"] = "no"
         out_dict["currentIP"] = currentIP
@@ -64,6 +80,7 @@ def get_message(currentIP, currentTime, requestIDProcessed):
         out_dict["exam"] = ""
         return json.dumps(out_dict)
     else:
+        out_dict["curRequestNo"] = curRequestNo
         out_dict["ipExists"] = "yes"
         out_dict["timeStampExists"] = "yes"
         out_dict["currentIP"] = currentIP
@@ -85,13 +102,13 @@ def get_message(currentIP, currentTime, requestIDProcessed):
 def index():
     currentIP = request.args.get("currentIP")
     currentTime = request.args.get("currentTime")
-    requestIDRaw = currentIP + "_" + currentTime
-    requestIDProcessed = currentTime.replace(":", "-").replace(".", "_")
+    sessionID = request.args.get("sessionID")
+    curRequestNo = request.args.get("curRequestNo")
 
     if request.headers.get('accept') == 'text/event-stream':
         def events():
             time.sleep(.1)  # an artificial delay
-            yield 'data: {}\n\n'.format(get_message(currentIP, currentTime, requestIDProcessed))
+            yield 'data: {}\n\n'.format(get_message(currentIP, currentTime, sessionID, curRequestNo))
         return flask.Response(events(), content_type='text/event-stream')
 
 @app.route('/listpdf', methods = ['GET', 'POST'])
@@ -233,18 +250,28 @@ def pushfile():
 
             # Unique entry for each request using timestamp!
             requestIDRaw = currentIP + "_" + currentTime
+            uniqueID = randomString()
             requestIDProcessed = currentTime.replace(":", "-").replace(".", "_")
-
-            if not requestIDProcessed in session:
-                entry = {'stage': 0, 'page' : 0, 'total' : 0, 'output' : [], 'filename' : ""}
-                session[requestIDProcessed] = entry
+            sessionID = requestIDProcessed + "_" + uniqueID
 
             print("Forking....")
             process = Process()
-            thread = threading.Thread(target=process.main, args=(filename, requestIDProcessed))
+            thread = threading.Thread(target=process.main, args=(filename, sessionID))
             thread.start()
-            return jsonify({"Succeeded": "yes", "YourIP" : str(currentIP), "YourTime" : currentTime, 'filename': filename})
+            return jsonify({"Succeeded": "yes", "YourSessionID" : sessionID, "YourIP" : str(currentIP), "YourTime" : currentTime, 'filename': filename})
 
+@app.route('/killsession', methods = ['GET', 'POST'])
+def killsession():
+    sessionID = request.args.get("sessionID")
+    if sessionID == "":
+        return jsonify({"Succeeded": "yes"})
+    else:
+        entry = {'delete' : "yes"}
+                    
+        with open('Sessions/' + sessionID +"_kill" + ".json", 'w') as outfile:
+            json.dump(entry, outfile)
+        return jsonify({"Succeeded": "yes"})
+    
 @app.route('/uploadfile', methods = ['GET', 'POST'])
 def uploadfile():
     print("called1")
@@ -260,28 +287,24 @@ def uploadfile():
 
         # Unique entry for each request using timestamp!
         requestIDRaw = currentIP + "_" + currentTime
+        uniqueID = randomString()
         requestIDProcessed = currentTime.replace(":", "-").replace(".", "_")
-
-        if not requestIDProcessed in session:
-            entry = {'stage': 0, 'page' : 0, 'total' : 0, 'output' : [], 'filename' : ""}
-            session[requestIDProcessed] = entry
+        sessionID = requestIDProcessed + "_" + uniqueID
 
         print("Forking....")
         process = Process()
-        thread = threading.Thread(target=process.main, args=(filename, requestIDProcessed))
+        thread = threading.Thread(target=process.main, args=(filename, sessionID))
         thread.start()
-        return jsonify({"Succeeded": "yes", "YourIP" : str(currentIP), "YourTime" : currentTime, 'filename': filename})
+        return jsonify({"Succeeded": "yes", "YourSessionID" : sessionID, "YourIP" : str(currentIP), "YourTime" : currentTime, 'filename': filename})
 
 
 @app.route('/getresult', methods = ['GET', 'POST'])
 def getresult():
+    sessionID = request.args.get("sessionID")
     currentIP = request.args.get("currentIP")
     currentTime = request.args.get("currentTime")
 
-    requestIDRaw = currentIP + "_" + currentTime
-    requestIDProcessed = currentTime.replace(":", "-").replace(".", "_")
-    
-    df = pd.read_csv(requestIDProcessed + "_output.csv")
+    df = pd.read_csv(sessionID + "_output.csv")
     df = df.fillna("-")
 
 
@@ -337,16 +360,19 @@ def getresult():
     dirpath = os.getcwd()
     items = os.listdir(dirpath + "/Sessions")
     for item in items:
-        if requestIDProcessed in item:
+        if sessionID in item:
             os.remove(os.path.join(dirpath + "/Sessions", item))
 
     row_json.append(thisPageList)
     # print(row_json)
     # for page in row_json:
     #     print("Page " + str(row_json.index(page) + 1) + ": " + str(len(page)) + " questions")
-    os.remove(requestIDProcessed + "_output.csv")
+    os.remove(sessionID + "_output.csv")
     return jsonify(row_json)
 
+def randomString(stringLength=8):
+    letters = string.ascii_lowercase
+    return ''.join(random.choices(string.ascii_letters + string.digits, k=stringLength))
 
 if __name__ == '__main__':
     app.run(threaded=True, host='0.0.0.0', port=3001)
