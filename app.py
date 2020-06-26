@@ -16,8 +16,6 @@ import random
 from sqlalchemy import create_engine
 import pymysql
 import ast
-import mysql.connector
-
 # install the following 2 libs first
 # from flask_sqlalchemy import SQLAlchemy
 # from flask_marshmallow import Marshmallow
@@ -386,54 +384,54 @@ def updatedatabase():
 
     decoded_data = request.data.decode("utf-8")
     list_data = ast.literal_eval(decoded_data)
-    df = pd.DataFrame(
-            columns=['Level', 'Page', 'Question', 'question_type', 'A', 'B', 'C', 'D',
-                     'Answer', 'Subject', 'Year', 'School', 'Exam',
-                     'Number', 'Image',
-                     'Image File', 'Answer'])
 
-    mydb = mysql.connector.connect(
-    host="localhost",
-    user="root",
-    password="Youzu2020!",
-    database="youzu"
-    )
-    mycursor = mydb.cursor()
-
-    try:
-        mycursor.execute("CREATE TABLE qbank (pg_num VARCHAR(255), title VARCHAR(255)\
-                    , option1 VARCHAR(255), option2 VARCHAR(255), option3 VARCHAR(255)\
-                    , option4 VARCHAR(255), qn_num VARCHAR(255), images VARCHAR(255)\
-                    , answer VARCHAR(255), question_type VARCHAR(255), hasImage VARCHAR(255))")
-    except:
-        pass
-    
-    i = 0
-    val = []
+    output_list = []
     for page in list_data:
         for row in page:
-            pg_num = row[0]
-            title = row[1]
-            option1 = row[2]
-            option2 = row[3]
-            option3 = row[4]
-            option4 = row[5]
-            qn_num = row[6]
-            images = ""
-            answer = row[8]
-            question_type = row[9]
-            hasImage = "Yes"
+            choice_dict = {
+                "A" : row[2],
+                "B" : row[3],
+                "C" : row[4],
+                "D" : row[5]
+            }
 
-            new_val = (pg_num, title, option1, option2, option3, option4, qn_num, images, answer, question_type, hasImage)
-            val.append(new_val)
-            i = i + 1
+            row_dict = {
+                "Level" : level,
+                "Page" : row[0],
+                "Question" : row[1],
+                "Question_type" : row[9],
+                "Choices" : choice_dict,
+                "Answer" : row[8],
+                "Subject" : subject,
+                "Year" : year,
+                "School" : school,
+                "Exam" : exam,
+                "Number" : row[6],
+                "Image File" : row[7],
+            }
+            output_list.append(row_dict)
 
-    sql = "INSERT INTO qbank (pg_num, title, option1, option2, option3,\
-                                        option4, qn_num, images, answer, question_type, hasImage) \
-                                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-    mycursor.executemany(sql, val)
-    mydb.commit()
+    con = pymysql.connect(host = 'localhost',user = 'root',passwd = 'Youzu2020!',db = 'youzu')
+    cursor = con.cursor()
 
+    create_table_query = """create table if not exists qbank(
+    id int auto_increment primary key,
+    question json
+    )"""
+    insert_query = """insert into qbank(question) values (%s)"""
+
+    try:
+        cursor.execute(create_table_query)
+        for x in output_list:
+            cursor.execute(insert_query, json.dumps(x))
+        con.commit()
+        print('successfully inserted values')
+
+    except Exception as e:
+        con.rollback()
+        print("exception occured:", e)
+
+    con.close()
     return jsonify({"Succeeded": "yes"})
 
 
@@ -442,4 +440,4 @@ def randomString(stringLength=8):
     return ''.join(random.choices(string.ascii_letters + string.digits, k=stringLength))
 
 if __name__ == '__main__':
-    app.run(threaded=True, host='0.0.0.0', port=3001)
+    app.run(threaded=True, host='0.0.0.0', port=3003)
