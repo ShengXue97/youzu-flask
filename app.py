@@ -248,7 +248,11 @@ def deleteworkspace():
         os.remove('Workspaces/pdf/' + name)
         if os.path.exists('Workspaces/csv/' + name):
             os.remove('Workspaces/csv/' + name)
-            return jsonify({"Succeeded": "yes"})
+            if os.path.exists('Workspaces/attribute/' + name):
+                os.remove('Workspaces/attribute/' + name)
+                return jsonify({"Succeeded": "yes"})
+            else:
+                return jsonify({"Succeeded": "no"})
         else:
             return jsonify({"Succeeded": "no"})
     else:
@@ -260,11 +264,16 @@ def renameworkspace():
     oldname = request.args.get("oldName") + ".txt"
     newname = request.args.get("newName") + ".txt"
     print(oldname + ";" + newname)
+
     if os.path.exists('Workspaces/csv/' + oldname):
-        os.rename('Workspaces/csv/' + oldname, 'Workspaces/csv/' + newname)
+        os.replace('Workspaces/csv/' + oldname, 'Workspaces/csv/' + newname)
         if os.path.exists('Workspaces/pdf/' + oldname):
-            os.rename('Workspaces/pdf/' + oldname, 'Workspaces/pdf/' + newname)
-            return jsonify({"Succeeded": "yes"})
+            os.replace('Workspaces/pdf/' + oldname, 'Workspaces/pdf/' + newname)
+            if os.path.exists('Workspaces/attribute/' + oldname):
+                os.replace('Workspaces/attribute/' + oldname, 'Workspaces/attribute/' + newname)
+                return jsonify({"Succeeded": "yes"})
+            else:
+                return jsonify({"Succeeded": "no"})
         else:
             return jsonify({"Succeeded": "no"})
     else:
@@ -487,4 +496,4 @@ def randomString(stringLength=8):
     return ''.join(random.choices(string.ascii_letters + string.digits, k=stringLength))
 
 if __name__ == '__main__':
-    app.run(threaded=True, host='0.0.0.0', port=3003)
+    app.run(threaded=True, host='0.0.0.0', port=3001)
