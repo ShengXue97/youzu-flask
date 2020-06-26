@@ -116,16 +116,26 @@ def index():
 @app.route('/listpdf', methods = ['GET', 'POST'])
 def listpdf():
     pdfs = []
-    if os.path.exists("pdfs"):
-        items = os.listdir("pdfs")
-        for item in items:
-            name = item.replace(".pdf", "")
-            lastModified = datetime.fromtimestamp(os.path.getmtime("pdfs/" + item))
-            newFile = {
-                'name' : name,
-                'lastModified' : lastModified,
-            }
-            pdfs.append(newFile)
+    azureDir = "datadrive/pdfs/"
+    localDir = "pdfs/"
+    myDir = ""
+
+    if os.path.exists(azureDir):
+        myDir = azureDir
+    elif os.path.exists(localDir):
+        myDir = localDir
+    else:
+        return jsonify({"Succeeded": "no", "Pdfs" : pdfs})
+
+    items = os.listdir(myDir)
+    for item in items:
+        name = item.replace(".pdf", "")
+        lastModified = datetime.fromtimestamp(os.path.getmtime(myDir + item))
+        newFile = {
+            'name' : name,
+            'lastModified' : lastModified,
+        }
+        pdfs.append(newFile)
 
     return jsonify({"Succeeded": "yes", "Pdfs" : pdfs})
 
