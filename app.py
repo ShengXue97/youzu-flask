@@ -461,11 +461,11 @@ def updatedatabase():
     con = pymysql.connect(host = 'localhost',user = 'root',passwd = 'Youzu2020!',db = 'youzu')
     cursor = con.cursor()
 
-    create_table_query = """create table if not exists bank2(
+    create_table_query = """create table if not exists qbank(
     id int auto_increment primary key,
     question json
     )"""
-    insert_query = """insert into bank2(question) values (%s)"""
+    insert_query = """insert into qbank(question) values (%s)"""
 
     try:
         cursor.execute(create_table_query)
@@ -487,4 +487,4 @@ def randomString(stringLength=8):
     return ''.join(random.choices(string.ascii_letters + string.digits, k=stringLength))
 
 if __name__ == '__main__':
-    app.run(threaded=True, host='0.0.0.0', port=3001)
+    app.run(threaded=True, host='0.0.0.0', port=3003)
