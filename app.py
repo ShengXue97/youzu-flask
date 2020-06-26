@@ -16,8 +16,6 @@ import random
 from sqlalchemy import create_engine
 import pymysql
 import ast
-import mysql.connector
-
 # install the following 2 libs first
 # from flask_sqlalchemy import SQLAlchemy
 # from flask_marshmallow import Marshmallow
@@ -140,7 +138,33 @@ def findworkspace():
         return jsonify({"Exists": "yes"})
     else:
         return jsonify({"Exists": "no"})
-        
+# 'filename': defaultFilename,
+# 'school': defaultSchoolname,
+# 'subject': defaultFilesubject,
+# 'level': defaultPaperlevel,
+# 'year': defaultPaperyear,
+# 'exam': defaultExam,
+
+@app.route('/saveattribute', methods = ['GET', 'POST'])
+def saveattribute():
+    filename = request.args.get("filename")
+    school = request.args.get("school")
+    subject = request.args.get("subject")
+    level = request.args.get("level")
+    year = request.args.get("year")
+    exam = request.args.get("exam")
+
+    if not os.path.exists("Workspaces/attribute"):
+        os.makedirs("Workspaces/attribute")
+    file1 = open("Workspaces/attribute/" + filename + ".txt","wb") 
+    attrStr = filename + ";" + school + ";" + subject + ";" + level + ";" + year + ";" + exam
+    file1.write(attrStr.encode('utf-8'))
+    
+    currentIP = request.remote_addr
+    currentTime = str(datetime.now())
+
+    return jsonify({"Succeeded": "yes", "YourIP" : str(currentIP), "YourTime" : currentTime})
+
 @app.route('/savecsv', methods = ['GET', 'POST'])
 def savecsv():
     name = request.args.get("name")
@@ -179,22 +203,43 @@ def openpdf():
     else:
         return jsonify({"Succeeded": "no", "fileData" : ""})
 
+
 @app.route('/openworkspace', methods = ['GET', 'POST'])
 def openworkspace():
     name = request.args.get("name") + ".txt"
     data = ""
     fileData = ""
-    if os.path.exists('Workspaces/csv/' + name):
-        with open('Workspaces/csv/' + name, 'r', encoding="utf8") as file1:
-            data = file1.read()
-        if os.path.exists('Workspaces/pdf/' + name):
-            with open('Workspaces/pdf/' + name, 'r', encoding="utf8") as file2:
-                fileData = file2.read()
-            return jsonify({"Succeeded": "yes", "data" : data, "fileData" : fileData})
-        else:
-            return jsonify({"Succeeded": "yes", "data" : "", "fileData" : ""})
-    else:
-        return jsonify({"Succeeded": "yes", "data" : "", "fileData" : ""})
+    attributeData = ""
+
+    if not os.path.exists('Workspaces/csv/' + name):
+        return jsonify({"Succeeded": "nocsv", "data" : "", "fileData" : ""})
+
+    if not os.path.exists('Workspaces/pdf/' + name):
+        return jsonify({"Succeeded": "nopdf", "data" : "", "fileData" : ""})
+
+    if not  os.path.exists('Workspaces/attribute/' + name):
+        return jsonify({"Succeeded": "noattribute", "data" : "", "fileData" : ""})
+
+    with open('Workspaces/csv/' + name, 'r', encoding="utf8") as file1:
+        data = file1.read()
+
+    with open('Workspaces/pdf/' + name, 'r', encoding="utf8") as file2:
+        fileData = file2.read()
+
+    with open('Workspaces/attribute/' + name, 'r', encoding="utf8") as file3:
+        attributeData = file3.read()
+
+    attributeDataSplit = attributeData.split(";")
+    attributeDataDict = {
+        'filename': attributeDataSplit[0],
+        'school': attributeDataSplit[1],
+        'subject': attributeDataSplit[2],
+        'level': attributeDataSplit[3],
+        'year': attributeDataSplit[4],
+        'exam': attributeDataSplit[5],
+    }
+
+    return jsonify({"Succeeded": "yes", "data" : data, "fileData" : fileData, "attributeData" : attributeDataDict})
 
 @app.route('/deleteworkspace', methods = ['GET', 'POST'])
 def deleteworkspace():
@@ -386,54 +431,54 @@ def updatedatabase():
 
     decoded_data = request.data.decode("utf-8")
     list_data = ast.literal_eval(decoded_data)
-    df = pd.DataFrame(
-            columns=['Level', 'Page', 'Question', 'question_type', 'A', 'B', 'C', 'D',
-                     'Answer', 'Subject', 'Year', 'School', 'Exam',
-                     'Number', 'Image',
-                     'Image File', 'Answer'])
 
-    mydb = mysql.connector.connect(
-    host="localhost",
-    user="root",
-    password="Youzu2020!",
-    database="youzu"
-    )
-    mycursor = mydb.cursor()
-
-    try:
-        mycursor.execute("CREATE TABLE qbank (pg_num VARCHAR(8000), title VARCHAR(8000)\
-                    , option1 VARCHAR(8000), option2 VARCHAR(8000), option3 VARCHAR(8000)\
-                    , option4 VARCHAR(8000), qn_num VARCHAR(8000), images VARCHAR(8000)\
-                    , answer VARCHAR(8000), question_type VARCHAR(8000), hasImage VARCHAR(8000))")
-    except:
-        pass
-    
-    i = 0
-    val = []
+    output_list = []
     for page in list_data:
         for row in page:
-            pg_num = row[0]
-            title = row[1]
-            option1 = row[2]
-            option2 = row[3]
-            option3 = row[4]
-            option4 = row[5]
-            qn_num = row[6]
-            images = ""
-            answer = row[8]
-            question_type = row[9]
-            hasImage = "Yes"
+            choice_dict = {
+                "A" : row[2],
+                "B" : row[3],
+                "C" : row[4],
+                "D" : row[5]
+            }
 
-            new_val = (pg_num, title, option1, option2, option3, option4, qn_num, images, answer, question_type, hasImage)
-            val.append(new_val)
-            i = i + 1
+            row_dict = {
+                "Level" : level,
+                "Page" : row[0],
+                "Question" : row[1],
+                "Question_type" : row[9],
+                "Choices" : choice_dict,
+                "Answer" : row[8],
+                "Subject" : subject,
+                "Year" : year,
+                "School" : school,
+                "Exam" : exam,
+                "Number" : row[6],
+                "Image File" : row[7],
+            }
+            output_list.append(row_dict)
 
-    sql = "INSERT INTO qbank (pg_num, title, option1, option2, option3,\
-                                        option4, qn_num, images, answer, question_type, hasImage) \
-                                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-    mycursor.executemany(sql, val)
-    mydb.commit()
+    con = pymysql.connect(host = 'localhost',user = 'root',passwd = 'Youzu2020!',db = 'youzu')
+    cursor = con.cursor()
 
+    create_table_query = """create table if not exists bank2(
+    id int auto_increment primary key,
+    question json
+    )"""
+    insert_query = """insert into bank2(question) values (%s)"""
+
+    try:
+        cursor.execute(create_table_query)
+        for x in output_list:
+            cursor.execute(insert_query, json.dumps(x))
+        con.commit()
+        print('successfully inserted values')
+
+    except Exception as e:
+        con.rollback()
+        print("exception occured:", e)
+
+    con.close()
     return jsonify({"Succeeded": "yes"})
 
 
