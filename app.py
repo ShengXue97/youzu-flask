@@ -495,5 +495,18 @@ def randomString(stringLength=8):
     letters = string.ascii_lowercase
     return ''.join(random.choices(string.ascii_letters + string.digits, k=stringLength))
 
+@app.before_request
+def log_request_info():
+    app.logger.debug('Headers: %s', request.headers)
+    app.logger.debug('Body: %s', request.get_data())
+    
+    with open("request_header_log.txt", "a") as myfile:
+        myfile.write('Headers: "' + str(request.headers) + '"\n')
+        myfile.write('-----------------------------------------\n')
+
+    with open("request_body_log.txt", "a") as myfile:
+        myfile.write('Body: "' + str(request.get_data()) + '"\n')
+        myfile.write('-----------------------------------------\n')
+
 if __name__ == '__main__':
     app.run(threaded=True, host='0.0.0.0', port=3001)
