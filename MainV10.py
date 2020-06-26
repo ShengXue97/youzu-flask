@@ -27,6 +27,8 @@ import os.path
 from os import path
 import json
 
+if platform.system() == "Windows":
+    pytesseract.pytesseract.tesseract_cmd = "C:/Program Files/Tesseract-OCR/tesseract.exe"
 
 class Process:
     def __init__(self):
