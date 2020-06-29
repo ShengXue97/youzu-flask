@@ -20,6 +20,7 @@ import ast
 # from flask_sqlalchemy import SQLAlchemy
 # from flask_marshmallow import Marshmallow
 # from models.question import Question
+
 class StoppableThread(threading.Thread):
     """Thread class with a stop() method. The thread itself has to check
     regularly for the stopped() condition."""
@@ -493,7 +494,7 @@ def updatedatabase():
 
 def randomString(stringLength=8):
     letters = string.ascii_lowercase
-    return ''.join(random.choices(string.ascii_letters + string.digits, k=stringLength))
+    return ''.join(random.sample(string.ascii_letters + string.digits, k=stringLength))
 
 @app.before_request
 def log_request_info():
@@ -509,4 +510,4 @@ def log_request_info():
         myfile.write('-----------------------------------------\n')
 
 if __name__ == '__main__':
-    app.run(threaded=True, host='0.0.0.0', port=3001)
+    app.run(threaded=True, host='0.0.0.0', port=3003)
