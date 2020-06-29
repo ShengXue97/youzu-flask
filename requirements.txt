@@ -56,6 +56,7 @@ keyrings.alt==3.0
 kiwisolver==1.1.0
 Markdown==3.1.1
 MarkupSafe==1.1.1
+<<<<<<< HEAD
 matplotlib==2.2.5
 mistune==0.8.4
 mock==3.0.5
@@ -77,6 +78,12 @@ pickleshare==0.7.5
 Pillow==6.2.2
 prometheus-client==0.8.0
 prompt-toolkit==1.0.18
+=======
+opencv-python==4.2.0.34
+pandas==1.0.4
+pdf2image==1.13.1
+Pillow==7.1.2
+>>>>>>> 4d5ed8addf45c400419806ff60aec2c735398a70
 protobuf==3.12.2
 ptyprocess==0.6.0
 pyasn1==0.4.8
