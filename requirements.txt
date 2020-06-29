@@ -9,8 +9,6 @@ itsdangerous==1.1.0
 Jinja2==2.11.2
 lxml==4.5.1
 MarkupSafe==1.1.1
-mysql-connector-python==8.0.20
-numpy==1.18.4
 opencv-python==4.2.0.34
 pandas==1.0.4
 pdf2image==1.13.1
