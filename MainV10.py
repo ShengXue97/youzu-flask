@@ -26,6 +26,7 @@ import base64
 import os.path
 from os import path
 import json
+from autocorrect import Speller
 
 if platform.system() == "Windows":
     pytesseract.pytesseract.tesseract_cmd = "C:/Program Files/Tesseract-OCR/tesseract.exe"
@@ -345,6 +346,7 @@ class Process:
         current_ans_list = []
         found_ans_options = False
         first_ans_pos = -1
+        spell = Speller()
 
         # file_attribute_list -> [paper_level, paper_subject, paper_year, paper_school, paper_exam_type]
         paper_level = self.file_attribute_list[0].upper()
@@ -363,10 +365,10 @@ class Process:
 
         for i in range(len(document_data_list)):
             data = document_data_list[i]
-            item = data[0]  # TempImages/5.jpg
+            item = spell(data[0])  # TempImages/5.jpg
             typeof = data[1]
             y_coord = data[2]
-            pseudo_text = data[3]
+            pseudo_text = spell(data[3])
             base64img = data[4]
 
             # STEP 2: Find ans sections
