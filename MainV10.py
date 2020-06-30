@@ -761,16 +761,15 @@ class Process:
                 x, y, w, h = cv2.boundingRect(c)
 
                 cv2.rectangle(result, (x, y), (x + w, y + h), (0, 0, 255), 2)
-
-                print(area, y / height , x / width , w / h)
+                
                 if (0.01 < area < 0.1) and y / height < 0.855 and (0 < x / width < 0.25) and (0.2 < w / h < 2):
-                    print('success')
+                    
                     if y - 5 > 0 and y + h + 5 < height and x - 5 > 0 and x + w + 5 < width:
-                        print('success2')
+                        
                         new_image = img[y - 5: y + h + 5, x - 5: x + w + 5]
                     else:
                         new_image = img[y:y + h, x:x + w]
-                        print('fail')
+                        
 
                     text = pytesseract.image_to_string(new_image, lang='eng', config='--psm 6')
 
@@ -792,7 +791,6 @@ class Process:
 
 
             sorted_cntr_tuples.sort(key=lambda tup: tup[2])
-            # print(sorted_cntr_tuples)
 
             # Comment this out to visualise the processing of small contours under TempImages/small_[NAME].jpg
             small_cntrs = []
