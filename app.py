@@ -117,7 +117,7 @@ def index():
 @app.route('/listpdf', methods = ['GET', 'POST'])
 def listpdf():
     pdfs = []
-    azureDir = "datadrive/pdfs/"
+    azureDir = "/datassd/pdf_downloader-master/pdfs/"
     localDir = "pdfs/"
     myDir = ""
 
@@ -206,9 +206,20 @@ def savepdf():
 @app.route('/openpdf', methods = ['GET', 'POST'])
 def openpdf():
     name = request.args.get("name") + ".pdf"
-    if os.path.exists('pdfs/' + name):
+    azureDir = "/datassd/pdf_downloader-master/pdfs/"
+    localDir = "pdfs/"
+    myDir = ""
+
+    if os.path.exists(azureDir):
+        myDir = azureDir
+    elif os.path.exists(localDir):
+        myDir = localDir
+    else:
+        return jsonify({"Succeeded": "no", "fileData" : ""})
+        
+    if os.path.exists(myDir + name):
         encoded_string = ""
-        with open('pdfs/' + name, "rb") as pdf_file:
+        with open(myDir + name, "rb") as pdf_file:
             encoded_string = "data:application/pdf;base64," + base64.b64encode(pdf_file.read()).decode("utf-8") 
         return jsonify({"Succeeded": "yes", "fileData" : encoded_string})
     else:
@@ -308,20 +319,30 @@ def listworkspace():
 
 @app.route('/pushfile', methods = ['GET', 'POST'])
 def pushfile():
-    print("called1")
+    currentIP = request.remote_addr
+    currentTime = str(datetime.now())
+
+    # Unique entry for each request using timestamp!
+    requestIDRaw = currentIP + "_" + currentTime
+    uniqueID = randomString()
+    requestIDProcessed = currentTime.replace(":", "-").replace(".", "_")
+    sessionID = requestIDProcessed + "_" + uniqueID
     filename = request.args.get("name") + ".pdf"
-    if os.path.exists('pdfs/' + filename):
+
+    azureDir = "/datassd/pdf_downloader-master/pdfs/"
+    localDir = "pdfs/"
+    myDir = ""
+
+    if os.path.exists(azureDir):
+        myDir = azureDir
+    elif os.path.exists(localDir):
+        myDir = localDir
+    else:
+        return jsonify({"Succeeded": "yes", "YourSessionID" : sessionID, "YourIP" : str(currentIP), "YourTime" : currentTime, 'filename': filename})
+
+    if os.path.exists(myDir + filename):
         response = None
         if request.method == 'POST':
-            currentIP = request.remote_addr
-            print(currentIP)
-            currentTime = str(datetime.now())
-
-            # Unique entry for each request using timestamp!
-            requestIDRaw = currentIP + "_" + currentTime
-            uniqueID = randomString()
-            requestIDProcessed = currentTime.replace(":", "-").replace(".", "_")
-            sessionID = requestIDProcessed + "_" + uniqueID
 
             print("Forking....")
             process = Process()
@@ -438,7 +459,7 @@ def getresult():
     # print(row_json)
     # for page in row_json:
     #     print("Page " + str(row_json.index(page) + 1) + ": " + str(len(page)) + " questions")
-    os.remove("Output/" + sessionID + "_output.csv")
+    #os.remove("Output/" + sessionID + "_output.csv")
     return jsonify(row_json)
 
 @app.route('/updatedatabase', methods = ['GET', 'POST'])
