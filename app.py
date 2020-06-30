@@ -373,7 +373,7 @@ def getresult():
     currentIP = request.args.get("currentIP")
     currentTime = request.args.get("currentTime")
 
-    df = pd.read_csv(sessionID + "_output.csv")
+    df = pd.read_csv("Output/" + sessionID + "_output.csv")
     df = df.fillna("-")
 
 
@@ -438,7 +438,7 @@ def getresult():
     # print(row_json)
     # for page in row_json:
     #     print("Page " + str(row_json.index(page) + 1) + ": " + str(len(page)) + " questions")
-    os.remove(sessionID + "_output.csv")
+    os.remove("Output/" + sessionID + "_output.csv")
     return jsonify(row_json)
 
 @app.route('/updatedatabase', methods = ['GET', 'POST'])
@@ -520,4 +520,4 @@ def log_request_info():
         myfile.write('-----------------------------------------\n')
 
 if __name__ == '__main__':
-    app.run(threaded=True, host='0.0.0.0', port=3003)
+    app.run(threaded=True, host='0.0.0.0', port=3001)

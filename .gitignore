@@ -1,4 +1,3 @@
-.venv
 __pycache__
 .vscode
 TempContours
@@ -7,6 +6,10 @@ Output
 ReactPDF
 Sessions
 images
+<<<<<<< HEAD
 venv
 pdfs
 .venv
+=======
+pdfs
+>>>>>>> d22a1a6c218971b0e631374ca4d7c810f75c1bb6

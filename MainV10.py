@@ -622,7 +622,7 @@ class Process:
             if not new_image_path in self.qn_images_list:
                 self.qn_images_list.append(new_image_path)
         else:
-            im1.save(self.sessionID + "_" + "temp.jpg",dpi=(500,500))
+            im1.save("TempImages/" + self.sessionID + "_" + "temp.jpg",dpi=(500,500))
 
     def save_qn_images(self, qn_coord):
         self.total_qns = len(qn_coord) - 2
@@ -650,7 +650,7 @@ class Process:
                         if pg_num == next_qn[0]:
                             im1 = cv2.imread(new_image_path)
                             self.crop_image(self.filenames_list[pg_num - 1], "", 0, next_qn[1], False, False)
-                            im2 = cv2.imread(self.sessionID + "_" + "temp.jpg")
+                            im2 = cv2.imread("TempImages/" + self.sessionID + "_" + "temp.jpg")
                             h1, w1, channels = im1.shape
                             h2, w2, channels1 = im2.shape
                             ### resize 2nd image if imgs are of different sizes
@@ -660,7 +660,7 @@ class Process:
                         else:
                             im1 = cv2.imread(new_image_path)
                             self.crop_image(self.filenames_list[pg_num - 1], "", 0, 0, True, True)
-                            im2 = cv2.imread(self.sessionID + "_" + "temp.jpg")
+                            im2 = cv2.imread("TempImages/" + self.sessionID + "_" + "temp.jpg")
                             h1, w1, channels = im1.shape
                             h2, w2, channels1 = im2.shape
                             ### resize 2nd image if imgs are of different sizes
@@ -893,6 +893,12 @@ class Process:
                      'Number',
                      'Image', 'Image File'])
 
+        if not os.path.exists("Sessions"):
+            os.makedirs("Sessions")
+
+        if not os.path.exists("Output"):
+            os.makedirs("Output")
+
         if not os.path.exists("TempImages"):
             os.makedirs("TempImages")
 
@@ -972,7 +978,7 @@ class Process:
             print("There could be too much noise being recognized as images, consider improving the filter" + "\n")
         else:
             print("Accuracy of Images : " + str(img_acc) + "%" + "\n")'''
-        self.global_df.to_csv(self.sessionID + "_output.csv")
+        self.global_df.to_csv("Output/" + self.sessionID + "_output.csv")
         entry = {'stage': 4, 'page': 0, 'total': 0, 'output': [], 'filename': self.filename,
                  'level': self.file_attribute_list[0], 'subject': self.file_attribute_list[1],
                  'year': self.file_attribute_list[2], 'school': self.file_attribute_list[3],
