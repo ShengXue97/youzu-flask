@@ -32,7 +32,7 @@ cursor = con.cursor();
 
 
 
-create_table_query = """create table if not exists bank3(
+create_table_query = """create table if not exists qbank(
 id int auto_increment primary key,
 question json
 )""";
@@ -42,17 +42,17 @@ def show_tables():
 
 
 def insert_data(json_obj):
-    insert_query = """insert into bank3(question) values (%s)"""
+    insert_query = """insert into qbank(question) values (%s)"""
     for x in json_obj:
         cursor.execute(insert_query, json.dumps(x))
 
 def reset_table():
-    cursor.execute("""truncate table bank2""")
+    cursor.execute("""truncate table qbank""")
 
 # def update():
 
 def reset_counter():
-    cursor.execute("""ALTER TABLE bank3 AUTO_INCREMENT = 1""")
+    cursor.execute("""ALTER TABLE qbank AUTO_INCREMENT = 1""")
 
 try:
     reset_table()
