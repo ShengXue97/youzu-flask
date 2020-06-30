@@ -26,6 +26,7 @@ import base64
 import os.path
 from os import path
 import json
+from autocorrect import Speller
 
 if platform.system() == "Windows":
     pytesseract.pytesseract.tesseract_cmd = "C:/Program Files/Tesseract-OCR/tesseract.exe"
@@ -345,6 +346,7 @@ class Process:
         current_ans_list = []
         found_ans_options = False
         first_ans_pos = -1
+        spell = Speller()
 
         # file_attribute_list -> [paper_level, paper_subject, paper_year, paper_school, paper_exam_type]
         paper_level = self.file_attribute_list[0].upper()
@@ -363,10 +365,10 @@ class Process:
 
         for i in range(len(document_data_list)):
             data = document_data_list[i]
-            item = data[0]  # TempImages/5.jpg
+            item = spell(data[0])  # TempImages/5.jpg
             typeof = data[1]
             y_coord = data[2]
-            pseudo_text = data[3]
+            pseudo_text = spell(data[3])
             base64img = data[4]
 
             # STEP 2: Find ans sections
@@ -752,19 +754,29 @@ class Process:
             y_tolerance = m.floor(0.01 * height)  # previously 0.024964
             thresh, cntrs = self.merge_contours(thresh, cntrs, x_tolerance, y_tolerance)
 
+
             for c in cntrs:
+                # print(c)
                 area = cv2.contourArea(c) / 10000
                 x, y, w, h = cv2.boundingRect(c)
+
                 cv2.rectangle(result, (x, y), (x + w, y + h), (0, 0, 255), 2)
 
+                print(area, y / height , x / width , w / h)
                 if (0.01 < area < 0.1) and y / height < 0.855 and (0 < x / width < 0.25) and (0.2 < w / h < 2):
+                    print('success')
                     if y - 5 > 0 and y + h + 5 < height and x - 5 > 0 and x + w + 5 < width:
+                        print('success2')
                         new_image = img[y - 5: y + h + 5, x - 5: x + w + 5]
                     else:
                         new_image = img[y:y + h, x:x + w]
+                        print('fail')
 
                     text = pytesseract.image_to_string(new_image, lang='eng', config='--psm 6')
+
+
                     if text != "":
+
                         # Check if pseudo_text contains numbers contained in any brackets
                         matches = re.search(r'[a-zA-Z]', text, re.I)
                         illegal_qn_strings = ["(", ")", "[", "]", "{", "}", "|", "NO"]
@@ -778,7 +790,9 @@ class Process:
                         if not contains_illegal_qn_string and not probably_same_contour and not matches:
                             sorted_cntr_tuples.append((c, self.pg_number, y, w, h, int(x / width)))
 
+
             sorted_cntr_tuples.sort(key=lambda tup: tup[2])
+            # print(sorted_cntr_tuples)
 
             # Comment this out to visualise the processing of small contours under TempImages/small_[NAME].jpg
             small_cntrs = []
@@ -941,6 +955,7 @@ class Process:
 
         self.total_pages = len(self.filenames_list)
         qn_coord = self.find_qn_coords(self.filenames_list)
+
         if qn_coord == True:
             # Session is killed
             return
@@ -948,6 +963,7 @@ class Process:
         self.save_qn_images(qn_coord)
 
         self.qn_num = 1
+        print(len(self.qn_images_list))
         for filename in self.qn_images_list:
             isKilled = self.generate_document(filename, qn_coord)
             if isKilled == True:
@@ -983,18 +999,18 @@ class Process:
         # shutil.rmtree(dirpath + "/TempImages")
         # shutil.rmtree(dirpath + "/images/")
         items = os.listdir(dirpath + "/TempImages")
-        for item in items:
-            if sessionID in item:
-                os.remove(os.path.join(dirpath + "/TempImages", item))
-
-        items = os.listdir(dirpath + "/TempContours")
-        for item in items:
-            if sessionID in item:
-                os.remove(os.path.join(dirpath + "/TempContours", item))
-        
-
-        if path.exists(dirpath + "/images/" + sessionID + "_" + pdfname):
-            shutil.rmtree(dirpath + "/images/" + sessionID + "_" + pdfname)
+        # for item in items:
+        #     if sessionID in item:
+        #         os.remove(os.path.join(dirpath + "/TempImages", item))
+        #
+        # items = os.listdir(dirpath + "/TempContours")
+        # for item in items:
+        #     if sessionID in item:
+        #         os.remove(os.path.join(dirpath + "/TempContours", item))
+        #
+        #
+        # if path.exists(dirpath + "/images/" + sessionID + "_" + pdfname):
+        #     shutil.rmtree(dirpath + "/images/" + sessionID + "_" + pdfname)
 
 
 '''for curFilename in os.listdir("ReactPDF"):
@@ -1011,9 +1027,9 @@ class Process:
         found_ans_options = False'''
 
 # process = Process()
-
+#
 # filename = "P6_English_2019_CA1_CHIJ_2Pages"
-# process.main(filename, "2")
+# process.main(filename, "chij2222")
 
 
 

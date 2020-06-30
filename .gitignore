@@ -6,4 +6,8 @@ Output
 ReactPDF
 Sessions
 images
+venv
 pdfs
+.venv
+request_body_log.txt
+request_header_log.txt
