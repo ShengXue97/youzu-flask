@@ -588,7 +588,7 @@ def updatedatabase():
             }
             output_list.append(row_dict)
 
-    con = pymysql.connect(host='localhost', user='root', passwd='youzu2020!', db='youzu')
+    con = pymysql.connect(host='localhost', user='root', passwd='Youzu2020!', db='youzu')
     cursor = con.cursor()
 
     create_table_query = """create table if not exists qbank(
@@ -613,7 +613,7 @@ def updatedatabase():
 
 @app.route('/getdatabase', methods=['GET', 'POST'])
 def getdatabase():
-    con = pymysql.connect(host='localhost', user='root', passwd='youzu2020!', db='youzu')
+    con = pymysql.connect(host='localhost', user='root', passwd='Youzu2020!', db='youzu')
     cursor = con.cursor()
 
     query = """SELECT * FROM qbank"""
