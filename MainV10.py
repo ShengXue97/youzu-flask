@@ -38,7 +38,7 @@ class Process:
         self.pg_cnt_ls = []
         self.pg_num_1 = 2
         self.sessionID = ""
-
+        self.diag_list = []
         self.qn_num = 1
         self.total_qns = 0
         self.pg_num = 1
@@ -256,14 +256,15 @@ class Process:
                             encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
                         document_data_list.append(
                             ("TempImages/" + self.sessionID + "_" + str(self.diagram_count) + ".jpg", "image", y,
-                             pseudo_text, encoded_string))
+                             pseudo_text, encoded_string,"",""))
                         self.diagram_count = self.diagram_count + 1
+                        self.diag_list.append([(y,y+h),(x,x+w)])
                     else:
                         # Likely to be text, just small regions like "Go on to the next page"
-                        document_data_list.append((text, "text", y, pseudo_text, ""))
+                        document_data_list.append((text, "text", y, pseudo_text, "",y+h/2,x+w/2))
                 else:
                     # Likely to be a text
-                    document_data_list.append((text, "text", y, pseudo_text, ""))
+                    document_data_list.append((text, "text", y, pseudo_text, "",y+h/2,x+w/2))
         # for non english papers, no blank line detection required
         # else:
         #     for c in cntrs:
@@ -371,7 +372,10 @@ class Process:
             item = spell(data[0])  # TempImages/5.jpg
             typeof = data[1]
             y_coord = data[2]
-            pseudo_text = spell(data[3])
+            if typeof == 'text' and not any(data[5] in range(j[0][0],j[0][1]) for j in self.diag_list) and not any(data[6] in range(j[1][0],j[1][1]) for j in self.diag_list):
+                pseudo_text = spell(data[3])
+            else:
+                pseudo_text = ''
             base64img = data[4]
 
             # STEP 2: Find ans sections
