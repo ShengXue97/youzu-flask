@@ -415,11 +415,13 @@ class Process:
                 if first_ans_pos == -1:
                     # Ans options not found yet
                     final_text = final_text + item
-                    final_text = re.sub(r'[0-9][0-9]\.|[0-9]\.|[0-9][0-9]|[0-9]', '',final_text,1)
+                    final_text = re.sub(r'^[0-9][0-9]\.|^[0-9]\.|^[0-9][0-9]|^[0-9]', '', final_text, 1)
                 else:
                     # Ans options found
                     final_text = final_text + item[:first_ans_pos]
-                    final_text = re.sub(r'[0-9][0-9]\.|[0-9]\.|[0-9][0-9]|[0-9]', '',final_text,1)
+                    # only remove header numbers for non math papers
+                    final_text = re.sub(r'^[0-9][0-9]\.|^[0-9]\.|^[0-9][0-9]|^[0-9]', '', final_text, 1)
+
 
             elif typeof == "image":
                 final_image = final_image + base64img + " "

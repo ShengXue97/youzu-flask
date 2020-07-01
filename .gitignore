@@ -9,4 +9,8 @@ images
 venv
 pdfs
 .venv
+myflaskenv
+filtertest.js
+MainV11.py
+symspelltest.py
 
