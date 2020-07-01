@@ -758,6 +758,7 @@ class Process:
 
 
             for c in cntrs:
+                # print(c)
                 area = cv2.contourArea(c) / 10000
                 x, y, w, h = cv2.boundingRect(c)
 
@@ -962,6 +963,7 @@ class Process:
         self.save_qn_images(qn_coord)
 
         self.qn_num = 1
+        print(len(self.qn_images_list))
         for filename in self.qn_images_list:
             isKilled = self.generate_document(filename, qn_coord)
             if isKilled == True:
