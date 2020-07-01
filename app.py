@@ -16,6 +16,7 @@ import random
 from sqlalchemy import create_engine
 import pymysql
 import ast
+from PyPDF2 import PdfFileReader, PdfFileReader, PdfFileWriter
 # install the following 2 libs first
 # from flask_sqlalchemy import SQLAlchemy
 # from flask_marshmallow import Marshmallow
@@ -190,6 +191,30 @@ def savecsv():
 
     return jsonify({"Succeeded": "yes", "YourIP" : str(currentIP), "YourTime" : currentTime})
 
+@app.route('/getpdfpages', methods = ['GET', 'POST'])
+def getpdfpages():
+    name = request.args.get("name")
+    isExisting = request.args.get("isExisting")
+    filePath = ""
+    print("um" + name)
+    if isExisting == "no":
+        fileDownloaded=request.files["myFile"]
+        fileDownloaded.save(os.path.join("./ReactPDF", name + ".pdf"))
+        filePath = "./ReactPDF/" + name + ".pdf"
+    else:
+        azureDir = "/datassd/pdf_downloader-master/pdfs/"
+        localDir = "pdfs/"
+
+        if os.path.exists(azureDir):
+            filePath = azureDir + name + ".pdf"
+        elif os.path.exists(localDir):
+            filePath = localDir + name + ".pdf"
+    
+    pdf = PdfFileReader(open(filePath,'rb'))
+    noOfPages = int(pdf.getNumPages())
+    return jsonify({"Succeeded": "yes", "noOfPages" : noOfPages}) 
+        
+
 @app.route('/savepdf', methods = ['GET', 'POST'])
 def savepdf():
     name = request.args.get("name")
@@ -285,7 +310,6 @@ def deleteworkspace():
 def renameworkspace():
     oldname = request.args.get("oldName") + ".txt"
     newname = request.args.get("newName") + ".txt"
-    print(oldname + ";" + newname)
 
     if os.path.exists('Workspaces/csv/' + oldname):
         os.replace('Workspaces/csv/' + oldname, 'Workspaces/csv/' + newname)
@@ -328,7 +352,6 @@ def pushfile():
     requestIDProcessed = currentTime.replace(":", "-").replace(".", "_")
     sessionID = requestIDProcessed + "_" + uniqueID
     filename = request.args.get("name") + ".pdf"
-
     azureDir = "/datassd/pdf_downloader-master/pdfs/"
     localDir = "pdfs/"
     myDir = ""
@@ -338,17 +361,41 @@ def pushfile():
     elif os.path.exists(localDir):
         myDir = localDir
     else:
-        return jsonify({"Succeeded": "yes", "YourSessionID" : sessionID, "YourIP" : str(currentIP), "YourTime" : currentTime, 'filename': filename})
+        return jsonify({"Succeeded": "no", "YourSessionID" : sessionID, "YourIP" : str(currentIP), "YourTime" : currentTime, 'filename': ""})
 
     if os.path.exists(myDir + filename):
         response = None
-        if request.method == 'POST':
+        infile = PdfFileReader(myDir + filename, 'rb')
+        output = PdfFileWriter()
+        currentStartPage = request.args.get("currentStartPage")
+        currentEndPage = request.args.get("currentEndPage")
+        ignoreCustomPageRange  = request.args.get("ignoreCustomPageRange")
 
-            print("Forking....")
-            process = Process()
-            thread = threading.Thread(target=process.main, args=(filename, sessionID))
-            thread.start()
-            return jsonify({"Succeeded": "yes", "YourSessionID" : sessionID, "YourIP" : str(currentIP), "YourTime" : currentTime, 'filename': filename})
+        if ignoreCustomPageRange == "true":
+            for i in range(infile.numPages):
+                p = infile.getPage(i)
+                output.addPage(p)
+        else:
+            # 0-index
+            for i in range(int(currentStartPage) -1 , int(currentEndPage)):
+                p = infile.getPage(i)
+                output.addPage(p)
+
+        newFilename = request.args.get("name") + "_" + sessionID + ".pdf"
+        with open("ReactPDF/" + newFilename, 'wb') as f:
+            output.write(f)
+
+        pdf_file = open("ReactPDF/" + newFilename, "rb")
+        pdf_data_binary = pdf_file.read()
+        pdf_bas64 = "data:application/pdf;base64," + (base64.b64encode(pdf_data_binary)).decode("ascii")
+
+        print("Forking....")
+        process = Process()
+        thread = threading.Thread(target=process.main, args=(newFilename, sessionID))
+        thread.start()
+        return jsonify({"Succeeded": "yes", "YourSessionID" : sessionID, "YourIP" : str(currentIP), "YourTime" : currentTime, 'filename': newFilename, 'pdf_base64': pdf_bas64})
+    else:
+        return jsonify({"Succeeded": "no", "YourSessionID" : sessionID, "YourIP" : str(currentIP), "YourTime" : currentTime, 'filename': "", 'pdf_base64': ""})
 
 @app.route('/killsession', methods = ['GET', 'POST'])
 def killsession():
@@ -364,16 +411,38 @@ def killsession():
     
 @app.route('/uploadfile', methods = ['GET', 'POST'])
 def uploadfile():
-    print("called1")
     response = None
     if request.method == 'POST':
         currentIP = request.remote_addr
-        print(currentIP)
 
         fileDownloaded=request.files["myFile"]
         filename = fileDownloaded.filename
         fileDownloaded.save(os.path.join("./ReactPDF", filename))
+
+        infile = PdfFileReader("ReactPDF/" + filename, 'rb')
+        output = PdfFileWriter()
+        currentStartPage = request.args.get("currentStartPage")
+        currentEndPage = request.args.get("currentEndPage")
+
+        ignoreCustomPageRange  = request.args.get("ignoreCustomPageRange")
+
+        if ignoreCustomPageRange == "true":
+            for i in range(infile.numPages):
+                p = infile.getPage(i)
+                output.addPage(p)
+        else:
+            # 0-index
+            for i in range(int(currentStartPage) -1 , int(currentEndPage)):
+                p = infile.getPage(i)
+                output.addPage(p)
+
+        with open("ReactPDF/" + filename, 'wb') as f:
+            output.write(f)
+
         currentTime = str(datetime.now())
+        pdf_file = open("ReactPDF/" + filename, "rb")
+        pdf_data_binary = pdf_file.read()
+        pdf_bas64 = "data:application/pdf;base64," + (base64.b64encode(pdf_data_binary)).decode("ascii")
 
         # Unique entry for each request using timestamp!
         requestIDRaw = currentIP + "_" + currentTime
@@ -385,7 +454,7 @@ def uploadfile():
         process = Process()
         thread = threading.Thread(target=process.main, args=(filename, sessionID))
         thread.start()
-        return jsonify({"Succeeded": "yes", "YourSessionID" : sessionID, "YourIP" : str(currentIP), "YourTime" : currentTime, 'filename': filename})
+        return jsonify({"Succeeded": "yes", "YourSessionID" : sessionID, "YourIP" : str(currentIP), "YourTime" : currentTime, 'filename': filename, 'pdf_base64': pdf_bas64})
 
 
 @app.route('/getresult', methods = ['GET', 'POST'])
@@ -420,7 +489,6 @@ def getresult():
                 answer = rows["Answer"]
                 question_type = rows["question_type"]
                 image = rows["Image"]
-                # print("base64: " + base64imgs)
                 qn_list = [pageNum, page, ans_a, ans_b, ans_c, ans_d, qnNum, base64imgs, answer, question_type, image]
                 # append question list to page list
                 thisPageList.append(qn_list)
@@ -443,7 +511,6 @@ def getresult():
                     answer = rows["Answer"]
                     question_type = rows["question_type"]
                     image = rows["Image"]
-                    # print("base64: " + base64imgs)
                     qn_list = [pageNum, page, ans_a, ans_b, ans_c, ans_d, qnNum, base64imgs, answer, question_type, image]
                     # append question list to page list
                     thisPageList.append(qn_list)
@@ -456,10 +523,6 @@ def getresult():
             os.remove(os.path.join(dirpath + "/Sessions", item))
 
     row_json.append(thisPageList)
-    # print(row_json)
-    # for page in row_json:
-    #     print("Page " + str(row_json.index(page) + 1) + ": " + str(len(page)) + " questions")
-    #os.remove("Output/" + sessionID + "_output.csv")
     return jsonify(row_json)
 
 @app.route('/updatedatabase', methods = ['GET', 'POST'])
@@ -522,23 +585,25 @@ def updatedatabase():
     con.close()
     return jsonify({"Succeeded": "yes"})
 
+# @app.before_request
+# def log_request_info():
+#     app.logger.debug('Headers: %s', request.headers)
+#     app.logger.debug('Body: %s', request.get_data())
+    
+#     with open("request_header_log.txt", "a") as myfile:
+#         myfile.write('Headers: "' + str(request.headers) + '"\n')
+#         myfile.write('-----------------------------------------\n')
+
+#     with open("request_body_log.txt", "a") as myfile:
+#         myfile.write('Body: "' + str(request.get_data()) + '"\n')
+#         myfile.write('-----------------------------------------\n')
+
+## Below are helper methods not part of API
 
 def randomString(stringLength=8):
     letters = string.ascii_lowercase
     return ''.join(random.sample(string.ascii_letters + string.digits, k=stringLength))
 
-@app.before_request
-def log_request_info():
-    app.logger.debug('Headers: %s', request.headers)
-    app.logger.debug('Body: %s', request.get_data())
-    
-    with open("request_header_log.txt", "a") as myfile:
-        myfile.write('Headers: "' + str(request.headers) + '"\n')
-        myfile.write('-----------------------------------------\n')
-
-    with open("request_body_log.txt", "a") as myfile:
-        myfile.write('Body: "' + str(request.get_data()) + '"\n')
-        myfile.write('-----------------------------------------\n')
 
 if __name__ == '__main__':
     app.run(threaded=True, host='0.0.0.0', port=3001)
