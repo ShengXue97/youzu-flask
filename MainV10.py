@@ -377,6 +377,7 @@ class Process:
             else:
                 pseudo_text = ''
             base64img = data[4]
+            self.diag_list.clear()
 
             # STEP 2: Find ans sections
             # regex = re.compile('[\[\(\|\{][0-9]?[0-9][\]\)\}\|]')
