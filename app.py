@@ -588,7 +588,7 @@ def updatedatabase():
             }
             output_list.append(row_dict)
 
-    con = pymysql.connect(host='localhost', user='root', passwd='Youzu2020!', db='youzu')
+    con = pymysql.connect(host='localhost', user='root', passwd='youzu2020!', db='youzu')
     cursor = con.cursor()
 
     create_table_query = """create table if not exists qbank(
@@ -611,6 +611,30 @@ def updatedatabase():
     con.close()
     return jsonify({"Succeeded": "yes"})
 
+@app.route('/getdatabase', methods=['GET', 'POST'])
+def getdatabase():
+    con = pymysql.connect(host='localhost', user='root', passwd='youzu2020!', db='youzu')
+    cursor = con.cursor()
+
+    query = """SELECT * FROM qbank"""
+    output_table = []
+    try:
+        cursor.execute(query)
+        for x in cursor:
+            question = json.loads(x[1])
+            question["A"] = question["Choices"]["A"]
+            question["B"] = question["Choices"]["B"]
+            question["C"] = question["Choices"]["C"]
+            question["D"] = question["Choices"]["D"]
+            del question["Choices"]
+            output_table.append(question)
+
+    except Exception as e:
+        con.rollback()
+        print("exception occured:", e)
+
+    con.close()
+    return jsonify({"Succeeded": "yes", "Table" : output_table})
 
 # @app.before_request
 # def log_request_info():
