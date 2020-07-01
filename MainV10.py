@@ -997,18 +997,18 @@ class Process:
         # shutil.rmtree(dirpath + "/TempImages")
         # shutil.rmtree(dirpath + "/images/")
         items = os.listdir(dirpath + "/TempImages")
-        # for item in items:
-        #     if sessionID in item:
-        #         os.remove(os.path.join(dirpath + "/TempImages", item))
-        #
-        # items = os.listdir(dirpath + "/TempContours")
-        # for item in items:
-        #     if sessionID in item:
-        #         os.remove(os.path.join(dirpath + "/TempContours", item))
-        #
-        #
-        # if path.exists(dirpath + "/images/" + sessionID + "_" + pdfname):
-        #     shutil.rmtree(dirpath + "/images/" + sessionID + "_" + pdfname)
+        for item in items:
+            if sessionID in item:
+                os.remove(os.path.join(dirpath + "/TempImages", item))
+        
+        items = os.listdir(dirpath + "/TempContours")
+        for item in items:
+            if sessionID in item:
+                os.remove(os.path.join(dirpath + "/TempContours", item))
+        
+        
+        if path.exists(dirpath + "/images/" + sessionID + "_" + pdfname):
+            shutil.rmtree(dirpath + "/images/" + sessionID + "_" + pdfname)
 
 
 '''for curFilename in os.listdir("ReactPDF"):
