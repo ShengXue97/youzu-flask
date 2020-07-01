@@ -26,6 +26,7 @@ import base64
 import os.path
 from os import path
 import json
+from autocorrect import Speller
 
 if platform.system() == "Windows":
     pytesseract.pytesseract.tesseract_cmd = "C:/Program Files/Tesseract-OCR/tesseract.exe"
@@ -345,6 +346,7 @@ class Process:
         current_ans_list = []
         found_ans_options = False
         first_ans_pos = -1
+        spell = Speller()
 
         # file_attribute_list -> [paper_level, paper_subject, paper_year, paper_school, paper_exam_type]
         paper_level = self.file_attribute_list[0].upper()
@@ -363,10 +365,10 @@ class Process:
 
         for i in range(len(document_data_list)):
             data = document_data_list[i]
-            item = data[0]  # TempImages/5.jpg
+            item = spell(data[0])  # TempImages/5.jpg
             typeof = data[1]
             y_coord = data[2]
-            pseudo_text = data[3]
+            pseudo_text = spell(data[3])
             base64img = data[4]
 
             # STEP 2: Find ans sections
@@ -756,21 +758,19 @@ class Process:
 
 
             for c in cntrs:
-                # print(c)
                 area = cv2.contourArea(c) / 10000
                 x, y, w, h = cv2.boundingRect(c)
 
                 cv2.rectangle(result, (x, y), (x + w, y + h), (0, 0, 255), 2)
-
-                print(area, y / height , x / width , w / h)
+                
                 if (0.01 < area < 0.1) and y / height < 0.855 and (0 < x / width < 0.25) and (0.2 < w / h < 2):
-                    print('success')
+                    
                     if y - 5 > 0 and y + h + 5 < height and x - 5 > 0 and x + w + 5 < width:
-                        print('success2')
+                        
                         new_image = img[y - 5: y + h + 5, x - 5: x + w + 5]
                     else:
                         new_image = img[y:y + h, x:x + w]
-                        print('fail')
+                        
 
                     text = pytesseract.image_to_string(new_image, lang='eng', config='--psm 6')
 
@@ -792,7 +792,6 @@ class Process:
 
 
             sorted_cntr_tuples.sort(key=lambda tup: tup[2])
-            # print(sorted_cntr_tuples)
 
             # Comment this out to visualise the processing of small contours under TempImages/small_[NAME].jpg
             small_cntrs = []
@@ -913,8 +912,8 @@ class Process:
         pdf_path = ""
         if os.path.exists("ReactPDF/" + paper_name + ".pdf"):
             pdf_path = "ReactPDF/" + paper_name + ".pdf"
-        else:
-            pdf_path = "pdfs/" + paper_name + ".pdf"
+        elif os.path.exists("/datassd/pdf_downloader-master/pdfs/" +  paper_name + ".pdf"):
+            pdf_path = "/datassd/pdf_downloader-master/pdfs/" +  paper_name + ".pdf"
 
         pages = convert_from_path(pdf_path)
         pg_cntr = 1
@@ -963,7 +962,6 @@ class Process:
         self.save_qn_images(qn_coord)
 
         self.qn_num = 1
-        print(len(self.qn_images_list))
         for filename in self.qn_images_list:
             isKilled = self.generate_document(filename, qn_coord)
             if isKilled == True:
@@ -999,18 +997,18 @@ class Process:
         # shutil.rmtree(dirpath + "/TempImages")
         # shutil.rmtree(dirpath + "/images/")
         items = os.listdir(dirpath + "/TempImages")
-        # for item in items:
-        #     if sessionID in item:
-        #         os.remove(os.path.join(dirpath + "/TempImages", item))
-        #
-        # items = os.listdir(dirpath + "/TempContours")
-        # for item in items:
-        #     if sessionID in item:
-        #         os.remove(os.path.join(dirpath + "/TempContours", item))
-        #
-        #
-        # if path.exists(dirpath + "/images/" + sessionID + "_" + pdfname):
-        #     shutil.rmtree(dirpath + "/images/" + sessionID + "_" + pdfname)
+        for item in items:
+            if sessionID in item:
+                os.remove(os.path.join(dirpath + "/TempImages", item))
+        
+        items = os.listdir(dirpath + "/TempContours")
+        for item in items:
+            if sessionID in item:
+                os.remove(os.path.join(dirpath + "/TempContours", item))
+        
+        
+        if path.exists(dirpath + "/images/" + sessionID + "_" + pdfname):
+            shutil.rmtree(dirpath + "/images/" + sessionID + "_" + pdfname)
 
 
 '''for curFilename in os.listdir("ReactPDF"):
