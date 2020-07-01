@@ -31,13 +31,14 @@ from autocorrect import Speller
 if platform.system() == "Windows":
     pytesseract.pytesseract.tesseract_cmd = "C:/Program Files/Tesseract-OCR/tesseract.exe"
 
+
 class Process:
     def __init__(self):
         self.pg_number = 1
         self.pg_cnt_ls = []
         self.pg_num_1 = 2
         self.sessionID = ""
-        
+
         self.qn_num = 1
         self.total_qns = 0
         self.pg_num = 1
@@ -50,10 +51,11 @@ class Process:
         self.filenames_list = []
         self.qn_images_list = []
         self.global_df = pd.DataFrame(
-            columns=['Level', 'Page', 'Question', 'question_type', 'A', 'B', 'C', 'D', 'Answer', 'Subject', 'Year', 'School', 'Exam',
+            columns=['Level', 'Page', 'Question', 'question_type', 'A', 'B', 'C', 'D', 'Answer', 'Subject', 'Year',
+                     'School', 'Exam',
                      'Number', 'Image',
                      'Image File', 'Answer'])
-    
+
     def is_session_killed(self):
         if os.path.exists('Sessions/' + self.sessionID + "_kill" + ".json"):
             # This session is killed!
@@ -213,7 +215,7 @@ class Process:
             if 0.05 < w1 / width < 0.2:
                 cv2.rectangle(result, (x1, y1), (x1 + w1, y1 + h1), (255, 0, 0), 2)
                 texted = cv2.putText(result_1, '(EMPTY)____', (x1, y1), cv2.FONT_HERSHEY_SIMPLEX,
-                                     1, (0, 0, 0), 2, cv2.LINE_AA) #1.2-->0.8
+                                     1, (0, 0, 0), 2, cv2.LINE_AA)  # 1.2-->0.8
                 texted = cv2.dilate(texted, np.ones((2, 2), np.uint8), iterations=1)
         for c in cntrs:
             area = cv2.contourArea(c) / 10000
@@ -228,12 +230,13 @@ class Process:
                 # image = cv2.imread(img, 0)
             thresh = 255 - cv2.threshold(grayish, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
             ###cropping out image and convert to text
-            if y-10 > 0 and y+h+10 < height and x-20 > 0 and x+w+20 < width :
-                ROI = thresh[y-10 : y+h+10, x-20 : x+w+20]
+            if y - 10 > 0 and y + h + 10 < height and x - 20 > 0 and x + w + 20 < width:
+                ROI = thresh[y - 10: y + h + 10, x - 20: x + w + 20]
             else:
-                ROI = thresh[y :y + h , x :x + w ]
+                ROI = thresh[y:y + h, x:x + w]
             text = pytesseract.image_to_string(ROI, lang='eng', config='--psm 6')
-            text = re.sub(r"\(EMPTY[\)]*|\(FMPTY[\)]*|\(eEmpTy[\)]*|\(Fupty[\)]*|\(Fuprty[\)]", "_________", text, flags=re.I)
+            text = re.sub(r"\(EMPTY[\)]*|\(FMPTY[\)]*|\(eEmpTy[\)]*|\(Fupty[\)]*|\(Fuprty[\)]", "_________", text,
+                          flags=re.I)
             pseudo_text = text
 
             if w / width > 0.05 and y / height < 0.95:  # and (x/width < 0.4 or x/width > 0.5)
@@ -248,7 +251,8 @@ class Process:
                         new_image = img[y:y + h, x:x + w]
                         cv2.imwrite("TempImages/" + self.sessionID + "_" + str(self.diagram_count) + ".jpg", new_image)
                         # store in base64 as well into document_data_list
-                        with open("TempImages/" + self.sessionID + "_" + str(self.diagram_count) + ".jpg", "rb") as image_file:
+                        with open("TempImages/" + self.sessionID + "_" + str(self.diagram_count) + ".jpg",
+                                  "rb") as image_file:
                             encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
                         document_data_list.append(
                             ("TempImages/" + self.sessionID + "_" + str(self.diagram_count) + ".jpg", "image", y,
@@ -337,7 +341,6 @@ class Process:
         else:
             return False
 
-
     def write_data_to_document(self, document_data_list, qn_coord):
         # qn_coord is a tuple consisting of nested (pg_number, y) tuples of each contour
 
@@ -372,9 +375,9 @@ class Process:
             base64img = data[4]
 
             # STEP 2: Find ans sections
-            #regex = re.compile('[\[\(\|\{][0-9]?[0-9][\]\)\}\|]')
-            #(any type of character within brackets, len < 3)
-            regex = re.compile('[\[\(\|\{].{1,3}[\]\)\}\|]')#|.{1,3}[\]\)\}\|]
+            # regex = re.compile('[\[\(\|\{][0-9]?[0-9][\]\)\}\|]')
+            # (any type of character within brackets, len < 3)
+            regex = re.compile('[\[\(\|\{].{1,3}[\]\)\}\|]')  # |.{1,3}[\]\)\}\|]
 
             matches = regex.finditer(pseudo_text)
             match_list = []
@@ -401,15 +404,15 @@ class Process:
                         current_ans_list.append(substr)
                 else:
                     break
-           
+
             ans_a = "-" if len(current_ans_list) <= 0 else current_ans_list[0]
-            ans_a = re.sub('[\[\(\|\{].{1,3}[\]\)\}\|]', '', ans_a,1)
+            ans_a = re.sub('[\[\(\|\{].{1,3}[\]\)\}\|]', '', ans_a, 1)
             ans_b = "-" if len(current_ans_list) <= 1 else current_ans_list[1]
-            ans_b = re.sub('[\[\(\|\{].{1,3}[\]\)\}\|]', '', ans_b,1)
+            ans_b = re.sub('[\[\(\|\{].{1,3}[\]\)\}\|]', '', ans_b, 1)
             ans_c = "-" if len(current_ans_list) <= 2 else current_ans_list[2]
-            ans_c = re.sub('[\[\(\|\{].{1,3}[\]\)\}\|]', '', ans_c,1)
+            ans_c = re.sub('[\[\(\|\{].{1,3}[\]\)\}\|]', '', ans_c, 1)
             ans_d = "-" if len(current_ans_list) <= 3 else current_ans_list[3]
-            ans_d = re.sub('[\[\(\|\{].{1,3}[\]\)\}\|]', '', ans_d,1)
+            ans_d = re.sub('[\[\(\|\{].{1,3}[\]\)\}\|]', '', ans_d, 1)
             answer = "-"
 
             # STEP 3: Add question to dataframe
@@ -417,13 +420,17 @@ class Process:
                 if first_ans_pos == -1:
                     # Ans options not found yet
                     final_text = final_text + item
-                    final_text = re.sub(r'^[0-9][0-9]\.|^[0-9]\.|^[0-9][0-9]|^[0-9]', '', final_text, 1)
+                    if not re.search(r'math', self.filename, re.I):
+                        final_text = re.sub(r'[0-9][0-9]\.|[0-9]\.|[0-9][0-9]|[0-9]', '', final_text, 1)
+                    else:
+                        final_text = re.sub(r'^[0-9][0-9]\.|^[0-9]\.|^[0-9][0-9]|^[0-9]', '', final_text, 1)
                 else:
                     # Ans options found
                     final_text = final_text + item[:first_ans_pos]
-                    # only remove header numbers for non math papers
-                    final_text = re.sub(r'^[0-9][0-9]\.|^[0-9]\.|^[0-9][0-9]|^[0-9]', '', final_text, 1)
-
+                    if not re.search(r'math', self.filename, re.I):
+                        final_text = re.sub(r'[0-9][0-9]\.|[0-9]\.|[0-9][0-9]|[0-9]', '', final_text, 1)
+                    else:
+                        final_text = re.sub(r'^[0-9][0-9]\.|^[0-9]\.|^[0-9][0-9]|^[0-9]', '', final_text, 1)
 
             elif typeof == "image":
                 final_image = final_image + base64img + " "
@@ -436,7 +443,8 @@ class Process:
         if final_image == "":
             final_image = "-"
 
-        self.global_df.loc[self.qn_num] = [paper_level, qn_coord[self.qn_num][0], final_text, "-", ans_a, ans_b, ans_c, ans_d,
+        self.global_df.loc[self.qn_num] = [paper_level, qn_coord[self.qn_num][0], final_text, "-", ans_a, ans_b, ans_c,
+                                           ans_d,
                                            answer, paper_subject,
                                            paper_year, paper_school, paper_exam_type, self.qn_num, contains_image,
                                            final_image]
@@ -459,12 +467,13 @@ class Process:
             return True
 
         print("STAGE 3 (Output Generation): QN " + str(self.qn_num - 1) + "/" + str(self.total_qns) +
-                ", Filename: " + self.filename + ", SessionID: " + self.sessionID)
-        entry = {'stage': 3, 'page' : self.qn_num - 1, 'total' : self.total_qns, 'output' : [],
-                 'filename' : self.filename, 'level': self.file_attribute_list[0], 'subject': self.file_attribute_list[1],
+              ", Filename: " + self.filename + ", SessionID: " + self.sessionID)
+        entry = {'stage': 3, 'page': self.qn_num - 1, 'total': self.total_qns, 'output': [],
+                 'filename': self.filename, 'level': self.file_attribute_list[0],
+                 'subject': self.file_attribute_list[1],
                  'year': self.file_attribute_list[2], 'school': self.file_attribute_list[3],
                  'exam': self.file_attribute_list[4]}
-                 
+
         with open('Sessions/' + self.sessionID + ".json", 'w') as outfile:
             json.dump(entry, outfile)
 
@@ -622,11 +631,11 @@ class Process:
             im1 = im.crop((left, top, right, bottom))
 
         if new_image_path != "":
-            im1.save(new_image_path,dpi=(500,500))
+            im1.save(new_image_path, dpi=(500, 500))
             if not new_image_path in self.qn_images_list:
                 self.qn_images_list.append(new_image_path)
         else:
-            im1.save("TempImages/" + self.sessionID + "_" + "temp.jpg",dpi=(500,500))
+            im1.save("TempImages/" + self.sessionID + "_" + "temp.jpg", dpi=(500, 500))
 
     def save_qn_images(self, qn_coord):
         self.total_qns = len(qn_coord) - 2
@@ -683,16 +692,17 @@ class Process:
             if self.is_session_killed():
                 return True
             print("STAGE 2 (Digitisation): PG " + str(self.pg_number) + "/" + str(self.total_pages) +
-                ", Filename: " + self.filename + ", SessionID: " + self.sessionID)
-                
-            entry = {'stage': 2, 'page' : str(self.pg_number), 'total' : self.total_pages, 'output' : [],
-                     'filename' : self.filename, 'level': self.file_attribute_list[0], 'subject': self.file_attribute_list[1],
-                    'year': self.file_attribute_list[2], 'school': self.file_attribute_list[3],
-                    'exam': self.file_attribute_list[4]}
+                  ", Filename: " + self.filename + ", SessionID: " + self.sessionID)
+
+            entry = {'stage': 2, 'page': str(self.pg_number), 'total': self.total_pages, 'output': [],
+                     'filename': self.filename, 'level': self.file_attribute_list[0],
+                     'subject': self.file_attribute_list[1],
+                     'year': self.file_attribute_list[2], 'school': self.file_attribute_list[3],
+                     'exam': self.file_attribute_list[4]}
 
             with open('Sessions/' + self.sessionID + ".json", 'w') as outfile:
                 json.dump(entry, outfile)
-            
+
             image_name = filename.replace(".jpg", "")
             ###### Step 1A: Read the image and check for special sections
             img = cv2.imread(image_name + ".jpg")
@@ -704,7 +714,7 @@ class Process:
 
             target_word = []
             sorted_cntr_tuples = []
-            #for section detection under 'Comments' column
+            # for section detection under 'Comments' column
             for j in range(21, 70):
                 section_targ.append('(' + str(j) + ')')
                 section_targ.append(str(j) + '.')
@@ -714,7 +724,6 @@ class Process:
                 target_word.append('(' + str(a) + ')')
             # same case for strangely placed qns, but they have a "." in front instead of parenthesis
             for b in range(0, 101):
-
                 target_word.append(str(b) + '.')
 
             data = pytesseract.image_to_data(img, output_type=pytesseract.Output.DICT)
@@ -738,7 +747,7 @@ class Process:
             for ele in target_word:
                 word_occurences = [i for i, word in enumerate(data["text"]) if word.lower() == ele]
                 for occ in word_occurences:
-                    if self.pg_number > 10 and y/height > 0.18: #self.pg_number > 10
+                    if self.pg_number > 10 and y / height > 0.18:  # self.pg_number > 10
                         w = data["width"][occ]
                         h = data["height"][occ]
                         x = data["left"][occ]
@@ -756,25 +765,21 @@ class Process:
             y_tolerance = m.floor(0.01 * height)  # previously 0.024964
             thresh, cntrs = self.merge_contours(thresh, cntrs, x_tolerance, y_tolerance)
 
-
             for c in cntrs:
-                # print(c)
                 area = cv2.contourArea(c) / 10000
                 x, y, w, h = cv2.boundingRect(c)
 
                 cv2.rectangle(result, (x, y), (x + w, y + h), (0, 0, 255), 2)
-                
+
                 if (0.01 < area < 0.1) and y / height < 0.855 and (0 < x / width < 0.25) and (0.2 < w / h < 2):
-                    
+
                     if y - 5 > 0 and y + h + 5 < height and x - 5 > 0 and x + w + 5 < width:
-                        
+
                         new_image = img[y - 5: y + h + 5, x - 5: x + w + 5]
                     else:
                         new_image = img[y:y + h, x:x + w]
-                        
 
                     text = pytesseract.image_to_string(new_image, lang='eng', config='--psm 6')
-
 
                     if text != "":
 
@@ -791,7 +796,6 @@ class Process:
                         if not contains_illegal_qn_string and not probably_same_contour and not matches:
                             sorted_cntr_tuples.append((c, self.pg_number, y, w, h, int(x / width)))
 
-
             sorted_cntr_tuples.sort(key=lambda tup: tup[2])
 
             # Comment this out to visualise the processing of small contours under TempImages/small_[NAME].jpg
@@ -802,9 +806,11 @@ class Process:
                     new_image = img[y:y + h, x:x + w]
                 else:
                     new_image = img[y:y + h, xw:xw + w]
-                cv2.imwrite("TempImages/" + self.sessionID + "_" + "small_" + str(self.diagram_count) + ".jpg", new_image)
+                cv2.imwrite("TempImages/" + self.sessionID + "_" + "small_" + str(self.diagram_count) + ".jpg",
+                            new_image)
                 # Read as binary image - only if we want to test what small image was read as (DEBUGGING)
-                small_image = cv2.imread("TempImages/" + self.sessionID + "_" + "small_" + str(self.diagram_count) + ".jpg", 0)
+                small_image = cv2.imread(
+                    "TempImages/" + self.sessionID + "_" + "small_" + str(self.diagram_count) + ".jpg", 0)
                 small_cntrs.append((self.pg_number, y))
                 self.diagram_count = self.diagram_count + 1
 
@@ -812,7 +818,6 @@ class Process:
                 qn_coord.append((self.pg_number, y))
             # page number will increment with every /small_ image appended to TempContours/
             cv2.imwrite("TempContours/" + self.sessionID + "_" + str(self.pg_num) + ".jpg", result)
-
 
             self.pg_number = self.pg_number + 1
 
@@ -887,10 +892,11 @@ class Process:
         global global_df
         global file_attribute_list
         print(pdfname)
-        
+
         self.sessionID = sessionID
         self.global_df = pd.DataFrame(
-            columns=['Level', 'Page', 'Question', 'question_type', 'A', 'B', 'C', 'D', 'Answer', 'Subject', 'Year', 'School',
+            columns=['Level', 'Page', 'Question', 'question_type', 'A', 'B', 'C', 'D', 'Answer', 'Subject', 'Year',
+                     'School',
                      'Exam',
                      'Number',
                      'Image', 'Image File'])
@@ -913,8 +919,8 @@ class Process:
         pdf_path = ""
         if os.path.exists("ReactPDF/" + paper_name + ".pdf"):
             pdf_path = "ReactPDF/" + paper_name + ".pdf"
-        elif os.path.exists("/datassd/pdf_downloader-master/pdfs/" +  paper_name + ".pdf"):
-            pdf_path = "/datassd/pdf_downloader-master/pdfs/" +  paper_name + ".pdf"
+        elif os.path.exists("/datassd/pdf_downloader-master/pdfs/" + paper_name + ".pdf"):
+            pdf_path = "/datassd/pdf_downloader-master/pdfs/" + paper_name + ".pdf"
 
         pages = convert_from_path(pdf_path)
         pg_cntr = 1
@@ -926,24 +932,25 @@ class Process:
             os.makedirs(sub_dir)
 
         if len(pages) == 1:
-            paige=pages
+            paige = pages
         else:
-            paige=pages
+            paige = pages
         for index, page in enumerate(paige):
             if self.is_session_killed():
                 return True
 
             print("STAGE 1 (Converting to images): PG " + str(index + 1) + "/" + str(len(paige)) +
-                ", Filename: " + self.filename + ", SessionID: " + self.sessionID)
+                  ", Filename: " + self.filename + ", SessionID: " + self.sessionID)
 
-            entry = {'stage': 1, 'page' : str(index + 1), 'total' : str(len(paige)), 'output' : [],
-                     'filename' : self.filename, 'level': self.file_attribute_list[0], 'subject': self.file_attribute_list[1],
-                    'year': self.file_attribute_list[2], 'school': self.file_attribute_list[3],
-                    'exam': self.file_attribute_list[4]}
+            entry = {'stage': 1, 'page': str(index + 1), 'total': str(len(paige)), 'output': [],
+                     'filename': self.filename, 'level': self.file_attribute_list[0],
+                     'subject': self.file_attribute_list[1],
+                     'year': self.file_attribute_list[2], 'school': self.file_attribute_list[3],
+                     'exam': self.file_attribute_list[4]}
 
             with open('Sessions/' + self.sessionID + ".json", 'w') as outfile:
                 json.dump(entry, outfile)
-                    
+
             filename = "pg_" + str(pg_cntr) + '_' + pdf_path.split('/')[-1].replace('.pdf', '.jpg')
             page.save(sub_dir + filename)
             pg_cntr = pg_cntr + 1
@@ -951,7 +958,6 @@ class Process:
             if not self.is_white_image(image_name):
                 image_name = image_name + "_inverted"
             self.filenames_list.append(image_name + ".jpg")
-
 
         self.total_pages = len(self.filenames_list)
         qn_coord = self.find_qn_coords(self.filenames_list)
@@ -963,7 +969,6 @@ class Process:
         self.save_qn_images(qn_coord)
 
         self.qn_num = 1
-        print(len(self.qn_images_list))
         for filename in self.qn_images_list:
             isKilled = self.generate_document(filename, qn_coord)
             if isKilled == True:
@@ -1002,13 +1007,12 @@ class Process:
         for item in items:
             if sessionID in item:
                 os.remove(os.path.join(dirpath + "/TempImages", item))
-        
+
         items = os.listdir(dirpath + "/TempContours")
         for item in items:
             if sessionID in item:
                 os.remove(os.path.join(dirpath + "/TempContours", item))
-        
-        
+
         if path.exists(dirpath + "/images/" + sessionID + "_" + pdfname):
             shutil.rmtree(dirpath + "/images/" + sessionID + "_" + pdfname)
 
