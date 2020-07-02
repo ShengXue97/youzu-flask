@@ -926,6 +926,8 @@ class Process:
             pdf_path = "ReactPDF/" + paper_name + ".pdf"
         elif os.path.exists("/datassd/pdf_downloader-master/pdfs/" + paper_name + ".pdf"):
             pdf_path = "/datassd/pdf_downloader-master/pdfs/" + paper_name + ".pdf"
+        elif os.path.exists("/pdfs/" + paper_name + ".pdf"):
+            pdf_path = "/pdfs/" + paper_name + ".pdf"
 
         pages = convert_from_path(pdf_path)
         pg_cntr = 1
