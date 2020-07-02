@@ -382,7 +382,7 @@ class Process:
             # STEP 2: Find ans sections
             # regex = re.compile('[\[\(\|\{][0-9]?[0-9][\]\)\}\|]')
             # (any type of character within brackets, len < 3)
-            regex = re.compile('[\[\(\|\{].{1,3}[\]\)\}\|]')  # |.{1,3}[\]\)\}\|]
+            regex = re.compile('[\[\(\|\{][^s]{0,3}[\]\)\}\|]')  # |.{1,3}[\]\)\}\|]
 
             matches = regex.finditer(pseudo_text)
             match_list = []
