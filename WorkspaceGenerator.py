@@ -171,8 +171,8 @@ def getresult(sessionID):
     file1.write(row_json_str.encode('utf-8'))
 
 dirpath = os.getcwd()
-mypath = dirpath + "/ReactPDF"
-# mypath = "/datassd/pdf_downloader-master/pdfs/"
+#mypath = dirpath + "/ReactPDF"
+mypath = "/datassd/pdf_downloader-master/pdfs/"
 items = os.listdir(mypath)
 batch_num = 2
 batches_list = []
