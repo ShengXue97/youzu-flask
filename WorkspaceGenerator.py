@@ -148,20 +148,24 @@ def getresult(sessionID):
 
     row_json_str = "["
     for page in row_json:
-        row_json_str = row_json_str + "["
-        for question in page:
+        if len(page) == 0:
+            row_json_str = row_json_str + "[]"
+        else:
             row_json_str = row_json_str + "["
-            for attribute in question:
-                if isinstance(attribute, str):
-                    #attribute = attribute.replace("'", '"')
-                    attribute = attribute.replace('"', "\\" + '"')
-                    row_json_str = row_json_str + '\"' + attribute + '\",'
-                else:
-                    row_json_str = row_json_str + str(attribute) + ','
+            for question in page:
+                row_json_str = row_json_str + "["
+                for attribute in question:
+                    if isinstance(attribute, str):
+                        #attribute = attribute.replace("'", '"')
+                        attribute = attribute.replace('"', "\\" + '"')
+                        row_json_str = row_json_str + '\"' + attribute + '\",'
+                    else:
+                        row_json_str = row_json_str + str(attribute) + ','
+
+                row_json_str = row_json_str[:-1] + "],"
 
             row_json_str = row_json_str[:-1] + "],"
-
-        row_json_str = row_json_str[:-1] + "],"
+            
     row_json_str = row_json_str[:-1] + "]"
     row_json_str = row_json_str.replace('\n', '\\n')
 
