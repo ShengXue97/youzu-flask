@@ -13,6 +13,7 @@ def generate_workspace(filename, sessionID):
 
 def get_pdf_base64(filename):
     pdf_path = ""
+    filename = filename.replace(".pdf","")
     if os.path.exists("ReactPDF/" + filename + ".pdf"):
         pdf_path = "ReactPDF/" + filename + ".pdf"
     elif os.path.exists("/datassd/pdf_downloader-master/pdfs/" + filename + ".pdf"):
@@ -20,15 +21,14 @@ def get_pdf_base64(filename):
     elif os.path.exists("/pdfs/" + filename + ".pdf"):
         pdf_path = "/pdfs/" + filename + ".pdf"
 
-    if os.path.exists(pdf_path):
-        encoded_string = ""
-        with open(pdf_path, "rb") as pdf_file:
-            encoded_string = "data:application/pdf;base64," + base64.b64encode(pdf_file.read()).decode("utf-8")
+    encoded_string = ""
+    with open(pdf_path, "rb") as pdf_file:
+        encoded_string = "data:application/pdf;base64," + base64.b64encode(pdf_file.read()).decode("utf-8")
 
-        if not os.path.exists("Workspaces/pdf"):
-            os.makedirs("Workspaces/pdf")
-        file1 = open("Workspaces/pdf/" + filename.replace(".pdf","") + ".txt", "wb")
-        file1.write(encoded_string.encode('utf-8'))
+    if not os.path.exists("Workspaces/pdf"):
+        os.makedirs("Workspaces/pdf")
+    file1 = open("Workspaces/pdf/" + filename.replace(".pdf","") + ".txt", "wb")
+    file1.write(encoded_string.encode('utf-8'))
 
 def find_paper_attributes(filename):
     # global filename
@@ -170,7 +170,32 @@ def getresult(sessionID):
     file1 = open("Workspaces/csv/" + sessionID + ".txt", "wb")
     file1.write(row_json_str.encode('utf-8'))
 
-process = Process()
-filename = "P6_English_2019_CA1_CHIJ_2Pages.pdf"
-thread = threading.Thread(target=generate_workspace, args=(filename, filename.replace(".pdf", "")))
-thread.start()
+dirpath = os.getcwd()
+mypath = dirpath + "/ReactPDF"
+# mypath = "/datassd/pdf_downloader-master/pdfs/"
+items = os.listdir(mypath)
+
+batch_num = 2
+batches_list = []
+
+prev_num = 0
+prev_batch = []
+for i in range(len(items)):
+    cur_num = i // batch_num
+    if cur_num != prev_num:
+        batches_list.append(prev_batch)
+        prev_batch = []
+        prev_num = cur_num
+    prev_batch.append(items[i])
+batches_list.append(prev_batch)
+
+for batch in batches_list:
+    threads = []
+    for filename in batch:
+        process = Process()
+        thread = threading.Thread(target=generate_workspace, args=(filename, filename.replace(".pdf", "")))
+        thread.start()
+        threads.append(thread)
+
+    for t in threads:
+        t.join()
