@@ -411,13 +411,13 @@ class Process:
                     break
 
             ans_a = "-" if len(current_ans_list) <= 0 else current_ans_list[0]
-            ans_a = re.sub('[\[\(\|\{].{1,3}[\]\)\}\|]', '', ans_a, 1)
+            ans_a = re.sub('[\[\(\|\{].{1,3}[\]\)\}\|]', '', ans_a, 1).strip()
             ans_b = "-" if len(current_ans_list) <= 1 else current_ans_list[1]
-            ans_b = re.sub('[\[\(\|\{].{1,3}[\]\)\}\|]', '', ans_b, 1)
+            ans_b = re.sub('[\[\(\|\{].{1,3}[\]\)\}\|]', '', ans_b, 1).strip()
             ans_c = "-" if len(current_ans_list) <= 2 else current_ans_list[2]
-            ans_c = re.sub('[\[\(\|\{].{1,3}[\]\)\}\|]', '', ans_c, 1)
+            ans_c = re.sub('[\[\(\|\{].{1,3}[\]\)\}\|]', '', ans_c, 1).strip()
             ans_d = "-" if len(current_ans_list) <= 3 else current_ans_list[3]
-            ans_d = re.sub('[\[\(\|\{].{1,3}[\]\)\}\|]', '', ans_d, 1)
+            ans_d = re.sub('[\[\(\|\{].{1,3}[\]\)\}\|]', '', ans_d, 1).strip()
             answer = "-"
 
             # STEP 3: Add question to dataframe
@@ -426,16 +426,16 @@ class Process:
                     # Ans options not found yet
                     final_text = final_text + item
                     if not re.search(r'math', self.filename, re.I):
-                        final_text = re.sub(r'[0-9][0-9]\.|[0-9]\.|[0-9][0-9]|[0-9]', '', final_text, 1)
+                        final_text = re.sub(r'[0-9][0-9]\.|[0-9]\.|[0-9][0-9]|[0-9]', '', final_text, 1).strip()
                     else:
-                        final_text = re.sub(r'^[0-9][0-9]\.|^[0-9]\.|^[0-9][0-9]|^[0-9]', '', final_text, 1)
+                        final_text = re.sub(r'^[0-9][0-9]\.|^[0-9]\.|^[0-9][0-9]|^[0-9]', '', final_text, 1).strip()
                 else:
                     # Ans options found
                     final_text = final_text + item[:first_ans_pos]
                     if not re.search(r'math', self.filename, re.I):
-                        final_text = re.sub(r'[0-9][0-9]\.|[0-9]\.|[0-9][0-9]|[0-9]', '', final_text, 1)
+                        final_text = re.sub(r'[0-9][0-9]\.|[0-9]\.|[0-9][0-9]|[0-9]', '', final_text, 1).strip()
                     else:
-                        final_text = re.sub(r'^[0-9][0-9]\.|^[0-9]\.|^[0-9][0-9]|^[0-9]', '', final_text, 1)
+                        final_text = re.sub(r'^[0-9][0-9]\.|^[0-9]\.|^[0-9][0-9]|^[0-9]', '', final_text, 1).strip()
 
             elif typeof == "image":
                 final_image = final_image + base64img + " "
