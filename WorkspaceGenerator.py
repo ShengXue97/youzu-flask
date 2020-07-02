@@ -149,7 +149,7 @@ def getresult(sessionID):
     row_json_str = "["
     for page in row_json:
         if len(page) == 0:
-            row_json_str = row_json_str + "[]"
+            row_json_str = row_json_str + "[],"
         else:
             row_json_str = row_json_str + "["
             for question in page:
@@ -165,7 +165,7 @@ def getresult(sessionID):
                 row_json_str = row_json_str[:-1] + "],"
 
             row_json_str = row_json_str[:-1] + "],"
-            
+
     row_json_str = row_json_str[:-1] + "]"
     row_json_str = row_json_str.replace('\n', '\\n')
 
