@@ -1,10 +1,5 @@
-import random
-import string
+with open('umm.txt', 'r', encoding='utf8') as myfile:
+  data = myfile.read()
 
-def randomString(stringLength=8):
-    letters = string.ascii_lowercase
-    return ''.join(random.sample(string.ascii_letters + string.digits, k=stringLength))
-
-print("Random String is ", randomString())
-print("Random String is ", randomString(20))
-print("Random String is ", randomString(20))
+print(data[560:580])
+print(data[571:577])

@@ -558,6 +558,7 @@ def updatedatabase():
     level = request.args.get("level")
     year = request.args.get("year")
     exam = request.args.get("exam")
+    pdfhash = request.args.get("pdfdata")
 
     decoded_data = request.data.decode("utf-8")
     list_data = ast.literal_eval(decoded_data)
@@ -595,12 +596,12 @@ def updatedatabase():
     id int auto_increment primary key,
     question json
     )"""
-    insert_query = """insert into qbank(question) values (%s)"""
+    insert_query = """insert into qbank(question,hashcode) values (%s,%s)"""
 
     try:
         cursor.execute(create_table_query)
         for x in output_list:
-            cursor.execute(insert_query, json.dumps(x))
+            cursor.execute(insert_query, (json.dumps(x),pdfhash))
         con.commit()
         print('successfully inserted values')
 

@@ -3,26 +3,26 @@ from sqlalchemy import create_engine
 import pymysql, os, json
 
 # convert csv to df
-df = pd.read_csv("/home/edu/DevelopmentBuild/youzu-flask/2020-06-25 11-52-30_066700_kiPa3qsA_output.csv") #insert file path
+# df = pd.read_csv("/home/edu/DevelopmentBuild/youzu-flask/2020-06-25 11-52-30_066700_kiPa3qsA_output.csv") #insert file path
 
-#clean df
-df1=df.drop(df.columns[0], axis=1)
-df1 = df1.fillna('-')
+# #clean df
+# df1=df.drop(df.columns[0], axis=1)
+# df1 = df1.fillna('-')
 
-#create json object output_list
-output_list=[]
-colname = list(df1)
-# print(colname)
-for index, row in df1.iterrows():
-    row_dict = {}
-    choice_dict = {}
-    for col in colname:
-        if col == 'A' or col == 'B' or col == 'C' or col == 'D':
-            choice_dict[col] = row[col]
-        else:
-            row_dict[col] = row[col]
-    row_dict['Choices'] = choice_dict
-    output_list.append(row_dict)
+# #create json object output_list
+# output_list=[]
+# colname = list(df1)
+# # print(colname)
+# for index, row in df1.iterrows():
+#     row_dict = {}
+#     choice_dict = {}
+#     for col in colname:
+#         if col == 'A' or col == 'B' or col == 'C' or col == 'D':
+#             choice_dict[col] = row[col]
+#         else:
+#             row_dict[col] = row[col]
+#     row_dict['Choices'] = choice_dict
+#     output_list.append(row_dict)
 
 
 
@@ -49,7 +49,8 @@ def insert_data(json_obj):
 def reset_table():
     cursor.execute("""truncate table qbank""")
 
-# def update():
+def insert_column():
+    cursor.execute("""Alter table qbank add column hashcode VARCHAR(100) not null after question""")
 
 def reset_counter():
     cursor.execute("""ALTER TABLE qbank AUTO_INCREMENT = 1""")
