@@ -611,7 +611,7 @@ def updatedatabase():
         for x in output_list:
             cursor.execute(insert_query, (json.dumps(x),pdfhash))
         con.commit()
-        print('successfully inserted',cursor.rowcount,'record(s)')
+        print('successfully inserted',len(output_list),'record(s)')
 
     except Exception as e:
         con.rollback()
