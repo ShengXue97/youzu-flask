@@ -107,6 +107,9 @@ def get_message(currentIP, currentTime, sessionID, curRequestNo):
         out_dict["exam"] = entry['exam']
         return json.dumps(out_dict)
 
+@app.route('/ping')
+def ping():
+    return jsonify({"Succeeded": "yes"})
 
 @app.route('/stream')
 def index():
