@@ -597,13 +597,18 @@ def updatedatabase():
     question json
     )"""
     insert_query = """insert into qbank(question,hashcode) values (%s,%s)"""
+    
+    overwrite_query = """delete from qbank where hashcode = %s  """
 
     try:
-        cursor.execute(create_table_query)
+        cursor.execute(overwrite_query, pdfhash)        
+        con.commit()
+        print(cursor.rowcount, 'Records(s) deleted')
+        
         for x in output_list:
             cursor.execute(insert_query, (json.dumps(x),pdfhash))
         con.commit()
-        print('successfully inserted values')
+        print('successfully inserted',cursor.rowcount,'record(s)')
 
     except Exception as e:
         con.rollback()
