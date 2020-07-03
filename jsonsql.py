@@ -40,7 +40,9 @@ cursor.execute(create_table_query)
 def show_tables():
     cursor.execute("""show tables""")
 
-
+def delete_table():
+    cursor.execute("""DROP TABLE IF EXISTS qbank""")
+    
 def insert_data(json_obj):
     insert_query = """insert into qbank(question) values (%s)"""
     for x in json_obj:
