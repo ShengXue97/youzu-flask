@@ -214,7 +214,7 @@ class Process:
             x1, y1, w1, h1 = cv2.boundingRect(c)
             if 0.05 < w1 / width < 0.2:
                 cv2.rectangle(result, (x1, y1), (x1 + w1, y1 + h1), (255, 0, 0), 2)
-                texted = cv2.putText(result_1, '(YMYM)____', (x1, y1), cv2.FONT_HERSHEY_SIMPLEX,
+                texted = cv2.putText(result_1, '(EMPTY)____', (x1, y1), cv2.FONT_HERSHEY_SIMPLEX,
                                      1, (0, 0, 0), 2, cv2.LINE_AA)  # 1.2-->0.8
                 texted = cv2.dilate(texted, np.ones((2, 2), np.uint8), iterations=1)
         for c in cntrs:
