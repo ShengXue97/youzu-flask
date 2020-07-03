@@ -158,6 +158,7 @@ def getresult(sessionID):
                     if isinstance(attribute, str):
                         #attribute = attribute.replace("'", '"')
                         attribute = attribute.replace('"', "\\" + '"')
+                        attribute = re.sub(r'\\[^bfnrt"]', '', attribute)
                         row_json_str = row_json_str + '\"' + attribute + '\",'
                     else:
                         row_json_str = row_json_str + str(attribute) + ','
@@ -173,6 +174,12 @@ def getresult(sessionID):
         os.makedirs("Workspaces/csv")
     file1 = open("Workspaces/csv/" + sessionID + ".txt", "wb")
     file1.write(row_json_str.encode('utf-8'))
+
+process = Process()
+filename = "P5-Chinese-SA2-2009-CHIJ.pdf"
+thread = threading.Thread(target=generate_workspace, args=(filename, filename.replace(".pdf", "")))
+thread.start()
+thread.join()
 
 dirpath = os.getcwd()
 #mypath = dirpath + "/ReactPDF"
