@@ -240,12 +240,31 @@ class Process:
             pseudo_text = text
 
             if w / width > 0.05 and y / height < 0.95:  # and (x/width < 0.4 or x/width > 0.5)
-                # hough line detector included too for eng
+                # pre-processing the cropped diagram for probabilistic hough line detection
                 new_image = img[y:y + h, x:x + w]
                 dst = cv2.Canny(new_image, 50, 200, None, 3)
+                # remove the horizontal separators in math papers (Mostly section B)
+                if re.search('math', self.filename, re.I):
+                    horizontal_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (40, 1))
+                    enhanced_dst = cv2.dilate(dst, horizontal_kernel, None, None, iterations=1)
+                    remove_dst_horizontal = cv2.morphologyEx(enhanced_dst, cv2.MORPH_OPEN, horizontal_kernel,
+                                                             iterations=1)
+                    cnts_dst = cv2.findContours(remove_dst_horizontal, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+                    cnts_dst = cnts_dst[0] if len(cnts_dst) == 2 else cnts_dst[1]
+                    for c in cnts_dst:
+                        height, width, channels = img.shape
+                        x, y, w, h = cv2.boundingRect(c)
+                        if w / width > 0.4 and 0.2 < y / height < 0.8:
+                            cv2.drawContours(dst, [c], -1, (0, 0, 0), 20)
+
+                # crop the image so only hough lines in the central portion of the image are searched for
+                height, width = dst.shape
+                dst = dst[m.floor(0.2 * height):m.floor(0.8 * height), 0:m.floor(width)]
+                # detect probabilistic hough lines
                 linesp = cv2.HoughLinesP(dst, 1, np.pi / 180, 50, None, 50, 2)
                 # if self.is_gibberish(text) and w/h < 5:
-                if self.is_gibberish(text) or 0.35 < (w * h) / (width * height) < 0.97 or linesp is not None:
+                if self.is_gibberish(text) or 0.35 < (w * h) / (width * height) < 0.97 \
+                        or (linesp is not None and len(linesp) > 20):
                     if h / height > 0.1 and w / h < 5:
                         # Likely to be an image
                         new_image = img[y:y + h, x:x + w]
@@ -1039,8 +1058,8 @@ class Process:
 
 # process = Process()
 #
-# filename = "P6_English_2019_CA1_CHIJ_2Pages"
-# process.main(filename, "chij2222")
+# filename = "P6-Maths-SA2-2017-Red-Swastika-2pgs"
+# process.main(filename, "redswast2017")
 
 
 

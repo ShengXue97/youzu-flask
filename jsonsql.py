@@ -54,12 +54,16 @@ def insert_column():
 
 def reset_counter():
     cursor.execute("""ALTER TABLE qbank AUTO_INCREMENT = 1""")
+    
+def overwrite_query():
+    cursor.execute("""delete from qbank where hashcode = %s """)
 
 try:
     reset_table()
     
     con.commit();
     print('update successful')
+    print(cursor.rowcount,'record(s) modified)
 
 except Exception as e:
     con.rollback();
