@@ -235,8 +235,13 @@ class Process:
             else:
                 ROI = thresh[y:y + h, x:x + w]
             text = pytesseract.image_to_string(ROI, lang='eng', config='--psm 6')
+            # for identification of 'fill in the blank' style lines
             text = re.sub(r"\(EMPTY[\)]*|\(FMPTY[\)]*|\(eEmpTy[\)]*|\(Fupty[\)]*|\(Fuprty[\)]", "_________", text,
                           flags=re.I)
+            # removing watermark that gets appended into questions
+            text = re.sub("www.testpapersfree.com", "", text, flags=re.I)
+            # removing section headers from papers
+            text = re.sub(r"^(Questions).+(Show your).+((provided)|(stated))?\.?$", "", text, flags=re.I)
             pseudo_text = text
 
             if w / width > 0.05 and y / height < 0.95:  # and (x/width < 0.4 or x/width > 0.5)
