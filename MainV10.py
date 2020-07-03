@@ -214,7 +214,7 @@ class Process:
             x1, y1, w1, h1 = cv2.boundingRect(c)
             if 0.05 < w1 / width < 0.2:
                 cv2.rectangle(result, (x1, y1), (x1 + w1, y1 + h1), (255, 0, 0), 2)
-                texted = cv2.putText(result_1, '(EMPTY)____', (x1, y1), cv2.FONT_HERSHEY_SIMPLEX,
+                texted = cv2.putText(result_1, '(YMYM)____', (x1, y1), cv2.FONT_HERSHEY_SIMPLEX,
                                      1, (0, 0, 0), 2, cv2.LINE_AA)  # 1.2-->0.8
                 texted = cv2.dilate(texted, np.ones((2, 2), np.uint8), iterations=1)
         for c in cntrs:
@@ -262,14 +262,10 @@ class Process:
                         if w / width > 0.4 and 0.2 < y / height < 0.8:
                             cv2.drawContours(dst, [c], -1, (0, 0, 0), 20)
 
-                # crop the image so only hough lines in the central portion of the image are searched for
-                height, width = dst.shape
-                dst = dst[m.floor(0.2 * height):m.floor(0.8 * height), 0:m.floor(width)]
                 # detect probabilistic hough lines
                 linesp = cv2.HoughLinesP(dst, 1, np.pi / 180, 50, None, 50, 2)
                 # if self.is_gibberish(text) and w/h < 5:
-                if self.is_gibberish(text) or 0.35 < (w * h) / (width * height) < 0.97 \
-                        or (linesp is not None and len(linesp) > 20):
+                if self.is_gibberish(text) or 0.35 < (w * h) / (width * height) < 0.97 or linesp is not None:
                     if h / height > 0.1 and w / h < 5:
                         # Likely to be an image
                         new_image = img[y:y + h, x:x + w]
