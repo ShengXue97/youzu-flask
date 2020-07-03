@@ -553,6 +553,30 @@ def getresult():
     row_json.append(thisPageList)
     return jsonify(row_json)
 
+@app.route('/checkdatabase', methods=['GET', 'POST'])
+def checkdatabase():
+    pdfhash = request.args.get("pdfdata")
+    number = 0
+    exists = "no"
+
+    # find number of rows with the hashcode
+    con = pymysql.connect(host='localhost', user='root', passwd='Aa04369484911', db='youzu')
+    cursor = con.cursor()
+    count_query = "select * from qbank where hashcode = %s"
+
+    try:
+        cursor.execute(count_query, pdfhash)
+        number = cursor.rowcount
+    except Exception as e:
+        con.rollback()
+        print("exception occured:", e)
+        return jsonify({"Succeeded": "no", "Exists" : exists, "Number" : number})
+
+
+    if number > 0:
+        exists = "yes"
+
+    return jsonify({"Succeeded": "yes", "Exists" : exists, "Number" : number})
 
 @app.route('/updatedatabase', methods=['GET', 'POST'])
 def updatedatabase():
@@ -592,18 +616,23 @@ def updatedatabase():
             }
             output_list.append(row_dict)
 
-    con = pymysql.connect(host='localhost', user='root', passwd='Youzu2020!', db='youzu')
+    con = pymysql.connect(host='localhost', user='root', passwd='Aa04369484911', db='youzu')
     cursor = con.cursor()
 
     create_table_query = """create table if not exists qbank(
     id int auto_increment primary key,
-    question json
+    question json,
+    hashcode VARCHAR(100)
     )"""
+
     insert_query = """insert into qbank(question,hashcode) values (%s,%s)"""
     
     overwrite_query = """delete from qbank where hashcode = %s  """
 
     try:
+        cursor.execute(create_table_query)
+        con.commit()
+        
         cursor.execute(overwrite_query, pdfhash)        
         con.commit()
         print(cursor.rowcount, 'Records(s) deleted')
@@ -622,7 +651,7 @@ def updatedatabase():
 
 @app.route('/getdatabase', methods=['GET', 'POST'])
 def getdatabase():
-    con = pymysql.connect(host='localhost', user='root', passwd='Youzu2020!', db='youzu')
+    con = pymysql.connect(host='localhost', user='root', passwd='Aa04369484911', db='youzu')
     cursor = con.cursor()
 
     query = """SELECT * FROM qbank"""
