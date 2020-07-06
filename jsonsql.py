@@ -33,9 +33,10 @@ cursor = con.cursor();
 
 
 create_table_query = """create table if not exists qbank(
-id int auto_increment primary key,
-question json
-)""";
+    id int auto_increment primary key,
+    question json,
+    hashcode VARCHAR(100)
+    )""";
 cursor.execute(create_table_query)
 def show_tables():
     cursor.execute("""show tables""")
