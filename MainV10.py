@@ -239,7 +239,7 @@ class Process:
             text = re.sub(r"\(EMPTY[\)]*|\(FMPTY[\)]*|\(eEmpTy[\)]*|\(Fupty[\)]*|\(Fuprty[\)]", "_________", text,
                           flags=re.I)
             # removing watermark that gets appended into questions
-            text = re.sub("www.testpapersfree.com", "", text, flags=re.I)
+            text = re.sub("www.testpapersfree.com|http://www. testpapersfree.com", "", text, flags=re.I)
             # removing section headers from papers
             text = re.sub(r"^(Questions).+(Show your).+((provided)|(stated))?\.?$", "", text, flags=re.I)
             pseudo_text = text
