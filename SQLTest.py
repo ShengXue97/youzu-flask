@@ -1,3 +1,4 @@
+### (IGNORE) Useful extract for mysql functions
 import mysql.connector
 
 mydb = mysql.connector.connect(
