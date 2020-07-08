@@ -205,9 +205,9 @@ class Process:
             # for lines identified as essential horizontal lines, generate the blank line as text from the image
             text = re.sub(r"\(EMPTY[\)]*|\(FMPTY[\)]*|\(eEmpTy[\)]*|\(Fupty[\)]*|\(Fuprty[\)]", "_________", text,
                           flags=re.I)
-            # remove watermark that gets appended into questions
+            # removing watermark that gets appended into questions
             text = re.sub("www.testpapersfree.com|http://www. testpapersfree.com", "", text, flags=re.I)
-            # remove section headers from papers
+            # removing section headers from papers
             text = re.sub(r"^(Questions).+(Show your).+((provided)|(stated))?\.?$", "", text, flags=re.I)
             pseudo_text = text
 

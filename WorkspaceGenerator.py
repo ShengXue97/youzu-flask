@@ -1,3 +1,6 @@
+# For every available PDFs, run it through our current codeto generate the 
+# workspace(pdf, csv and attributes)
+
 from MainV10 import Process
 import threading
 import pandas as pd
