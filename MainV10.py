@@ -644,7 +644,7 @@ class Process:
         # ims = cv2.resize(result, (700, 850))
         # cv2.imshow('result',ims)
 
-        cv2.imwrite("TempContours/" + self.sessionID + "_" + str(self.pg_num) + ".jpg", ims)
+        cv2.imwrite("TempContours/" + self.sessionID + "_" + str(self.pg_num) + ".jpg", result)
         self.pg_num = self.pg_num + 1
         return False
 
