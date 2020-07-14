@@ -911,10 +911,10 @@ class Process:
             if self.is_session_killed():
                 return True
 
-            print("STAGE 1 (Converting to images): PG " + str(index + 1) + "/" + str(len(paige)) +
+            print("STAGE 1 (Converting to images): PG " + str(index + 1) + "/" + str(len(pages)) +
                   ", Filename: " + self.filename + ", SessionID: " + self.sessionID)
 
-            entry = {'stage': 1, 'page': str(index + 1), 'total': str(len(paige)), 'output': [],
+            entry = {'stage': 1, 'page': str(index + 1), 'total': str(len(pages)), 'output': [],
                      'filename': self.filename, 'level': self.file_attribute_list[0],
                      'subject': self.file_attribute_list[1],
                      'year': self.file_attribute_list[2], 'school': self.file_attribute_list[3],
