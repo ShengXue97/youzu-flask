@@ -663,11 +663,11 @@ def getdatabase():
         cursor.execute(query)
         for x in cursor:
             question = json.loads(x[1])
-            question["A"] = question["Choices"]["A"]
-            question["B"] = question["Choices"]["B"]
-            question["C"] = question["Choices"]["C"]
-            question["D"] = question["Choices"]["D"]
-            del question["Choices"]
+            question["1"] = question["choices"]["1"]["text"]
+            question["2"] = question["choices"]["2"]["text"]
+            question["3"] = question["choices"]["3"]["text"]
+            question["4"] = question["choices"]["4"]["text"]
+            del question["choices"]
             output_table.append(question)
 
     except Exception as e:
