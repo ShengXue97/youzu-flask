@@ -1,12 +1,5 @@
-# V10E: Current implementation - Working on English Papers (MCQ)
-### For English MCQs Questions only ###
-
-### For English MCQs Questions only ###
-
-### For English MCQs Questions only ###
-
-
-### For English MCQs Questions only ###
+### Main driver code for the digitisation of exam papers
+### V10E: Current implementation - Working on English Papers (MCQ)
 import cv2
 import numpy as np
 import pytesseract

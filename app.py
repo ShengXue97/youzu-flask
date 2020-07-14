@@ -1,3 +1,6 @@
+### Flask server acting as the backend for the React website, calling MainV10 for the 
+### digitisation process
+
 from flask import Flask, request, jsonify, session
 from flask_cors import CORS, cross_origin
 import json
@@ -594,25 +597,25 @@ def updatedatabase():
     for page in list_data:
         for row in page:
             choice_dict = {
-                "A": row[2],
-                "B": row[3],
-                "C": row[4],
-                "D": row[5]
+                "1": {"text": row[2], "image" : ""},
+                "2": {"text": row[3], "image" : ""},
+                "3": {"text": row[4], "image" : ""},
+                "4": {"text": row[5], "image" : ""},
             }
 
             row_dict = {
-                "Level": level,
-                "Page": row[0],
-                "Question": row[1],
-                "Question_type": row[9],
-                "Choices": choice_dict,
-                "Answer": row[8],
-                "Subject": subject,
-                "Year": year,
-                "School": school,
-                "Exam": exam,
-                "Number": row[6],
-                "Image File": row[7],
+                "level": level,
+                "page": row[0],
+                "question": row[1],
+                "question_type": row[9],
+                "choices": choice_dict,
+                "answer": row[8],
+                "subject": subject,
+                "year": year,
+                "school": school,
+                "exam": exam,
+                "number": row[6],
+                "image": row[7],
             }
             output_list.append(row_dict)
 

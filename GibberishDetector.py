@@ -1,3 +1,4 @@
+### Used to decide whether the pesudo text generated from a contour is an image or actual text
 """
 Gibberish Classifier
 Author: ProgramFOX

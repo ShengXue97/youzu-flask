@@ -1,4 +1,5 @@
-# V9: Current implementation - Working on Math Papers
+### Main driver code for the digitisation of exam papers
+### V9: Current implementation - Working on Math Papers
 
 import cv2
 import numpy as np
