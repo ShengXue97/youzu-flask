@@ -628,13 +628,19 @@ def updatedatabase():
     hashcode VARCHAR(100)
     )"""
 
-    insert_query = """insert into qbank(question,hashcode) values (%s,%s)"""
+    insert_query = """INSERT INTO qbank(question,hashcode) VALUES """
     
-    overwrite_query = """delete from qbank where hashcode = %s  """
+    overwrite_query = """DELETE FROM qbank WHERE hashcode = %s  """
 
-    request_list = []
-    for x in output_list:
-        request_list.append((json.dumps(x),pdfhash))
+    for i in range(len(output_list)):
+        x = output_list[i]
+        strTuple = (json.dumps(x),pdfhash)
+        insert_query = insert_query + str(strTuple)
+        if i == len(output_list) - 1:
+            insert_query = insert_query + ";"
+        else:
+            insert_query = insert_query + ","
+    print(insert_query)
 
     try:
         cursor.execute(create_table_query)
@@ -643,7 +649,7 @@ def updatedatabase():
         print(cursor.rowcount, 'Records(s) deleted')
         
         for x in output_list:
-            cursor.executemany(insert_query, request_list)
+            cursor.execute(insert_query)
         con.commit()
         print('successfully inserted',len(output_list),'record(s)')
 
