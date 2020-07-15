@@ -632,16 +632,18 @@ def updatedatabase():
     
     overwrite_query = """delete from qbank where hashcode = %s  """
 
+    request_list = []
+    for x in output_list:
+        request_list.append((json.dumps(x),pdfhash))
+
     try:
         cursor.execute(create_table_query)
-        con.commit()
 
-        cursor.execute(overwrite_query, pdfhash)        
-        con.commit()
+        cursor.execute(overwrite_query, pdfhash) 
         print(cursor.rowcount, 'Records(s) deleted')
         
         for x in output_list:
-            cursor.execute(insert_query, (json.dumps(x),pdfhash))
+            cursor.executemany(insert_query, request_list)
         con.commit()
         print('successfully inserted',len(output_list),'record(s)')
 
