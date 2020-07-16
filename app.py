@@ -162,7 +162,6 @@ def listpdf():
             with open(myDir + item, "rb") as pdf_file:
                 filedata = base64.b64encode(pdf_file.read())
                 pdfhash = hashlib.sha512(filedata).hexdigest()
-                print(pdfhash)
 
             cursor.execute(count_query, pdfhash)
             if cursor.rowcount > 0:
@@ -684,7 +683,6 @@ def checkdatabase():
 
     if number > 0:
         exists = "yes"
-    print(number)
     return jsonify({"Succeeded": "yes", "Exists" : exists, "Number" : number})
 
 @app.route('/updatedatabase', methods=['GET', 'POST'])
@@ -774,11 +772,9 @@ def updatedatabase():
         cursor.execute(create_table_query)
 
         cursor.execute(overwrite_query, pdfhash) 
-        print(cursor.rowcount, 'Records(s) deleted')
         
         cursor.executemany(insert_query, request_list)
         con.commit()
-        print('successfully inserted',len(output_list),'record(s)')
 
     except Exception as e:
         con.rollback()
