@@ -154,13 +154,10 @@ def listpdf():
         name = item.replace(".pdf", "")
 
         lastModified = datetime.fromtimestamp(os.path.getmtime(myDir + item))
-        status = "-"
+        status = "Not Processed"
         count_query = "SELECT * FROM pdfbank WHERE hashcode = %s"
 
         try:
-            if name != "java-samples-P1-Chinese-SA2-2013-Red-Swastika":
-                continue
-
             pdfhash = ""
             with open(myDir + item, "rb") as pdf_file:
                 filedata = base64.b64encode(pdf_file.read())
@@ -168,12 +165,15 @@ def listpdf():
                 print(pdfhash)
 
             cursor.execute(count_query, pdfhash)
-            status = "Not Processed"
             if cursor.rowcount > 0:
                 myresult = cursor.fetchall()
                 ## 0 for the first value with the pdfhash, since it should be unique
                 ## 2 for the third value in the row, which contains the pdf status
-                print(myresult[0][2])
+                rawStatus = myresult[0][2]
+                if rawStatus == 0:
+                    status = "In Library Only"
+                elif rawStatus == 1:
+                    status = "In Library and Database"
 
         except Exception as e:
             con.rollback()
@@ -182,6 +182,7 @@ def listpdf():
         newFile = {
             'name': name,
             'lastModified': lastModified,
+            'status': status,
         }
         pdfs.append(newFile)
 
@@ -267,6 +268,9 @@ def getpdfpages():
 @app.route('/savepdf', methods=['GET', 'POST'])
 def savepdf():
     name = request.args.get("name")
+    pdfdata = request.data[28:]
+    pdfhash = hashlib.sha512(pdfdata).hexdigest()
+
     if not os.path.exists("Workspaces/pdf"):
         os.makedirs("Workspaces/pdf")
     file1 = open("Workspaces/pdf/" + name + ".txt", "wb")
@@ -277,6 +281,20 @@ def savepdf():
     ### PDFBANK
     con = pymysql.connect(host='localhost', user='root', passwd='Aa04369484911', db='youzu')
     cursor = con.cursor()
+
+    count_query = "select * from pdfbank where hashcode = %s"
+    number = 0
+    try:
+        cursor.execute(count_query, pdfhash)
+        number = cursor.rowcount
+        if number > 0:
+            ## If entry already exist in pdfbank, do not change the pdf status when saving workspace
+            return jsonify({"Succeeded": "yes", "YourIP": str(currentIP), "YourTime": currentTime})
+
+    except Exception as e:
+        con.rollback()
+        print("exception occured:", e)
+
 
     create_table_query = """create table if not exists pdfbank(
     id int auto_increment primary key,
@@ -290,9 +308,6 @@ def savepdf():
     
     try:
         cursor.execute(create_table_query)
-        pdfdata = request.data[28:]
-                
-        pdfhash = hashlib.sha512(pdfdata).hexdigest()
         cursor.execute(overwrite_query, pdfhash) 
         
         ## Status 0 means pdf is in workspace
@@ -409,14 +424,45 @@ def renameworkspace():
 @app.route('/listworkspace', methods=['GET', 'POST'])
 def listworkspace():
     workspaces = []
+    
+    ### PDFBANK
+    con = pymysql.connect(host='localhost', user='root', passwd='Aa04369484911', db='youzu')
+    cursor = con.cursor()
+    
     if os.path.exists("Workspaces/csv"):
         items = os.listdir("Workspaces/csv")
         for item in items:
             name = item.replace(".txt", "")
             lastModified = datetime.fromtimestamp(os.path.getmtime("Workspaces/csv/" + item))
+
+            status = "Not Processed"
+            count_query = "SELECT * FROM pdfbank WHERE hashcode = %s"
+
+            try:
+                pdfhash = ""
+                with open("Workspaces/pdf/" + name + ".txt", "r") as pdf_file:
+                    filedata = pdf_file.read()[28:]
+                    pdfhash = hashlib.sha512(filedata.encode("utf-8")).hexdigest()
+
+                cursor.execute(count_query, pdfhash)
+                if cursor.rowcount > 0:
+                    myresult = cursor.fetchall()
+                    ## 0 for the first value with the pdfhash, since it should be unique
+                    ## 2 for the third value in the row, which contains the pdf status
+                    rawStatus = myresult[0][2]
+                    if rawStatus == 0:
+                        status = "In Library Only"
+                    elif rawStatus == 1:
+                        status = "In Library and Database"
+
+            except Exception as e:
+                con.rollback()
+                print(e)
+
             newFile = {
                 'name': name,
                 'lastModified': lastModified,
+                'status': status,
             }
             workspaces.append(newFile)
 
@@ -616,12 +662,14 @@ def getresult():
 
 @app.route('/checkdatabase', methods=['GET', 'POST'])
 def checkdatabase():
-    pdfhash = request.args.get("pdfdata")
+    pdfdata = request.data[28:]
+    pdfhash = hashlib.sha512(pdfdata).hexdigest()
+    
     number = 0
     exists = "no"
 
     # find number of rows with the hashcode
-    con = pymysql.connect(host='localhost', user='root', passwd='Youzu2020!', db='youzu')
+    con = pymysql.connect(host='localhost', user='root', passwd='Aa04369484911', db='youzu')
     cursor = con.cursor()
     count_query = "select * from qbank where hashcode = %s"
 
@@ -646,13 +694,17 @@ def updatedatabase():
     level = request.args.get("level")
     year = request.args.get("year")
     exam = request.args.get("exam")
-    pdfhash = request.args.get("pdfdata")
 
     decoded_data = request.data.decode("utf-8")
-    list_data = ast.literal_eval(decoded_data)
+    eval_dict = ast.literal_eval(decoded_data)
+
+    pdfdata = eval_dict["pdfData"][28:]
+    listdata = eval_dict["validData"]
+    pdfhash = hashlib.sha512(pdfdata.encode("utf-8")).hexdigest()
+    
 
     output_list = []
-    for page in list_data:
+    for page in listdata:
         for row in page:
             choice_dict = {
                 "1": {"text": row[2], "image" : ""},
@@ -677,7 +729,7 @@ def updatedatabase():
             }
             output_list.append(row_dict)
 
-    con = pymysql.connect(host='localhost', user='root', passwd='Youzu2020!', db='youzu')
+    con = pymysql.connect(host='localhost', user='root', passwd='Aa04369484911', db='youzu')
     cursor = con.cursor()
 
     ### PDFBANK
@@ -695,9 +747,8 @@ def updatedatabase():
     try:
         cursor.execute(create_table_query)
         cursor.execute(overwrite_query, pdfhash) 
-        
         ## Status 0 means pdf is in workspace
-        cursor.execute(insert_query, (pdfhash, 0))
+        cursor.execute(insert_query, (pdfhash, 1))
         con.commit()
 
     except Exception as e:
@@ -708,7 +759,7 @@ def updatedatabase():
     create_table_query = """create table if not exists qbank(
     id int auto_increment primary key,
     question json,
-    hashcode VARCHAR(100)
+    hashcode VARCHAR(10000)
     )"""
 
     insert_query = """INSERT INTO qbank(question,hashcode) VALUES (%s,%s)"""
