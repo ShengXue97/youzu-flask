@@ -178,18 +178,22 @@ def getresult(sessionID):
     file1 = open("Workspaces/csv/" + sessionID + ".txt", "wb")
     file1.write(row_json_str.encode('utf-8'))
 
-process = Process()
-filename = "P5-Chinese-SA2-2009-CHIJ.pdf"
-thread = threading.Thread(target=generate_workspace, args=(filename, filename.replace(".pdf", "")))
-thread.start()
-thread.join()
+#process = Process()
+#filename = "P5-Chinese-SA2-2009-CHIJ.pdf"
+#thread = threading.Thread(target=generate_workspace, args=(filename, filename.replace(".pdf", "")))
+#thread.start()
+#thread.join()
 
 dirpath = os.getcwd()
 #mypath = dirpath + "/ReactPDF"
 mypath = "/datassd/pdf_downloader-master/pdfs/"
 items = os.listdir(mypath)
-batch_num = 2
+batch_num = 5
 batches_list = []
+
+print(len(items))
+items = [k for k in items if 'english' in k.lower()]
+print(len(items))
 
 prev_num = 0
 prev_batch = []
