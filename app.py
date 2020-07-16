@@ -20,7 +20,8 @@ from sqlalchemy import create_engine
 import pymysql
 import ast
 from PyPDF2 import PdfFileReader, PdfFileReader, PdfFileWriter
-
+import hashlib
+import binascii
 
 # install the following 2 libs first
 # from flask_sqlalchemy import SQLAlchemy
@@ -143,10 +144,41 @@ def listpdf():
     else:
         return jsonify({"Succeeded": "no", "Pdfs": pdfs})
 
+    ### PDFBANK
+    con = pymysql.connect(host='localhost', user='root', passwd='Aa04369484911', db='youzu')
+    cursor = con.cursor()
+
+        
     items = os.listdir(myDir)
     for item in items:
         name = item.replace(".pdf", "")
+
         lastModified = datetime.fromtimestamp(os.path.getmtime(myDir + item))
+        status = "-"
+        count_query = "SELECT * FROM pdfbank WHERE hashcode = %s"
+
+        try:
+            if name != "java-samples-P1-Chinese-SA2-2013-Red-Swastika":
+                continue
+
+            pdfhash = ""
+            with open(myDir + item, "rb") as pdf_file:
+                filedata = base64.b64encode(pdf_file.read())
+                pdfhash = hashlib.sha512(filedata).hexdigest()
+                print(pdfhash)
+
+            cursor.execute(count_query, pdfhash)
+            status = "Not Processed"
+            if cursor.rowcount > 0:
+                myresult = cursor.fetchall()
+                ## 0 for the first value with the pdfhash, since it should be unique
+                ## 2 for the third value in the row, which contains the pdf status
+                print(myresult[0][2])
+
+        except Exception as e:
+            con.rollback()
+            print(e)
+
         newFile = {
             'name': name,
             'lastModified': lastModified,
@@ -214,7 +246,6 @@ def getpdfpages():
     name = request.args.get("name")
     isExisting = request.args.get("isExisting")
     filePath = ""
-    print("um" + name)
     if isExisting == "no":
         fileDownloaded = request.files["myFile"]
         fileDownloaded.save(os.path.join("./ReactPDF", name + ".pdf"))
@@ -240,9 +271,38 @@ def savepdf():
         os.makedirs("Workspaces/pdf")
     file1 = open("Workspaces/pdf/" + name + ".txt", "wb")
     file1.write(request.data)
-
     currentIP = request.remote_addr
     currentTime = str(datetime.now())
+
+    ### PDFBANK
+    con = pymysql.connect(host='localhost', user='root', passwd='Aa04369484911', db='youzu')
+    cursor = con.cursor()
+
+    create_table_query = """create table if not exists pdfbank(
+    id int auto_increment primary key,
+    hashcode VARCHAR(10000),
+    status int
+    )"""
+
+    overwrite_query = """DELETE FROM pdfbank WHERE hashcode = %s  """
+
+    insert_query = """INSERT INTO pdfbank (hashcode,status) VALUES (%s,%s)"""
+    
+    try:
+        cursor.execute(create_table_query)
+        pdfdata = request.data[28:]
+                
+        pdfhash = hashlib.sha512(pdfdata).hexdigest()
+        cursor.execute(overwrite_query, pdfhash) 
+        
+        ## Status 0 means pdf is in workspace
+        cursor.execute(insert_query, (pdfhash, 0))
+        con.commit()
+
+    except Exception as e:
+        con.rollback()
+        print(e)
+        
 
     return jsonify({"Succeeded": "yes", "YourIP": str(currentIP), "YourTime": currentTime})
 
@@ -413,7 +473,6 @@ def pushfile():
         pdf_data_binary = pdf_file.read()
         pdf_bas64 = "data:application/pdf;base64," + (base64.b64encode(pdf_data_binary)).decode("ascii")
 
-        print("Forking....")
         process = Process()
         thread = threading.Thread(target=process.main, args=(newFilename, sessionID))
         thread.start()
@@ -480,7 +539,6 @@ def uploadfile():
         requestIDProcessed = currentTime.replace(":", "-").replace(".", "_")
         sessionID = requestIDProcessed + "_" + uniqueID
 
-        print("Forking....")
         process = Process()
         thread = threading.Thread(target=process.main, args=(filename, sessionID))
         thread.start()
@@ -622,6 +680,31 @@ def updatedatabase():
     con = pymysql.connect(host='localhost', user='root', passwd='Youzu2020!', db='youzu')
     cursor = con.cursor()
 
+    ### PDFBANK
+
+    create_table_query = """create table if not exists pdfbank(
+    id int auto_increment primary key,
+    hashcode VARCHAR(10000),
+    status int
+    )"""
+
+    overwrite_query = """DELETE FROM pdfbank WHERE hashcode = %s  """
+
+    insert_query = """INSERT INTO pdfbank (hashcode,status) VALUES (%s,%s)"""
+    
+    try:
+        cursor.execute(create_table_query)
+        cursor.execute(overwrite_query, pdfhash) 
+        
+        ## Status 0 means pdf is in workspace
+        cursor.execute(insert_query, (pdfhash, 0))
+        con.commit()
+
+    except Exception as e:
+        con.rollback()
+        print(e)
+
+    ## QBANK
     create_table_query = """create table if not exists qbank(
     id int auto_increment primary key,
     question json,
@@ -655,7 +738,7 @@ def updatedatabase():
 
 @app.route('/getdatabase', methods=['GET', 'POST'])
 def getdatabase():
-    con = pymysql.connect(host='localhost', user='root', passwd='Youzu2020!', db='youzu')
+    con = pymysql.connect(host='localhost', user='root', passwd='Aa04369484911', db='youzu')
     cursor = con.cursor()
 
     query = """SELECT * FROM qbank"""
@@ -673,7 +756,6 @@ def getdatabase():
 
     except Exception as e:
         con.rollback()
-        print("exception occured:", e)
 
     con.close()
     return jsonify({"Succeeded": "yes", "Table" : output_table})
