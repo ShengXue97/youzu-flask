@@ -145,7 +145,7 @@ def listpdf():
         return jsonify({"Succeeded": "no", "Pdfs": pdfs})
 
     ### PDFBANK
-    con = pymysql.connect(host='localhost', user='root', passwd='Aa04369484911', db='youzu')
+    con = pymysql.connect(host='localhost', user='root', passwd='Youzu2020!', db='youzu')
     cursor = con.cursor()
 
         
@@ -279,7 +279,7 @@ def savepdf():
     currentTime = str(datetime.now())
 
     ### PDFBANK
-    con = pymysql.connect(host='localhost', user='root', passwd='Aa04369484911', db='youzu')
+    con = pymysql.connect(host='localhost', user='root', passwd='Youzu2020!', db='youzu')
     cursor = con.cursor()
 
     count_query = "select * from pdfbank where hashcode = %s"
@@ -426,7 +426,7 @@ def listworkspace():
     workspaces = []
     
     ### PDFBANK
-    con = pymysql.connect(host='localhost', user='root', passwd='Aa04369484911', db='youzu')
+    con = pymysql.connect(host='localhost', user='root', passwd='Youzu2020!', db='youzu')
     cursor = con.cursor()
     
     if os.path.exists("Workspaces/csv"):
@@ -669,7 +669,7 @@ def checkdatabase():
     exists = "no"
 
     # find number of rows with the hashcode
-    con = pymysql.connect(host='localhost', user='root', passwd='Aa04369484911', db='youzu')
+    con = pymysql.connect(host='localhost', user='root', passwd='Youzu2020!', db='youzu')
     cursor = con.cursor()
     count_query = "select * from qbank where hashcode = %s"
 
@@ -729,7 +729,7 @@ def updatedatabase():
             }
             output_list.append(row_dict)
 
-    con = pymysql.connect(host='localhost', user='root', passwd='Aa04369484911', db='youzu')
+    con = pymysql.connect(host='localhost', user='root', passwd='Youzu2020!', db='youzu')
     cursor = con.cursor()
 
     ### PDFBANK
@@ -789,7 +789,7 @@ def updatedatabase():
 
 @app.route('/getdatabase', methods=['GET', 'POST'])
 def getdatabase():
-    con = pymysql.connect(host='localhost', user='root', passwd='Aa04369484911', db='youzu')
+    con = pymysql.connect(host='localhost', user='root', passwd='Youzu2020!', db='youzu')
     cursor = con.cursor()
 
     query = """SELECT * FROM qbank"""
