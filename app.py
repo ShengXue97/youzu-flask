@@ -176,7 +176,7 @@ def listpdf():
 
         except Exception as e:
             con.rollback()
-            print(e)
+            
 
         newFile = {
             'name': name,
@@ -292,7 +292,6 @@ def savepdf():
 
     except Exception as e:
         con.rollback()
-        print("exception occured:", e)
 
 
     create_table_query = """create table if not exists pdfbank(
@@ -315,7 +314,7 @@ def savepdf():
 
     except Exception as e:
         con.rollback()
-        print(e)
+        
         
 
     return jsonify({"Succeeded": "yes", "YourIP": str(currentIP), "YourTime": currentTime})
@@ -456,7 +455,7 @@ def listworkspace():
 
             except Exception as e:
                 con.rollback()
-                print(e)
+                
 
             newFile = {
                 'name': name,
@@ -677,7 +676,6 @@ def checkdatabase():
         number = cursor.rowcount
     except Exception as e:
         con.rollback()
-        print("exception occured:", e)
         return jsonify({"Succeeded": "no", "Exists" : exists, "Number" : number})
 
 
@@ -751,7 +749,7 @@ def updatedatabase():
 
     except Exception as e:
         con.rollback()
-        print(e)
+        
 
     ## QBANK
     create_table_query = """create table if not exists qbank(
@@ -778,7 +776,6 @@ def updatedatabase():
 
     except Exception as e:
         con.rollback()
-        print("exception occured:", e)
 
     con.close()
     return jsonify({"Succeeded": "yes"})
