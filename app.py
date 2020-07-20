@@ -137,6 +137,7 @@ def listpdf():
     azureDir = "/datassd/pdf_downloader-master/pdfs/"
     localDir = "pdfs/"
     myDir = ""
+    currentBatch = int(request.args.get("batch"))
 
     if os.path.exists(azureDir):
         myDir = azureDir
@@ -151,31 +152,54 @@ def listpdf():
 
         
     items = os.listdir(myDir)
-    for item in items:
+    total_batches = 10
+
+    total_size = len(items)
+    batch_size = total_size // total_batches
+    lower_bound = currentBatch * batch_size
+    upper_bound = (currentBatch * batch_size) + batch_size
+    if upper_bound > total_size:
+        upper_bound = total_size
+
+    batched_items = items[lower_bound: upper_bound]
+    select_query = "SELECT * FROM pdfbank"
+    cursor.execute(select_query)
+    select_results = cursor.fetchall()
+    
+    for item in batched_items:
         name = item.replace(".pdf", "")
 
         lastModified = datetime.fromtimestamp(os.path.getmtime(myDir + item))
         status = "Not Processed"
-        count_query = "SELECT * FROM pdfbank WHERE hashcode = %s"
 
         try:
-            pdf_file = open(myDir + item, "rb")
-            pdf_data_binary = pdf_file.read()
-            pdf_bas64 = "data:application/pdf;base64," + (base64.b64encode(pdf_data_binary)).decode("ascii")
-            encoded_string = pdf_bas64[28:].encode('ascii')
-            pdfhash = hashlib.sha512(encoded_string).hexdigest()
+            pdfhash = ""
+            if not os.path.exists(myDir + "hash/"):
+                os.makedirs(myDir + "hash/")
 
-            with open('1.txt', 'wb') as f:
-                f.write(encoded_string)
+            if not os.path.exists(myDir + "hash/" + name + ".txt"):
+                # Cache for the hash, so it will be faster
+                pdf_file = open(myDir + item, "rb")
+                pdf_data_binary = pdf_file.read()
+                pdf_bas64 = "data:application/pdf;base64," + (base64.b64encode(pdf_data_binary)).decode("ascii")
+                encoded_string = pdf_bas64[28:].encode('ascii')
+                pdfhash = hashlib.sha512(encoded_string).hexdigest()
+                
+                file1 = open(myDir + "hash/" + name + ".txt", "w")
+                file1.write(pdfhash)
+            else:
+                with open(myDir + "hash/" + name + ".txt", "r") as hashfile:
+                    pdfhash = hashfile.read()
 
-            cursor.execute(count_query, pdfhash)
-            if cursor.rowcount > 0:
-                myresult = cursor.fetchall()
+
+
+            filtered_select_results = [k for k in select_results if pdfhash in k]
+            if len(filtered_select_results) > 0:
                 ## [0] for the first value with the pdfhash, since it should be unique
                 ## [2] for the third value in the row, which contains the inLibrary column
                 ## [3] for the fourth value in the row, which contains the inDatabase column
-                inLibrary = myresult[0][2]
-                inDatabase = myresult[0][3]
+                inLibrary = filtered_select_results[0][2]
+                inDatabase = filtered_select_results[0][3]
 
                 if inLibrary == 0:
                     if inDatabase == 0:
@@ -284,13 +308,16 @@ def savepdf():
     pdfdata = request.data[28:]
     pdfhash = hashlib.sha512(pdfdata).hexdigest()
     
-    with open('2.txt', 'wb') as f:
-        f.write(pdfdata)
-    
     if not os.path.exists("Workspaces/pdf"):
         os.makedirs("Workspaces/pdf")
     file1 = open("Workspaces/pdf/" + name + ".txt", "wb")
     file1.write(request.data)
+
+    if not os.path.exists("Workspaces/hash"):
+        os.makedirs("Workspaces/hash")
+    file2 = open("Workspaces/hash/" + name + ".txt", "w")
+    file2.write(pdfhash)
+
     currentIP = request.remote_addr
     currentTime = str(datetime.now())
 
@@ -318,7 +345,7 @@ def savepdf():
 
     except Exception as e:
         con.rollback()
-        print(e)
+        print("2: " + str(e))
         
         
 
@@ -426,7 +453,7 @@ def deleteworkspace():
 
             except Exception as e:
                 con.rollback()
-                print(e)
+                print("3: " + str(e))
 
         os.remove('Workspaces/pdf/' + name)
         if os.path.exists('Workspaces/csv/' + name):
@@ -471,6 +498,10 @@ def listworkspace():
     cursor = con.cursor()
     
     if os.path.exists("Workspaces/csv"):
+        select_query = "SELECT * FROM pdfbank"
+        cursor.execute(select_query)
+        select_results = cursor.fetchall()
+
         items = os.listdir("Workspaces/csv")
         for item in items:
             name = item.replace(".txt", "")
@@ -481,18 +512,31 @@ def listworkspace():
 
             try:
                 pdfhash = ""
-                with open("Workspaces/pdf/" + name + ".txt", "r") as pdf_file:
-                    filedata = pdf_file.read()[28:]
-                    pdfhash = hashlib.sha512(filedata.encode("utf-8")).hexdigest()
+                
+                if not os.path.exists("Workspaces/hash"):
+                    os.makedirs("Workspaces/hash")
 
-                cursor.execute(count_query, pdfhash)
-                if cursor.rowcount > 0:
-                    myresult = cursor.fetchall()
+                if not os.path.exists("Workspaces/hash/" + name + ".txt"):
+                    # Cache for the hash, so it will be faster
+                    with open("Workspaces/pdf/" + name + ".txt", "r") as pdf_file:
+                        filedata = pdf_file.read()[28:]
+                        pdfhash = hashlib.sha512(filedata.encode("utf-8")).hexdigest()
+                    
+                    file1 = open("Workspaces/hash/" + name + ".txt", "w")
+                    file1.write(pdfhash)
+                else:
+                    with open("Workspaces/hash/" + name + ".txt", "r") as hashfile:
+                        pdfhash = hashfile.read()
+                        
+    
+
+                filtered_select_results = [k for k in select_results if pdfhash in k]
+                if len(filtered_select_results) > 0:
                     ## [0] for the first value with the pdfhash, since it should be unique
                     ## [2] for the third value in the row, which contains the inLibrary column
                     ## [3] for the fourth value in the row, which contains the inDatabase column
-                    inLibrary = myresult[0][2]
-                    inDatabase = myresult[0][3]
+                    inLibrary = filtered_select_results[0][2]
+                    inDatabase = filtered_select_results[0][3]
 
                     if inLibrary == 0:
                         if inDatabase == 0:
@@ -800,7 +844,7 @@ def updatedatabase():
 
     except Exception as e:
         con.rollback()
-        print(e)        
+        print("4: " + str(e))        
 
     ## QBANK
     create_table_query = """create table if not exists qbank(
