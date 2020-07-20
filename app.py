@@ -23,7 +23,7 @@ from PyPDF2 import PdfFileReader, PdfFileReader, PdfFileWriter
 import hashlib
 import binascii
 import filecmp
-
+import shutil
 # install the following 2 libs first
 # from flask_sqlalchemy import SQLAlchemy
 # from flask_marshmallow import Marshmallow
@@ -146,7 +146,7 @@ def listpdf():
         return jsonify({"Succeeded": "no", "Pdfs": pdfs})
 
     ### PDFBANK
-    con = pymysql.connect(host='localhost', user='root', passwd='Aa04369484911', db='youzu')
+    con = pymysql.connect(host='localhost', user='root', passwd='Youzu2020!', db='youzu')
     cursor = con.cursor()
 
         
@@ -159,13 +159,14 @@ def listpdf():
         count_query = "SELECT * FROM pdfbank WHERE hashcode = %s"
 
         try:
-            pdfhash = ""
-            with open(myDir + item, "rb") as pdf_file:
-                filedata = (base64.b64encode(pdf_file.read()))
-                pdfhash = hashlib.sha512(filedata).hexdigest()
-                with open('1.txt', 'wb') as f:
-                    f.write(filedata)
+            pdf_file = open(myDir + item, "rb")
+            pdf_data_binary = pdf_file.read()
+            pdf_bas64 = "data:application/pdf;base64," + (base64.b64encode(pdf_data_binary)).decode("ascii")
+            encoded_string = pdf_bas64[28:].encode('ascii')
+            pdfhash = hashlib.sha512(encoded_string).hexdigest()
 
+            with open('1.txt', 'wb') as f:
+                f.write(encoded_string)
 
             cursor.execute(count_query, pdfhash)
             if cursor.rowcount > 0:
@@ -285,8 +286,6 @@ def savepdf():
     
     with open('2.txt', 'wb') as f:
         f.write(pdfdata)
-    print("d")
-    print(pdfdata[:50])
     
     if not os.path.exists("Workspaces/pdf"):
         os.makedirs("Workspaces/pdf")
@@ -296,7 +295,7 @@ def savepdf():
     currentTime = str(datetime.now())
 
     ### PDFBANK
-    con = pymysql.connect(host='localhost', user='root', passwd='Aa04369484911', db='youzu')
+    con = pymysql.connect(host='localhost', user='root', passwd='Youzu2020!', db='youzu')
     cursor = con.cursor()
 
     create_table_query = """create table if not exists pdfbank(
@@ -399,7 +398,7 @@ def deleteworkspace():
         ##Only update pdfbank if no other workspaces contains the same exact pdf file
         if numOfSame == 1:
             ### PDFBANK
-            con = pymysql.connect(host='localhost', user='root', passwd='Aa04369484911', db='youzu')
+            con = pymysql.connect(host='localhost', user='root', passwd='Youzu2020!', db='youzu')
             cursor = con.cursor()
 
             create_table_query = """create table if not exists pdfbank(
@@ -468,7 +467,7 @@ def listworkspace():
     workspaces = []
     
     ### PDFBANK
-    con = pymysql.connect(host='localhost', user='root', passwd='Aa04369484911', db='youzu')
+    con = pymysql.connect(host='localhost', user='root', passwd='Youzu2020!', db='youzu')
     cursor = con.cursor()
     
     if os.path.exists("Workspaces/csv"):
@@ -551,20 +550,18 @@ def pushfile():
         currentStartPage = request.args.get("currentStartPage")
         currentEndPage = request.args.get("currentEndPage")
         ignoreCustomPageRange = request.args.get("ignoreCustomPageRange")
+        newFilename = request.args.get("name") + "_" + sessionID + ".pdf"
 
-        if ignoreCustomPageRange == "true":
-            for i in range(infile.numPages):
-                p = infile.getPage(i)
-                output.addPage(p)
-        else:
+        if ignoreCustomPageRange == "false":
             # 0-index
             for i in range(int(currentStartPage) - 1, int(currentEndPage)):
                 p = infile.getPage(i)
                 output.addPage(p)
 
-        newFilename = request.args.get("name") + "_" + sessionID + ".pdf"
-        with open("ReactPDF/" + newFilename, 'wb') as f:
-            output.write(f)
+            with open("ReactPDF/" + newFilename, 'wb') as f:
+                output.write(f)
+        else:
+            shutil.copyfile(myDir + filename, "ReactPDF/" + newFilename)
 
         pdf_file = open("ReactPDF/" + newFilename, "rb")
         pdf_data_binary = pdf_file.read()
@@ -720,7 +717,7 @@ def checkdatabase():
     exists = "no"
 
     # find number of rows with the hashcode
-    con = pymysql.connect(host='localhost', user='root', passwd='Aa04369484911', db='youzu')
+    con = pymysql.connect(host='localhost', user='root', passwd='Youzu2020!', db='youzu')
     cursor = con.cursor()
     count_query = "select * from qbank where hashcode = %s"
 
@@ -778,7 +775,7 @@ def updatedatabase():
             }
             output_list.append(row_dict)
 
-    con = pymysql.connect(host='localhost', user='root', passwd='Aa04369484911', db='youzu')
+    con = pymysql.connect(host='localhost', user='root', passwd='Youzu2020!', db='youzu')
     cursor = con.cursor()
 
     ### PDFBANK
@@ -836,7 +833,7 @@ def updatedatabase():
 
 @app.route('/getdatabase', methods=['GET', 'POST'])
 def getdatabase():
-    con = pymysql.connect(host='localhost', user='root', passwd='Aa04369484911', db='youzu')
+    con = pymysql.connect(host='localhost', user='root', passwd='Youzu2020!', db='youzu')
     cursor = con.cursor()
 
     query = """SELECT * FROM qbank"""
