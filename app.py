@@ -23,6 +23,7 @@ from PyPDF2 import PdfFileReader, PdfFileReader, PdfFileWriter
 import hashlib
 import binascii
 import filecmp
+import math
 import shutil
 # install the following 2 libs first
 # from flask_sqlalchemy import SQLAlchemy
@@ -155,18 +156,21 @@ def listpdf():
     total_batches = 10
 
     total_size = len(items)
-    batch_size = total_size // total_batches
+    batch_size = math.ceil(total_size / total_batches)
+
     lower_bound = currentBatch * batch_size
     upper_bound = (currentBatch * batch_size) + batch_size
     if upper_bound > total_size:
         upper_bound = total_size
-
     batched_items = items[lower_bound: upper_bound]
+    
     select_query = "SELECT * FROM pdfbank"
     cursor.execute(select_query)
     select_results = cursor.fetchall()
     
     for item in batched_items:
+        if item == "hash":
+            continue
         name = item.replace(".pdf", "")
 
         lastModified = datetime.fromtimestamp(os.path.getmtime(myDir + item))
