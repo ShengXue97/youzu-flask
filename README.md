@@ -32,4 +32,8 @@ uploaded/selected PDF(s) and processes it entirely, sorting images from text and
 comes in the form of a triple-nested list that `app.py` retrieves, stores and sends it to the front-end UI for the user 
 to mutate this data to his/her liking. Any core adjustments to the back-end code regarding paper output are done here.
 
+#### `jsonsql.py`
+This python script contains MySQL queries to alter and change the database using the PyMySQL library. Developer can change
+the queries to be executed and run this script to mutate and change the sql database. 
+
 ######*`MainV9.py` is an older version of this module, while `MainV11.py` has no support yet. Their uses have been deprecated since.*
