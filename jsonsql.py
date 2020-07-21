@@ -42,7 +42,7 @@ def show_tables():
     cursor.execute("""show tables""")
 
 def delete_table():
-    cursor.execute("""DROP TABLE IF EXISTS qbank""")
+    cursor.execute("""DROP TABLE IF EXISTS pdfbank""")
     
 def insert_data(json_obj):
     insert_query = """insert into qbank(question) values (%s)"""
@@ -50,7 +50,7 @@ def insert_data(json_obj):
         cursor.execute(insert_query, json.dumps(x))
 
 def reset_table():
-    cursor.execute("""truncate table qbank""")
+    cursor.execute("""truncate table pdfbank""")
 
 def insert_column():
     cursor.execute("""Alter table qbank add column hashcode VARCHAR(100) not null after question""")
@@ -62,9 +62,9 @@ def overwrite_query():
     cursor.execute("""delete from qbank where hashcode = %s """)
 
 def update_hash_query():
-    cursor.execute("""update qbank set hashcode = 'db7ad91061d48783cf37762e11f347955f0acbc0b14270dd06aa7e690e6abcb72901de74edef520b25a33c122529e0b9683564b42965f412abb2501368baf5f7' where hashcode = '27b6664da634a0b745d0'""")
+    cursor.execute("""update qbank set hashcode = '' where hashcode = ''""")
 try:
-    update_hash_query()
+    
 
     con.commit();
     print('update successful')
