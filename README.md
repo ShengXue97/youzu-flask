@@ -36,15 +36,15 @@ to mutate this data to his/her liking. Any core adjustments to the back-end code
 ### `extraFiles`
 This folder contains several scripts that are either used for testing or to generate files in the background on the virtual machine
 
-#### `jsonsql.py`
+* #### `jsonsql.py`
 This python script contains MySQL queries to alter and change the database using the PyMySQL library. Developer can change
 the queries to be executed and run this script to mutate and change the sql database. 
 
-#### `WorkspaceGenerator.py` 
+* #### `WorkspaceGenerator.py` 
 This is a script that calls MainV10.py to convert pdfs in the 'Avaliable pdfs' into csv files and subsequently saved under Workspaces.
 The script is continually running in the background on the virtual machine in a tmux session. 
 
-#### `update-pdfbank.py`
+* #### `update-pdfbank.py`
 This is a script that establishes a connection with the MySQL database and updates the 'inLibrary' status of respective files present in
 the Workspace folder. The SHA-2 hash for each file is obtained from /Workspace/hash directory and inserted as a row entry in the 'pdfbank'
 table. A '1' value will also be inserted in the 'inLibrary' column to indicate positive status. 
