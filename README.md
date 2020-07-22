@@ -33,6 +33,9 @@ The pipeline makes use of the Tesseract Open Source OCR to extract text from ima
 comes in the form of a triple-nested list that `app.py` retrieves, stores and sends it to the front-end UI for the user 
 to mutate this data to his/her liking. Any core adjustments to the back-end code regarding paper output are done here.
 
+### `extraFiles`
+This folder contains several scripts that are either used for testing or to generate files in the background on the virtual machine
+
 #### `jsonsql.py`
 This python script contains MySQL queries to alter and change the database using the PyMySQL library. Developer can change
 the queries to be executed and run this script to mutate and change the sql database. 
