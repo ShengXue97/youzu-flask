@@ -1,0 +1,216 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module MainV10</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>MainV10</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cgraez%5Conedrive%5Cdesktop%5Cyouzu-flask%5Cmainv10.py">c:\users\graez\onedrive\desktop\youzu-flask\mainv10.py</a></font></td></tr></table>
+    <p><tt>V10:&nbsp;This&nbsp;is&nbsp;the&nbsp;main&nbsp;code&nbsp;that&nbsp;is&nbsp;used&nbsp;for&nbsp;processing&nbsp;the&nbsp;entire&nbsp;PDF&nbsp;and&nbsp;outputting&nbsp;a&nbsp;nested&nbsp;list&nbsp;question&nbsp;format<br>
+This&nbsp;implementation&nbsp;works&nbsp;as&nbsp;a&nbsp;class&nbsp;that&nbsp;is&nbsp;split&nbsp;into&nbsp;many&nbsp;functions,&nbsp;with&nbsp;process.main()&nbsp;as&nbsp;the&nbsp;call&nbsp;for&nbsp;all&nbsp;fns<br>
+app.py&nbsp;(flask&nbsp;end)&nbsp;will&nbsp;call&nbsp;MainV10&nbsp;in&nbsp;its&nbsp;call&nbsp;for&nbsp;/pushfile.<br>
+&nbsp;<br>
+Currently,&nbsp;the&nbsp;main&nbsp;focus&nbsp;here&nbsp;is&nbsp;on&nbsp;MCQs,&nbsp;with&nbsp;English&nbsp;MCQs&nbsp;performing&nbsp;the&nbsp;best,&nbsp;followed&nbsp;by&nbsp;Science,&nbsp;then&nbsp;Math.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="PIL.Image.html">PIL.Image</a><br>
+<a href="PIL.ImageOps.html">PIL.ImageOps</a><br>
+<a href="base64.html">base64</a><br>
+<a href="cv2.cv2.html">cv2.cv2</a><br>
+</td><td width="25%" valign=top><a href="json.html">json</a><br>
+<a href="math.html">math</a><br>
+<a href="numpy.html">numpy</a><br>
+<a href="os.html">os</a><br>
+</td><td width="25%" valign=top><a href="ntpath.html">ntpath</a><br>
+<a href="pandas.html">pandas</a><br>
+<a href="platform.html">platform</a><br>
+<a href="pytesseract.html">pytesseract</a><br>
+</td><td width="25%" valign=top><a href="re.html">re</a><br>
+<a href="shutil.html">shutil</a><br>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="builtins.html#object">builtins.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="MainV10.html#Process">Process</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Process">class <strong>Process</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>these&nbsp;are&nbsp;the&nbsp;default&nbsp;attributes&nbsp;that&nbsp;every&nbsp;PDF&nbsp;begins&nbsp;with<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="Process-__init__"><strong>__init__</strong></a>(self)</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
+
+<dl><dt><a name="Process-copytree"><strong>copytree</strong></a>(self, src, dst, symlinks=False, ignore=None)</dt><dd><tt>this&nbsp;fn&nbsp;copies&nbsp;all&nbsp;files&nbsp;from&nbsp;the&nbsp;src&nbsp;directory&nbsp;to&nbsp;destination&nbsp;directory</tt></dd></dl>
+
+<dl><dt><a name="Process-crop_image"><strong>crop_image</strong></a>(self, image_path, new_image_path, top, bottom, ignoreBottom, ignoreTop)</dt><dd><tt>This&nbsp;function&nbsp;is&nbsp;called&nbsp;by&nbsp;<a href="#Process-save_qn_images">save_qn_images</a>()<br>
+&nbsp;<br>
+imgs&nbsp;are&nbsp;cropped&nbsp;to&nbsp;individual&nbsp;qns&nbsp;based&nbsp;on&nbsp;y-coords&nbsp;found&nbsp;in&nbsp;qn_coord<br>
+&nbsp;<br>
+file&nbsp;path&nbsp;of&nbsp;each&nbsp;image&nbsp;is&nbsp;appended&nbsp;to&nbsp;qn_images_list<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;image_path<br>
+&nbsp;&nbsp;&nbsp;&nbsp;new_image_path<br>
+&nbsp;&nbsp;&nbsp;&nbsp;top<br>
+&nbsp;&nbsp;&nbsp;&nbsp;bottom<br>
+&nbsp;&nbsp;&nbsp;&nbsp;ignoreBottom<br>
+&nbsp;&nbsp;&nbsp;&nbsp;ignoreTop</tt></dd></dl>
+
+<dl><dt><a name="Process-draw_contours"><strong>draw_contours</strong></a>(self, result, img, cntrs, image_name)</dt><dd><tt>this&nbsp;fn&nbsp;takes&nbsp;in&nbsp;the&nbsp;new&nbsp;contours&nbsp;(merged&nbsp;and&nbsp;not&nbsp;merged),&nbsp;and&nbsp;draws&nbsp;these&nbsp;contours<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;result<br>
+&nbsp;&nbsp;&nbsp;&nbsp;img<br>
+&nbsp;&nbsp;&nbsp;&nbsp;cntrs<br>
+&nbsp;&nbsp;&nbsp;&nbsp;image_name<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;document_data_list</tt></dd></dl>
+
+<dl><dt><a name="Process-find_paper_attributes"><strong>find_paper_attributes</strong></a>(self, paper_name)</dt><dd><tt>this&nbsp;fn&nbsp;identifies&nbsp;the&nbsp;important&nbsp;details&nbsp;of&nbsp;the&nbsp;paper<br>
+&nbsp;<br>
+Attributes:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;paper_name<br>
+&nbsp;&nbsp;&nbsp;&nbsp;paper_subject<br>
+&nbsp;&nbsp;&nbsp;&nbsp;paper_exam_type<br>
+&nbsp;&nbsp;&nbsp;&nbsp;paper_year<br>
+&nbsp;&nbsp;&nbsp;&nbsp;paper_school<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;paper_name<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Attributes</tt></dd></dl>
+
+<dl><dt><a name="Process-find_qn_coords"><strong>find_qn_coords</strong></a>(self, filenames_list)</dt><dd><tt>this&nbsp;fn&nbsp;captures&nbsp;the&nbsp;coords&nbsp;of&nbsp;where&nbsp;each&nbsp;qn&nbsp;starts<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;filenames_list<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;qn_coord</tt></dd></dl>
+
+<dl><dt><a name="Process-generate_document"><strong>generate_document</strong></a>(self, filename, qn_coord)</dt><dd><tt>this&nbsp;function&nbsp;will&nbsp;remove&nbsp;horizontal&nbsp;lines&nbsp;at&nbsp;paper&nbsp;margins&nbsp;and&nbsp;call&nbsp;other&nbsp;fns(<a href="#Process-get_thresh_and_contours">get_thresh_and_contours</a>(),<a href="#Process-merge_contours">merge_contours</a>(),&nbsp;<a href="#Process-draw_contours">draw_contours</a>())&nbsp;involving&nbsp;contours&nbsp;and&nbsp;also&nbsp;<a href="#Process-write_data_to_document">write_data_to_document</a>()&nbsp;to&nbsp;finally&nbsp;create&nbsp;a&nbsp;dataframe<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;filename<br>
+&nbsp;&nbsp;&nbsp;&nbsp;qn_coord<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;False</tt></dd></dl>
+
+<dl><dt><a name="Process-get_image"><strong>get_image</strong></a>(self, image_path)</dt><dd><tt>this&nbsp;fn&nbsp;maps&nbsp;each&nbsp;PDF&nbsp;page&nbsp;to&nbsp;an&nbsp;image&nbsp;in&nbsp;numpy&nbsp;array&nbsp;form&nbsp;to&nbsp;access&nbsp;its&nbsp;pixel&nbsp;values&nbsp;[x][y]<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;image_path<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pixel_values</tt></dd></dl>
+
+<dl><dt><a name="Process-get_thresh_and_contours"><strong>get_thresh_and_contours</strong></a>(self, img, filename)</dt><dd><tt>this&nbsp;fn&nbsp;pre-processes&nbsp;each&nbsp;image&nbsp;(now&nbsp;all&nbsp;positive),&nbsp;before&nbsp;returning&nbsp;their&nbsp;detected&nbsp;contours<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;img<br>
+&nbsp;&nbsp;&nbsp;&nbsp;filename<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;thresh<br>
+&nbsp;&nbsp;&nbsp;&nbsp;cntrs<br>
+&nbsp;&nbsp;&nbsp;&nbsp;result<br>
+&nbsp;&nbsp;&nbsp;&nbsp;morph</tt></dd></dl>
+
+<dl><dt><a name="Process-is_gibberish"><strong>is_gibberish</strong></a>(self, text)</dt><dd><tt>this&nbsp;is&nbsp;a&nbsp;helper&nbsp;fn&nbsp;that&nbsp;checks&nbsp;if&nbsp;the&nbsp;text&nbsp;passed&nbsp;is&nbsp;gibberish&nbsp;or&nbsp;not<br>
+&nbsp;<br>
+the&nbsp;higher&nbsp;threshold_percentage&nbsp;is,&nbsp;the&nbsp;higher&nbsp;the&nbsp;tolerance&nbsp;for&nbsp;nonsense&nbsp;in&nbsp;the&nbsp;text<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;text<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;True&nbsp;if&nbsp;detected&nbsp;to&nbsp;be&nbsp;gibberish,&nbsp;False&nbsp;if&nbsp;otherwise</tt></dd></dl>
+
+<dl><dt><a name="Process-is_session_killed"><strong>is_session_killed</strong></a>(self)</dt><dd><tt>if&nbsp;the&nbsp;user&nbsp;stops&nbsp;the&nbsp;PDF&nbsp;conversion&nbsp;halfway,&nbsp;we&nbsp;will&nbsp;remove&nbsp;all&nbsp;instantiated&nbsp;folders</tt></dd></dl>
+
+<dl><dt><a name="Process-is_white_image"><strong>is_white_image</strong></a>(self, image_name)</dt><dd><tt>this&nbsp;fn&nbsp;checks&nbsp;if&nbsp;the&nbsp;PDF&nbsp;page&nbsp;(image)&nbsp;is&nbsp;negative&nbsp;(scan&nbsp;issue),&nbsp;and&nbsp;converts&nbsp;it&nbsp;back&nbsp;to&nbsp;positive<br>
+&nbsp;<br>
+The&nbsp;higher&nbsp;the&nbsp;white_percentage_threshold,&nbsp;the&nbsp;more&nbsp;likely&nbsp;this&nbsp;fn&nbsp;is&nbsp;to&nbsp;detect&nbsp;the&nbsp;image&nbsp;as&nbsp;negative<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;image_name<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;True&nbsp;if&nbsp;white,&nbsp;False&nbsp;if&nbsp;&lt;&nbsp;threshold</tt></dd></dl>
+
+<dl><dt><a name="Process-main"><strong>main</strong></a>(self, pdfname, sessionID)</dt><dd><tt>this&nbsp;is&nbsp;the&nbsp;main&nbsp;function&nbsp;that&nbsp;will&nbsp;be&nbsp;called&nbsp;from&nbsp;app.py,&nbsp;which&nbsp;calls&nbsp;all&nbsp;the&nbsp;other&nbsp;essential&nbsp;fns<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pdfname<br>
+&nbsp;&nbsp;&nbsp;&nbsp;sessionID</tt></dd></dl>
+
+<dl><dt><a name="Process-merge_contours"><strong>merge_contours</strong></a>(self, thresh, cntrs, x_tolerance, y_tolerance)</dt><dd><tt>this&nbsp;fn&nbsp;takes&nbsp;the&nbsp;pre-processed&nbsp;image,&nbsp;and&nbsp;merges&nbsp;the&nbsp;close&nbsp;contours&nbsp;together&nbsp;(for&nbsp;text/diagram&nbsp;analysis)<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;thresh<br>
+&nbsp;&nbsp;&nbsp;&nbsp;cntrs<br>
+&nbsp;&nbsp;&nbsp;&nbsp;x_tolerance<br>
+&nbsp;&nbsp;&nbsp;&nbsp;y_tolerance<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;thresh<br>
+&nbsp;&nbsp;&nbsp;&nbsp;cntrs</tt></dd></dl>
+
+<dl><dt><a name="Process-save_qn_images"><strong>save_qn_images</strong></a>(self, qn_coord)</dt><dd><tt>this&nbsp;fn&nbsp;takes&nbsp;in&nbsp;qn_coord&nbsp;and&nbsp;calls&nbsp;crop_image&nbsp;function,&nbsp;saving&nbsp;qn&nbsp;numbers&nbsp;captured&nbsp;under&nbsp;/TempImages<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;qn_coord<br>
+&nbsp;<br>
+Note:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;cropped&nbsp;images&nbsp;are&nbsp;saved&nbsp;under&nbsp;/TempImages</tt></dd></dl>
+
+<dl><dt><a name="Process-section_chk"><strong>section_chk</strong></a>(self, image, j, k)</dt><dd><tt>this&nbsp;fn&nbsp;will&nbsp;take&nbsp;in&nbsp;each&nbsp;page&nbsp;as&nbsp;an&nbsp;image,&nbsp;then&nbsp;identify&nbsp;its&nbsp;paper&nbsp;section&nbsp;(eng&nbsp;support)<br>
+&nbsp;<br>
+this&nbsp;fn&nbsp;is&nbsp;currently&nbsp;unused&nbsp;since&nbsp;it&nbsp;is&nbsp;integrated&nbsp;in&nbsp;<a href="#Process-find_qn_coords">find_qn_coords</a>()<br>
+&nbsp;<br>
+file&nbsp;here&nbsp;refers&nbsp;to&nbsp;a&nbsp;single&nbsp;page&nbsp;(img)</tt></dd></dl>
+
+<dl><dt><a name="Process-write_data_to_document"><strong>write_data_to_document</strong></a>(self, document_data_list, qn_coord)</dt><dd><tt>this&nbsp;fn&nbsp;gathers&nbsp;the&nbsp;important&nbsp;file&nbsp;attributes&nbsp;from&nbsp;the&nbsp;other&nbsp;fns,&nbsp;sorting&nbsp;them&nbsp;into&nbsp;relevant&nbsp;information<br>
+&nbsp;<br>
+qn_coord&nbsp;is&nbsp;a&nbsp;tuple&nbsp;consisting&nbsp;of&nbsp;nested&nbsp;(pg_number,&nbsp;y)&nbsp;tuples&nbsp;of&nbsp;each&nbsp;contour<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;document_data_list<br>
+&nbsp;&nbsp;&nbsp;&nbsp;qn_coord<br>
+Note:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Function&nbsp;updates&nbsp;and&nbsp;fills&nbsp;dataframe</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table></td></tr></table>
+</body></html>

@@ -1,10 +1,11 @@
-'''
-V10: This is the main code that is used for processing the entire PDF and outputting a nested list question format
+
+"""V10: This is the main code that is used for processing the entire PDF and outputting a nested list question format
 This implementation works as a class that is split into many functions, with process.main() as the call for all fns
 app.py (flask end) will call MainV10 in its call for /pushfile.
 
 Currently, the main focus here is on MCQs, with English MCQs performing the best, followed by Science, then Math.
-'''
+"""
+
 import cv2
 import numpy as np
 import pytesseract
@@ -29,8 +30,9 @@ if platform.system() == "Windows":
 
 
 class Process:
+    """these are the default attributes that every PDF begins with"""
     def __init__(self):
-        # these are the default attributes that every PDF begins with
+
         self.pg_number = 1
         self.pg_cnt_ls = []
         self.pg_num_1 = 2
@@ -53,8 +55,9 @@ class Process:
                      'Number', 'Image',
                      'Image File', 'Answer'])
 
-    # if the user stops the PDF conversion halfway, we will remove all instantiated folders
+
     def is_session_killed(self):
+        """if the user stops the PDF conversion halfway, we will remove all instantiated folders"""
         if os.path.exists('Sessions/' + self.sessionID + "_kill" + ".json"):
             # This session is killed!
             os.remove('Sessions/' + self.sessionID + "_kill" + ".json")
@@ -66,8 +69,17 @@ class Process:
         else:
             return False
 
-    # this fn maps each PDF page to an image in numpy array form to access its pixel values [x][y]
+
     def get_image(self, image_path):
+        """this fn maps each PDF page to an image in numpy array form to access its pixel values [x][y]
+
+        Args:
+            image_path
+
+        Returns:
+            pixel_values
+
+        """
         image = Image.open(image_path, 'r')
         image = image.convert('L')  # makes it greyscale
         width, height = image.size
@@ -82,9 +94,18 @@ class Process:
         pixel_values = np.array(pixel_values).reshape((width, height, channels))
         return pixel_values
 
-    # this fn checks if the PDF page (image) is negative (scan issue), and converts it back to positive
+
     def is_white_image(self, image_name):
-        # The higher the white_percentage_threshold, the more likely this fn is to detect the image as negative
+        """this fn checks if the PDF page (image) is negative (scan issue), and converts it back to positive
+
+        The higher the white_percentage_threshold, the more likely this fn is to detect the image as negative
+
+        Args:
+            image_name
+
+        Returns:
+            True if white, False if < threshold
+        """
         white_percentage_threshold = 0.75
         numpy_array = self.get_image(image_name + ".jpg")
         total_pixels = numpy_array.size
@@ -113,8 +134,20 @@ class Process:
         else:
             return True
 
-    # this fn pre-processes each image (now all positive), before returning their detected contours
-    def get_thresh_and_contours(self, img, filename):
+
+    def get_thresh_and_contours(self, img,filename):
+        """this fn pre-processes each image (now all positive), before returning their detected contours
+
+        Args:
+            img
+            filename
+
+        Returns:
+            thresh
+            cntrs
+            result
+            morph
+        """
         # step 1: blurring
         imgBlur = cv2.GaussianBlur(img, (7, 7), 1)
 
@@ -138,8 +171,20 @@ class Process:
         cntrs = cntrs[0] if len(cntrs) == 2 else cntrs[1]
         return thresh, cntrs, result, morph
 
-    # this fn takes the pre-processed image, and merges the close contours together (for text/diagram analysis)
+
     def merge_contours(self, thresh, cntrs, x_tolerance, y_tolerance):
+        """this fn takes the pre-processed image, and merges the close contours together (for text/diagram analysis)
+
+        Args:
+            thresh
+            cntrs
+            x_tolerance
+            y_tolerance
+        Returns:
+            thresh
+            cntrs
+
+        """
         # area_threshold is the smallest area allowed for the contour before it is removed
         area_threshold = 100
 
@@ -163,8 +208,19 @@ class Process:
             cntrs, hier = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
             return thresh, cntrs
 
-    # this fn takes in the new contours (merged and not merged), and draws these contours
+
     def draw_contours(self, result, img, cntrs, image_name):
+        """this fn takes in the new contours (merged and not merged), and draws these contours
+
+        Args:
+            result
+            img
+            cntrs
+            image_name
+
+        Returns:
+            document_data_list
+        """
         document_data_list = []  # will contain list of tuples of (data, type, y_coord)
         height, width, channels = img.shape
         result_1 = img.copy()
@@ -254,9 +310,18 @@ class Process:
                     document_data_list.append((text, "text", y, pseudo_text, "", y + h / 2, x + w / 2))
         return document_data_list
 
-    # this is a helper fn that checks if the given detected line is gibberish or not
+
     def is_gibberish(self, text):
-        # the higher threshold_percentage is, the higher the tolerance for nonsense in the text
+        """this is a helper fn that checks if the text passed is gibberish or not
+
+        the higher threshold_percentage is, the higher the tolerance for nonsense in the text
+
+        Args:
+            text
+
+        Returns:
+            True if detected to be gibberish, False if otherwise
+        """
         threshold_percentage = 45  # if too high, some diagrams without hough lines may be detected as text
         is_definitely_not_gibberish = False
         split = text.split("\n")
@@ -296,8 +361,15 @@ class Process:
         else:
             return False
 
-    # this fn captures the coords of where each qn starts
     def find_qn_coords(self, filenames_list):
+        """this fn captures the coords of where each qn starts
+
+        Args:
+            filenames_list
+
+        Returns:
+            qn_coord
+        """
         qn_coord = []  # each element in the list will be in the format (self.pg_number, y)
         qn_coord.append((0, 0))
         self.qn_num = 1
@@ -433,9 +505,17 @@ class Process:
 
         return qn_coord
 
-    # this fn gathers the important file attributes from the other fns, sorting them into relevant information
     def write_data_to_document(self, document_data_list, qn_coord):
-        # qn_coord is a tuple consisting of nested (pg_number, y) tuples of each contour
+        """this fn gathers the important file attributes from the other fns, sorting them into relevant information
+
+        qn_coord is a tuple consisting of nested (pg_number, y) tuples of each contour
+
+        Args:
+            document_data_list
+            qn_coord
+        Note:
+            Function updates and fills dataframe
+        """
         # Sort document_data_list according to element y-coordinates
         document_data_list.sort(key=lambda tup: tup[2])
         current_ans_list = []
@@ -567,8 +647,17 @@ class Process:
                     if row['Page'] == x:
                         self.global_df.at[index, 'question_type'] = 'Unsupported Question Type'
 
-    # this function will remove horizontal lines at paper margins and call other fns(get_thresh_and_contours(),merge_contours(), draw_contours()) involving contours and also write_data_to_document() to finally create a dataframe
+
     def generate_document(self, filename, qn_coord):
+        """this function will remove horizontal lines at paper margins and call other fns(get_thresh_and_contours(),merge_contours(), draw_contours()) involving contours and also write_data_to_document() to finally create a dataframe
+
+        Args:
+            filename
+            qn_coord
+
+        Returns:
+            False
+        """
         # the higher these two thresholds, the further the max distance before two contours will merge
         x_tolerance_threshold = 0.18138  # previously 0.18
         y_tolerance_threshold = 0.014964  # previously 0.009
@@ -648,8 +737,8 @@ class Process:
         self.pg_num = self.pg_num + 1
         return False
 
-    # this fn copies all files from the src directory to destination directory
     def copytree(self, src, dst, symlinks=False, ignore=None):
+        """this fn copies all files from the src directory to destination directory"""
         if not os.path.exists(dst):
             os.makedirs(dst)
         for item in os.listdir(src):
@@ -661,10 +750,13 @@ class Process:
                 if not os.path.exists(d) or os.stat(s).st_mtime - os.stat(d).st_mtime > 1:
                     shutil.copy2(s, d)
 
-    # this fn will take in each page as an image, then identify its paper section (eng support)
-    # this fn is currently unused since it is integrated in find_qn_coords()
     def section_chk(self, image, j, k):
-        # file here refers to a single page (img)
+        """this fn will take in each page as an image, then identify its paper section (eng support)
+
+        this fn is currently unused since it is integrated in find_qn_coords()
+
+        file here refers to a single page (img)
+        """
         height, width, channels = image.shape
         data = pytesseract.image_to_data(image, output_type=pytesseract.Output.DICT)
 
@@ -695,9 +787,22 @@ class Process:
 
         return self.pg_cnt_ls
 
-    # this fn is called by save_qn_images(); imgs are cropped to individual qns based on y-coords found in qn_coord,
-    # file path of each image is appended to qn_images_list
     def crop_image(self, image_path, new_image_path, top, bottom, ignoreBottom, ignoreTop):
+        """This function is called by save_qn_images()
+
+        imgs are cropped to individual qns based on y-coords found in qn_coord
+
+        file path of each image is appended to qn_images_list
+
+        Args:
+            image_path
+            new_image_path
+            top
+            bottom
+            ignoreBottom
+            ignoreTop
+
+        """
         # Opens a image in RGB mode
         image_name = image_path.replace(".jpg", "")
         im = Image.open(image_path)
@@ -745,8 +850,15 @@ class Process:
             # save img,change dpi parameters to alter resolution of images
             im1.save("TempImages/" + self.sessionID + "_" + "temp.jpg", dpi=(500, 500))
 
-    # this fn takes in qn_coord and calls crop_image function, saving qn numbers captured under /TempImages
     def save_qn_images(self, qn_coord):
+        """this fn takes in qn_coord and calls crop_image function, saving qn numbers captured under /TempImages
+
+        Args:
+            qn_coord
+
+        Note:
+            cropped images are saved under /TempImages
+        """
         self.total_qns = len(qn_coord) - 2
         for qn_num in range(1, len(qn_coord)):
             qn = qn_coord[qn_num]
@@ -793,8 +905,23 @@ class Process:
                             im_v = cv2.vconcat([im1, im2])
                             cv2.imwrite(new_image_path, im_v)
 
-    # this fn identifies the important details of the paper
     def find_paper_attributes(self, paper_name):
+        """this fn identifies the important details of the paper
+
+        Attributes:
+            paper_name
+            paper_subject
+            paper_exam_type
+            paper_year
+            paper_school
+
+        Args:
+            paper_name
+
+        Returns:
+            Attributes
+
+        """
         paper_name = paper_name.lower()
         paper_subject = ""
         paper_level = ""
@@ -855,8 +982,14 @@ class Process:
         paper_school = paper_school[:-1]
         return paper_level, paper_subject, paper_year, paper_school, paper_exam_type
 
-    # this is the main function that will be called from app.py, which calls all the other essential fns
     def main(self, pdfname, sessionID):
+        """this is the main function that will be called from app.py, which calls all the other essential fns
+
+        Args:
+            pdfname
+            sessionID
+        
+        """
         global total_pages
         global global_df
         global file_attribute_list
