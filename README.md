@@ -3,6 +3,28 @@ This repository hosts the back-end framework for the React web-page, as part of 
 is built with [flask](https://palletsprojects.com/p/flask/ "flask Home Page"), a lightweight Web Server Gateway 
 Interface web application framework optimized for the Python Language.
 
+## Digitisation Pipeline
+![alt text](https://github.com/ShengXue97/youzu-flask/blob/master/Additonalmages/Pipeline%20and%20Prototype.jpg 'Illustration of Pipeline')
+1. **PDF to Image** 
+Uploaded pdf will be converted to images, and the attributes of the exam paper will be extracted. Negative-scale images will be converted to white if they fall below a certain threshold.
+2. **Question Detection**
+Using Tesseract-OCR and our algorithm, small images of question numbers and their y-coordinates on each page of the paper will be extracted. 
+3. **Image Cropping**
+Based on the y-coordinates of the question numbers extracted from the previours step, each page of the paper will be cropped to fit only the contents of a single question. They will be subsequently saved under the /TempImages folder.
+4. **Image Pre-processing**
+Several image-preprocessing techniques available in the OpenCV computer vision library will be utilised to improve the quality before being passed to the OCR. Below techniques are also used to remove unwanted long lines along margins present in some pages of papers.
+*Examples of techniques used (not exhaustive):*
+    * Gaussian Blurring
+    * Grayscaling
+    * Morphological operations like erosion, dilation, opening, closing etc
+5. **Contour Detection**
+After image is cleaned and denoised, cv2.findContours() function is used to obtains countours wrapping blocks of text on the image. Contours extremely close in proximity will then be merged, while very small contours will be erased. These contours will be passed into our defined draw_contours() function, which will use the cv2.boundingRect() function to outline (rectangular in shape) blocks of text/diagrams. Blank lines in the question will be detected, and a '_______' text will be inserted in the corresponding position in the processed text thereafter. 
+
+Illustration of bounding box:![alt text](https://github.com/ShengXue97/youzu-flask/blob/master/Additonalmages/contour.jpg)
+
+
+
+
 ## Breakdown
 This repository holds many folders that contain highly important data, and are the backbone of many of the functions 
 observed in the React UI. Arguably, the most important directory/modules are:
@@ -33,7 +55,7 @@ The pipeline makes use of the Tesseract Open Source OCR to extract text from ima
 comes in the form of a triple-nested list that `app.py` retrieves, stores and sends it to the front-end UI for the user 
 to mutate this data to his/her liking. Any core adjustments to the back-end code regarding paper output are done here.
 
-### `extraFiles`
+### `/extraFiles`
 This folder contains several scripts that are either used for testing or to generate files in the background on the virtual machine
 
 * #### `jsonsql.py`
