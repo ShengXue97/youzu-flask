@@ -5,9 +5,9 @@ DEVELOPER GUIDE FOR YOUZU SINGAPORE
 
 
 **Group members :** 
-Sim Sheng Xue
-Justin Yip Jia En
-Yu Ying Cheng
+* Sim Sheng Xue
+* Justin Yip Jia En
+* Yu Ying Cheng
 
 
 
