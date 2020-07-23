@@ -18,10 +18,15 @@ Several image-preprocessing techniques available in the OpenCV computer vision l
     * Grayscaling
     * Morphological operations like erosion, dilation, opening, closing etc
 5. **Contour Detection**
-After image is cleaned and denoised, cv2.findContours() function is used to obtains countours wrapping blocks of text on the image. Contours extremely close in proximity will then be merged, while very small contours will be erased. These contours will be passed into our defined draw_contours() function, which will use the cv2.boundingRect() function to outline (rectangular in shape) blocks of text/diagrams. Blank lines in the question will be detected, and a '_______' text will be inserted in the corresponding position in the processed text thereafter. 
-
+After image is cleaned and denoised, cv2.findContours() function is used to obtains countours wrapping blocks of text on the image. Contours extremely close in proximity will then be merged, while very small contours will be erased. These contours will be passed into our defined draw_contours() function, which will use the cv2.boundingRect() function to outline (rectangular in shape) blocks of text/diagrams. Blank lines in the question will be detected, and a '_______' text will be inserted in the corresponding position in the processed text thereafter. Based on the x,y,w,h coordinates of the blocks obtained from cv2.boundingRect() function, the region will be cropped out and subsequently passed into the OCR to be converted to text strings. 
 Illustration of bounding box:![alt text](https://github.com/ShengXue97/youzu-flask/blob/master/Additonalmages/contour.jpg)
-
+6. **Diagram/Text Classification**
+Using Gibberish Detector module, Hough Lines and aspect ratio of the contours, the cropped region will be deemed to be readable text or diagram. For text that passes the filters, it will be appended to a list. Otherwise, digrams will be saved under the /TempImages folder and the base64 string will be appended to the same list.
+7. **Diagram/Text Segmentation**
+Diagrams under /TempImages folder:![alt text](https://github.com/ShengXue97/youzu-flask/blob/master/Additonalmages/tempimages.PNG)
+Base64 strings of diagrams sorted under the /TempImages folder will be accessed and appended to the corresponding questions while text will be segmented into the question title and options using regular expressions. 
+8. **Create Pandas Dataframe**
+All essential and processed content will be inserted into a pandas dataframe, with each question taking up one row. The output will be saved as a csv file, and user can modify MainV10.py script to retain the csv file for inspection. The information and processed content will then be pushed to the front end for user edit and viewing.
 
 
 
@@ -70,6 +75,9 @@ The script is continually running in the background on the virtual machine in a 
 This is a script that establishes a connection with the MySQL database and updates the 'inLibrary' status of respective files present in
 the Workspace folder. The SHA-2 hash for each file is obtained from /Workspace/hash directory and inserted as a row entry in the 'pdfbank'
 table. A '1' value will also be inserted in the 'inLibrary' column to indicate positive status. 
+
+#### `MainV10.html`
+Documentation of functions under MainV10.py. For more detailed explanation, please view the MainV10.py script itself.
 
 ## Dependencies
 The relevant dependencies and libraries used are listed in the requirements.txt file
