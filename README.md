@@ -13,6 +13,7 @@ Using Tesseract-OCR and our algorithm, small images of question numbers and thei
 Based on the y-coordinates of the question numbers extracted from the previours step, each page of the paper will be cropped to fit only the contents of a single question. They will be subsequently saved under the /TempImages folder.
 4. **Image Pre-processing**
 Several image-preprocessing techniques available in the OpenCV computer vision library will be utilised to improve the quality before being passed to the OCR. Below techniques are also used to remove unwanted long lines along margins present in some pages of papers.
+
 *Examples of techniques used (not exhaustive):*
     * Gaussian Blurring
     * Grayscaling
@@ -81,5 +82,10 @@ Documentation of functions under MainV10.py. For more detailed explanation, plea
 
 ## Dependencies
 The relevant dependencies and libraries used are listed in the requirements.txt file
+
+## Future updates and improvements
+* Modularise OCR sections - Such that Tesseract-OCR can be substituted with other compatible OCR modules
+* Adding of image/diagram to individual options under every question
+* Enable processing and user editing of Structured (open-ended) questions 
 
 ######*`MainV9.py` is an older version of this module, while `MainV11.py` has no support yet. Their uses have been deprecated since.*
