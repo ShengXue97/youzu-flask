@@ -243,6 +243,8 @@ The essential functions in `Edit.js` are, but not limited to:
 ticked)*
 * User clicks "Delete Selected Questions"
     - `handleOnDeleteQuestions()` - Deletes all questions that have their checkboxes ticked
+* User edits the content of a single question
+    - `handleOnChangeQuestion()` - Updates the internal representations of the questions data
 
 These functions are responsible for the logic specific to each question. They are passed onto the helper component, `Question.js`:
 * User clicks on "Add a new question below" for a single question
@@ -313,7 +315,7 @@ In the sections below describing setting up the React and Flask servers, highlig
 ### 1.1 Setting up Flask Server
 Note that for Flask to work on a new Virtual Machine, Poppler for Pytesseract and OpenCV will need to be installed.
 
-Run the following commands in order:
+Run the following commands in order(on Linux), or from step 4 on Windows:
 1. `tmux`
 2. ctrl+b then $
 3. Type `flask-production`
@@ -325,7 +327,7 @@ Run the following commands in order:
 9. `python3 app.py`
 
 ### 1.2 Updating Flask Server from GitHub
-Run the following commands in order:
+Run the following commands in order(on Linux), or from step 2 on Windows:
 1. `tmux attach-session -t flask-production`
 2. `git stash`
 3. `git pull origin master`
@@ -333,7 +335,7 @@ Run the following commands in order:
 5. `python3 app.py`
 
 ### 1.3 Setting up React Client
-Run the following commands in order:
+Run the following commands in order(on Linux), or from step 4 on Windows:
 1. `tmux`
 2. `ctrl+b` then `$`
 3. Type `react-production`
@@ -345,7 +347,7 @@ Run the following commands in order:
 Note: In the event that required react package is missing, run ‘npm i <package-name>’ to install the package. Also take note of the version number of packages.
 
 ### 1.4 Updating React Client from GitHub
-Run the following commands in order:
+Run the following commands in order(on Linux), or from step 2 on Windows:
 1. `tmux attach-session -t react-production`
 2. `git stash`
 3. `git pull origin master`
@@ -415,7 +417,7 @@ After installing the MySQL client, configure your login credentials and user pri
 
 ### 3.5 Configure login information on app.py
 
-Default login details:![alt text](https://github.com/ShengXue97/youzu-flask/blob/master/Additonalmages/login.PNG)
+Default login details:![alt text](https://github.com/ShengXue97/youzu-flask/blob/master/Additonalmages/pymysql.PNG)
 
 Identify the above lines on the app.py script and change them accordingly based on your login details for MySQL database. 
 * Note that 'qbank' and 'pdfbank' tables will be created by default. Please maintain and use these tables.
@@ -424,10 +426,10 @@ Identify the above lines on the app.py script and change them accordingly based 
 
 
 
-## Dependencies
+## 4 Dependencies
 The relevant dependencies and libraries used are listed in the requirements.txt file
 
-## Future updates and improvements
+## 5 Future updates and improvements
 * Modularise OCR sections - Such that Tesseract-OCR can be substituted with other compatible OCR modules
 * Adding of image/diagram to individual options under every question
 * Enable processing and user editing of Structured (open-ended) questions 
