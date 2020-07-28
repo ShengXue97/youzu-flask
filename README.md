@@ -14,6 +14,7 @@ Yu Ying Cheng
 * __Section B - Breakdown of app.py__
 * __Section C - Breakdown of MainV10.py__
 * __Section D - Introduction To React Repository__
+* __Section E - FAQ
 * __Appendix A - Installation Guide__
 
 ## Section A: Introduction To Flask Repository
@@ -295,18 +296,15 @@ Library pages (such as a search feature and download button for users that want 
 * User clicks on "Refresh Data", or simply opened the Database Tab
     - `getDatabase()` *(Post a request for the database "qbank" table, and displays the server response data in the database table*
 
-## 8 FAQ
-Below are the Frequently Asked Questions.
-1. 
-Q: `pymysql.connect(host='localhost', user='root', passwd='', db='')` is found in almost every function of `appy.py`, do I need to change all of them according to my own database setup?
+## Section E: FAQ
+## 8 Frequently Asked Questions
+1.  Q: `pymysql.connect(host='localhost', user='root', passwd='', db='')` is found in almost every function of `appy.py`, do I need to change all of them according to my own database setup?
 A: Yes. The password and db fields should be changed according to your own setup.
 
-2. 
-Q:  `WorkspaceGenerator.py` is not found in the main directory, is it under 'extraFiles'?
+2. Q:  `WorkspaceGenerator.py` is not found in the main directory, is it under 'extraFiles'?
 A: Yes. It is.
 
-3. 
-Q: `WorkspaceGenerator.py` script is continually running in the background on the virtual machine in a tmux session. How about Windows OS?
+3. Q: `WorkspaceGenerator.py` script is continually running in the background on the virtual machine in a tmux session. How about Windows OS?
 A: Most virtual machines run in Linux, which supports the tmux session. It is not recommended to run this script on your Windows computer, unless you wish to keep it on for days on end. To run on your Windows computer, simply run the script without tmux session.
 
 
