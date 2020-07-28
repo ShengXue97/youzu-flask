@@ -73,10 +73,10 @@ The back-end is built with [flask](https://palletsprojects.com/p/flask/ "flask H
 
 ## 2 Home Tab functions
 ### 2.1 Uploadfile
-User clicked Choose PDF File or dropped files into the dotted box area. The user’s files will be saved under /ReactPDF folder. If a custom page is defined, PyPDF2 is used to truncate the pdf file. After this, the file is saved under the same folder. The MainV10 script is started using a new thread, while returning success to React. React will then call Stream(method below).
+User clicked Choose PDF File or dropped files into the dotted box area. The user’s files will be saved under /ReactPDF folder. If a custom page is defined, PyPDF2 is used to truncate the pdf file. After this, the file is saved under the same folder. The MainV10 script is started using a new thread, while returning success to React. React will then call Stream(method below in Section 2.6).
 
 ### 2.2 Pushfile
-User clicked Process PDF in one or more files in the pdf table. The appropriate directory where the pdfs are stored will be indicated, which is under /datassd in Azure, and under /pdfs in the developer’s local drive. What happens after is similar to Uploadfile. Custom page range selection is taken into account, and MainV10 script will be called. React will then call Stream(method below).
+User clicked Process PDF in one or more files in the pdf table. The appropriate directory where the pdfs are stored will be indicated, which is under /datassd in Azure, and under /pdfs in the developer’s local drive. What happens after is similar to Uploadfile. Custom page range selection is taken into account, and MainV10 script will be called. React will then call Stream(method below in Section 2.6).
 
 ### 2.3 Getpdfpages
 User either uploaded or pushed a file, and selected to use custom pdf page range. This method is used to feedback to React the number of pages this pdf has, allowing the user to select a range from this pdf page range given.
@@ -135,7 +135,7 @@ The user clicks delete workspace button of a workspace entry in the workspace ta
 The user clicks on Refresh data in the workspace table, or is simply called when the user clicks the Library Tab. The Status attribute of the workspace is the same as explained under Listpdf. The attributes of the Workspaces(Name, Last Modified and Status) are received from the pdfbank table with a SELECT query. This Workspaces data is returned to React to populate the Workspaces table.
 
 ## 5 Database Tab functions
-### 5.1 getdatabase
+### 5.1 Getdatabase
 The user clicks on Refresh data in the database table, or is simply called when the user clicks the Database Tab. The various attributes of each question are received from the qbank table with a SELECT query. This database data is returned to React to populate the database table.
 
 ## Section C: Breakdown of `MainV10.py`
@@ -173,7 +173,7 @@ Diagrams under /TempImages folder:![alt text](https://github.com/ShengXue97/youz
 Base64 strings of diagrams sorted under the /TempImages folder will be accessed and appended to the corresponding questions while text will be segmented into the question title and options using regular expressions. 
 
 ### 6.8 Create Pandas Dataframe
-All essential and processed content will be inserted into a pandas dataframe, with each question taking up one row. The output will be saved as a csv file, and user can modify MainV10.py script to retain the csv file for inspection. The information and processed content will then be pushed to the front end for user edit and viewing.
+All essential and processed content will be inserted into a pandas dataframe, with each question taking up one row. The output will be saved as a csv file, which can be found under Output/ directory.
 
 
 ## Section D: Introduction To React Repository
@@ -294,6 +294,21 @@ Library pages (such as a search feature and download button for users that want 
 
 * User clicks on "Refresh Data", or simply opened the Database Tab
     - `getDatabase()` *(Post a request for the database "qbank" table, and displays the server response data in the database table*
+
+## 8 FAQ
+Below are the Frequently Asked Questions.
+1. 
+Q: `pymysql.connect(host='localhost', user='root', passwd='', db='')` is found in almost every function of `appy.py`, do I need to change all of them according to my own database setup?
+A: Yes. The password and db fields should be changed according to your own setup.
+
+2. 
+Q:  `WorkspaceGenerator.py` is not found in the main directory, is it under 'extraFiles'?
+A: Yes. It is.
+
+3. 
+Q: `WorkspaceGenerator.py` script is continually running in the background on the virtual machine in a tmux session. How about Windows OS?
+A: Most virtual machines run in Linux, which supports the tmux session. It is not recommended to run this script on your Windows computer, unless you wish to keep it on for days on end. To run on your Windows computer, simply run the script without tmux session.
+
 
 ## Appendix A: Installation Guide
 
