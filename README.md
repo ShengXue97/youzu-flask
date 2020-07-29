@@ -337,7 +337,7 @@ Run the following commands in order(on Linux), or from step 4 on Windows:
 6. `python3 -m venv .venv`
 7. `source .venv/bin/activate`
 8. `pip3 install -r requirements.txt`
-9. `python3 app.py`
+9. `sudo python3 app.py`
 
 ### 1.2 Updating Flask Server from GitHub
 Run the following commands in order(on Linux), or from step 2 on Windows:
@@ -345,7 +345,7 @@ Run the following commands in order(on Linux), or from step 2 on Windows:
 2. `git stash`
 3. `git pull origin master`
 4. Ensure that the last line of app.py is app.run(threaded=True, host='0.0.0.0', port=3001)
-5. `python3 app.py`
+5. `sudo python3 app.py`
 
 ### 1.3 Setting up React Client
 Run the following commands in order(on Linux), or from step 4 on Windows:
