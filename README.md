@@ -2,7 +2,7 @@
 # Developer Guide
 
 DEVELOPER GUIDE FOR YOUZU SINGAPORE
-
+This repository is the Flask Repository(youzu-flask).
 
 **Group members :** 
 Sim Sheng Xue
@@ -14,7 +14,7 @@ Yu Ying Cheng
 * __Section B - Breakdown of app.py__
 * __Section C - Breakdown of MainV10.py__
 * __Section D - Introduction To React Repository__
-* __Section E - FAQ
+* __Section E - FAQ__
 * __Appendix A - Installation Guide__
 
 ## Section A: Introduction To Flask Repository
