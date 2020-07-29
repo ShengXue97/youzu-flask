@@ -938,7 +938,7 @@ def listworkspace():
     return jsonify({"Succeeded": "yes", "Workspaces": workspaces})
 
 ### Database Tab functions
-## getdatabase: The user clicks on Refresh data in the database table, or is simply called when
+## Getdatabase: The user clicks on Refresh data in the database table, or is simply called when
 #  the user clicks the Database Tab. The various attributes of each question are received from 
 # the qbank table with a SELECT query. This database data is returned to React to populate the 
 # database table.
