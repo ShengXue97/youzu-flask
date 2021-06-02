@@ -86,7 +86,7 @@ traitlets==4.3.2
 Twisted==17.9.0
 ufw==0.36
 unattended-upgrades==0.1
-urllib3==1.22
+urllib3==1.26.5
 virtualenv==15.1.0
 WALinuxAgent==2.2.45
 wcwidth==0.1.7
