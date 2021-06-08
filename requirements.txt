@@ -51,7 +51,7 @@ pandocfilters==1.4.2
 pdf2image==1.13.1
 pexpect==4.2.1
 pickleshare==0.7.4
-Pillow==7.1.2
+Pillow==8.2.0
 prompt-toolkit==1.0.15
 pyasn1==0.4.2
 pyasn1-modules==0.2.1
